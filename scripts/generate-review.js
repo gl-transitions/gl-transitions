@@ -72,7 +72,7 @@ function finish() {
     results.filter(r => r.errors.length === 0).reduce(
       (promise, r) =>
         promise.then(array =>
-          exec("./gif-it.sh " + r.path)
+          exec(path.join(__dirname, "gif-it.sh") + " " + r.path)
             .then(gif => {
               if (gif) return array.concat([gif]);
               else return array;
