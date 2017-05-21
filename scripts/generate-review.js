@@ -88,7 +88,7 @@ function finish() {
     )
     .then(gifs => {
       const previews = gifs.map(gif => `![](${gif})`).join("\n");
-      const event = haveErrors ? "REQUEST_CHANGES" : "APROVE";
+      const event = haveErrors ? "REQUEST_CHANGES" : "APPROVE";
       const body = `${headMessage}\n\n${summaryDetails}\n\n${previews}`;
       const comments = results
         .map(({ errors, path }) =>
