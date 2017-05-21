@@ -1,5 +1,6 @@
 const request = require("request");
 const fs = require("fs");
+const path = require("path");
 const sys = require("sys");
 const child_process = require("child_process");
 const transform = require("gl-transition-scripts/lib/transform").default;
@@ -87,7 +88,7 @@ function finish() {
     )
     .then(gifs => {
       const previews = gifs.map(gif => `![](${gif})`).join("\n");
-      const event = haveErrors ? "REQUEST_CHANGES" : "APROVE";
+      const event = haveErrors ? "REQUEST_CHANGES" : "APPROVE";
       const body = `${headMessage}\n\n${summaryDetails}\n\n${previews}`;
       const comments = results
         .map(({ errors, path }) =>
