@@ -1,5 +1,6 @@
 const request = require("request");
 const fs = require("fs");
+const path = require("path");
 const sys = require("sys");
 const child_process = require("child_process");
 const transform = require("gl-transition-scripts/lib/transform").default;
