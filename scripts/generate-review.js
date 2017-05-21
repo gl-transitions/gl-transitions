@@ -1,8 +1,18 @@
 const request = require("request");
 const fs = require("fs");
+const sys = require("sys");
+const child_process = require("child_process");
 const transform = require("gl-transition-scripts/lib/transform").default;
 const prNumber = process.env.TRAVIS_PULL_REQUEST;
 const pass = process.env.GITHUB_AUTH_PASS;
+
+const exec = (cmd, opts) =>
+  new Promise((success, failure) => {
+    child_process.exec(cmd, opts, (error, stdout, stderr) => {
+      if (error) failure(error);
+      else success(stdout);
+    });
+  });
 
 const ms = n => (n < 1 ? n.toFixed(2) : Math.round(n)) + "ms";
 
@@ -58,47 +68,66 @@ function finish() {
     .map(line => "- " + line)
     .join("\n");
 
-  const event = haveErrors ? "REQUEST_CHANGES" : "APROVE";
-  const body = `${headMessage}\n\n${summaryDetails}`;
-  const comments = results
-    .map(({ errors, path }) =>
-      errors.filter(e => e.line).map(e => ({
-        path,
-        position: e.line,
-        body: e.message,
-      }))
+  Promise.all(
+    results.filter(r => r.errors.length === 0).reduce(
+      (promise, r) =>
+        promise.then(array =>
+          exec("./gif-it.sh " + r.path)
+            .then(gif => {
+              if (gif) return array.concat([gif]);
+              else return array;
+            })
+            .catch(e => {
+              console.error("Failed to generate a gif: ", e);
+              return array;
+            })
+        ),
+      Promise.resolve([])
     )
-    .reduce((acc, comments) => acc.concat(comments), []);
+  ).then(gifs => {
+    const previews = gifs.map(gif => `![](${gif})`).join("\n");
+    const event = haveErrors ? "REQUEST_CHANGES" : "APROVE";
+    const body = `${headMessage}\n\n${summaryDetails}\n\n${previews}`;
+    const comments = results
+      .map(({ errors, path }) =>
+        errors.filter(e => e.line).map(e => ({
+          path,
+          position: e.line,
+          body: e.message,
+        }))
+      )
+      .reduce((acc, comments) => acc.concat(comments), []);
 
-  request(
-    {
-      method: "POST",
-      url: `https://api.github.com/repos/gre/gl-transitions/pulls/${prNumber}/reviews`,
-      json: true,
-      body: { event, body, comments },
-      auth: {
-        user: "gltransitions",
-        pass,
+    request(
+      {
+        method: "POST",
+        url: `https://api.github.com/repos/gre/gl-transitions/pulls/${prNumber}/reviews`,
+        json: true,
+        body: { event, body, comments },
+        auth: {
+          user: "gltransitions",
+          pass,
+        },
+        headers: {
+          "User-Agent": "gl-transitions-bot",
+        },
       },
-      headers: {
-        "User-Agent": "gl-transitions-bot",
-      },
-    },
-    (error, response, body) => {
-      if (error || !response || response.statusCode !== 200) {
-        console.log("Failed to review the Pull Request " + prNumber);
-        if (error) {
-          console.error(error);
+      (error, response, body) => {
+        if (error || !response || response.statusCode !== 200) {
+          console.log("Failed to review the Pull Request " + prNumber);
+          if (error) {
+            console.error(error);
+          } else {
+            console.log(body);
+          }
+          process.exit(1);
         } else {
-          console.log(body);
+          console.log("Successful reviewed the Pull Request " + prNumber);
+          process.exit(0);
         }
-        process.exit(1);
-      } else {
-        console.log("Successful reviewed the Pull Request " + prNumber);
-        process.exit(0);
       }
-    }
-  );
+    );
+  });
 }
 
 process.stdin
