@@ -68,8 +68,9 @@ function finish() {
     .map(line => "- " + line)
     .join("\n");
 
-  Promise.all(
-    results.filter(r => r.errors.length === 0).reduce(
+  results
+    .filter(r => r.errors.length === 0)
+    .reduce(
       (promise, r) =>
         promise.then(array =>
           exec(path.join(__dirname, "gif-it.sh") + " " + r.path)
@@ -84,7 +85,6 @@ function finish() {
         ),
       Promise.resolve([])
     )
-  )
     .then(gifs => {
       const previews = gifs.map(gif => `![](${gif})`).join("\n");
       const event = haveErrors ? "REQUEST_CHANGES" : "APROVE";
