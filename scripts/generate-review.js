@@ -72,7 +72,7 @@ function finish() {
     results.filter(r => r.errors.length === 0).reduce(
       (promise, r) =>
         promise.then(array =>
-          exec("./gif-it.sh " + r.path)
+          exec(path.join(__dirname, "gif-it.sh") + " " + r.path)
             .then(gif => {
               if (gif) return array.concat([gif]);
               else return array;
@@ -84,50 +84,55 @@ function finish() {
         ),
       Promise.resolve([])
     )
-  ).then(gifs => {
-    const previews = gifs.map(gif => `![](${gif})`).join("\n");
-    const event = haveErrors ? "REQUEST_CHANGES" : "APROVE";
-    const body = `${headMessage}\n\n${summaryDetails}\n\n${previews}`;
-    const comments = results
-      .map(({ errors, path }) =>
-        errors.filter(e => e.line).map(e => ({
-          path,
-          position: e.line,
-          body: e.message,
-        }))
-      )
-      .reduce((acc, comments) => acc.concat(comments), []);
+  )
+    .then(gifs => {
+      const previews = gifs.map(gif => `![](${gif})`).join("\n");
+      const event = haveErrors ? "REQUEST_CHANGES" : "APROVE";
+      const body = `${headMessage}\n\n${summaryDetails}\n\n${previews}`;
+      const comments = results
+        .map(({ errors, path }) =>
+          errors.filter(e => e.line).map(e => ({
+            path,
+            position: e.line,
+            body: e.message,
+          }))
+        )
+        .reduce((acc, comments) => acc.concat(comments), []);
 
-    request(
-      {
-        method: "POST",
-        url: `https://api.github.com/repos/gre/gl-transitions/pulls/${prNumber}/reviews`,
-        json: true,
-        body: { event, body, comments },
-        auth: {
-          user: "gltransitions",
-          pass,
+      request(
+        {
+          method: "POST",
+          url: `https://api.github.com/repos/gre/gl-transitions/pulls/${prNumber}/reviews`,
+          json: true,
+          body: { event, body, comments },
+          auth: {
+            user: "gltransitions",
+            pass,
+          },
+          headers: {
+            "User-Agent": "gl-transitions-bot",
+          },
         },
-        headers: {
-          "User-Agent": "gl-transitions-bot",
-        },
-      },
-      (error, response, body) => {
-        if (error || !response || response.statusCode !== 200) {
-          console.log("Failed to review the Pull Request " + prNumber);
-          if (error) {
-            console.error(error);
+        (error, response, body) => {
+          if (error || !response || response.statusCode !== 200) {
+            console.log("Failed to review the Pull Request " + prNumber);
+            if (error) {
+              console.error(error);
+            } else {
+              console.log(body);
+            }
+            process.exit(1);
           } else {
-            console.log(body);
+            console.log("Successful reviewed the Pull Request " + prNumber);
+            process.exit(0);
           }
-          process.exit(1);
-        } else {
-          console.log("Successful reviewed the Pull Request " + prNumber);
-          process.exit(0);
         }
-      }
-    );
-  });
+      );
+    })
+    .catch(e => {
+      console.error(e);
+      process.exit(1);
+    });
 }
 
 process.stdin
