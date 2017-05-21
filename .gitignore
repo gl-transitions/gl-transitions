@@ -7,6 +7,4 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-transitions.json
-index.js
-gl-transitions.js
+release/

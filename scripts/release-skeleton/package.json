@@ -1,10 +1,9 @@
 {
   "name": "gl-transitions",
-  "version": "0.0.5",
+  "version": "0.0.0",
   "description": "The open collection of GL Transitions",
   "main": "index.js",
   "files": [
-    "transitions",
     "transitions.json",
     "gl-transitions.js",
     "index.js"
