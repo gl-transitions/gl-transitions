@@ -7,7 +7,7 @@ dist: trusty
 before_install:
   - cd scripts
 install:
-  - yarn
+  - npm i
 after_install:
   - cd -
 addons:
@@ -21,7 +21,7 @@ addons:
 before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; cd scripts
 script:
-  - yarn run build
+  - npm run build
 after_script:
   - cd -
 before_deploy:
