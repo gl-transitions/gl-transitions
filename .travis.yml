@@ -4,9 +4,12 @@ node_js:
 os: linux
 sudo: required
 dist: trusty
+before_install:
+  - cd scripts
 install:
   - yarn
-  - cd scripts ; yarn ; cd -
+after_install:
+  - cd -
 addons:
   apt:
     packages:
@@ -16,8 +19,11 @@ addons:
     - libglapi-mesa
     - libosmesa6
 before_script:
-  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
-script: cd scripts ; yarn run build ; cd -
+  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start; cd scripts
+script:
+  - yarn run build
+after_script:
+  - cd -
 before_deploy:
   - cd release
 deploy:
