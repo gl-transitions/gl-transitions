@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - node
+  - "node"
 os: linux
 sudo: required
 dist: trusty
@@ -14,7 +14,11 @@ addons:
     - libosmesa6
 before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
-script: cd scripts && yarn && yarn run build && cd -
+  - cd scripts
+  - yarn
+script: cd scripts
+after_script:
+  - cd -
 before_deploy:
   - cd release
 deploy:
