@@ -5,7 +5,7 @@ os: linux
 sudo: required
 dist: trusty
 install:
-  - cd scripts && npm i && cd -
+  - ./scripts/travis-install.sh
 addons:
   apt:
     packages:
