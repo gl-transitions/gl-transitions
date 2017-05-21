@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "description": "The open collection of GL Transitions",
   "main": "index.js",
+  "files": [
+    "transitions",
+    "transitions.json"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gre/gl-transitions.git"

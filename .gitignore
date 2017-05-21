@@ -1,0 +1,12 @@
+node_modules/
+lerna-debug.log
+npm-debug.log
+.DS_Store
+.env
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+transitions.json
+index.js
+gl-transitions.js

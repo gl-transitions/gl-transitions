@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "./build.sh"
+  },
+  "dependencies": {
+    "gl-transition-scripts": "^1.0.0"
+  },
+  "name": "gl-transitions-scripts",
+  "private": true
+}
