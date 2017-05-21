@@ -9,12 +9,12 @@ tmpimgs="/tmp/gl-transition-imgs"
 palette="/tmp/gl-transition-palette.png"
 gif="/tmp/gl-transition.gif"
 
-filters="scale=256:-1:flags=lanczos"
 
 rm -rf $tmpimgs $palette $gif
 
 gl-transition-render -t $tname --from scripts/in.jpg --to scripts/out.jpg -w 512 -h 400 -f 50 -o $tmpimgs
 
+filters="scale=256:-1:flags=lanczos"
 ffmpeg -v fatal -framerate 20 -i $tmpimgs/%d.png -vf "$filters,palettegen" -y $palette
 ffmpeg -v fatal -framerate 20 -i $tmpimgs/%d.png -i $palette -lavfi "$filters [x]; [x][1:v] paletteuse" -y $gif
 

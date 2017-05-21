@@ -5,7 +5,7 @@ os: linux
 sudo: required
 dist: trusty
 install:
-  - cd scripts && npm i && cd -
+  - ./scripts/travis-install.sh
 addons:
   apt:
     packages:
@@ -14,7 +14,6 @@ addons:
     - libgl1-mesa-dri
     - libglapi-mesa
     - libosmesa6
-    - ffmpeg
 before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
 script:
