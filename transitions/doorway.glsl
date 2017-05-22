@@ -1,8 +1,9 @@
- 
+// author: gre
+// License: MIT 
 uniform float reflection; // = 0.4
 uniform float perspective; // = 0.4
 uniform float depth; // = 3
- 
+
 const vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
 const vec2 boundMin = vec2(0.0, 0.0);
 const vec2 boundMax = vec2(1.0, 1.0);
@@ -10,11 +11,11 @@ const vec2 boundMax = vec2(1.0, 1.0);
 bool inBounds (vec2 p) {
   return all(lessThan(boundMin, p)) && all(lessThan(p, boundMax));
 }
- 
+
 vec2 project (vec2 p) {
   return p * vec2(1.0, -1.2) + vec2(0.0, -0.02);
 }
- 
+
 vec4 bgColor (vec2 p, vec2 pto) {
   vec4 c = black;
   pto = project(pto);
