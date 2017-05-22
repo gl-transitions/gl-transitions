@@ -10,11 +10,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gre/gl-transitions.git"
+    "url": "git+https://github.com/gltransitions/gl-transitions.git"
   },
-  "license": "ISC",
   "bugs": {
-    "url": "https://github.com/gre/gl-transitions/issues"
+    "url": "https://github.com/gltransitions/gl-transitions/issues"
   },
-  "homepage": "https://github.com/gre/gl-transitions#readme"
+  "homepage": "https://github.com/gltransitions/gl-transitions#readme"
 }
