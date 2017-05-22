@@ -5,7 +5,7 @@ const sys = require("sys");
 const child_process = require("child_process");
 const transform = require("gl-transition-scripts/lib/transform").default;
 const prNumber = process.env.TRAVIS_PULL_REQUEST;
-const pass = process.env.GITHUB_AUTH_PASS;
+const pass = process.env.GITHUB_TOKEN;
 
 const exec = (cmd, opts) =>
   new Promise((success, failure) => {
