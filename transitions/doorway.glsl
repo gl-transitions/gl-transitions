@@ -26,8 +26,7 @@ vec4 bgColor (vec2 p, vec2 pto) {
 }
 
 
-vec4 transition (vec2 uv) {
-  vec2 p = uv; // FIXME fix the transformer to allow different name :o
+vec4 transition (vec2 p) {
   vec2 pfr = vec2(-1.), pto = vec2(-1.);
   float middleSlit = 2.0 * abs(p.x-0.5) - progress;
   if (middleSlit > 0.0) {
