@@ -26,5 +26,7 @@ deploy:
   on:
     repo: gltransitions/gl-transitions
     branch: master
+  api_key:
+    secure: uEQXe8OyqwqgtK4tuYNgpN0/94gbqj4bCYWZsy3eT0QCsYNUjelvheDB5AS+LJSBb3Hs2nVP2iudkTtnQxTrVDG6nbvJJLHLSDTS+UUqdlyCzM+PMR8zxevIAwbNOl6GfB9Rdp0wFNT9/7r1sAxry/XReNdDyUIr5jLBDJhmSX/IkIfkdsWD99CFdFNTROibR3p8Zp/qFTvFfu/7sFUFWEG9ang+sjrJ4I6u0mvfMu5tQpgJaiih68oT4G8u/MRE2EqwjQZhjM6bgMobFfspbUUgUtm9D7CzCat65qaofIXp0CEPuQU+/lqbPYzKmmVIk40sBRjzX10+M+v6Locg85ftiCVT0Z6Uf5XVCnYbQhn5ufsvCT5nQGj202e74osq2yYh4GJAEtwNu2rD/xluwcFTqsWIC2lCHPhwuaeOUp9FlOpwrAABweQWOVttpurY6Okv92xD9X0945t71CJHxqBzBxuf1UqSngd5w2E5SKDlhBSn4jmh9ovD83NOHBSbUXkBuCHHPBKaTuCRZeztyS1L4Stg1Mu7KCeuXrRgKc44e0d3svq1uL+Zvh86l9OD2Vm1cqgjR4+KcLDAJuCqQVyp2SW9Gde/uXpl2alNoM3FyzYFOgR4j3mSY/EHQVWdNvVCOcf8rpHAjlZmR89CrQnKMHe+I6TPUKSMRY2f6yw=
 after_deploy:
 - "../scripts/tag-and-push.sh"
