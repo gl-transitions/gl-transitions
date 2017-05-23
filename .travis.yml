@@ -16,7 +16,7 @@ before_script:
   - npm i -g gl-transition-scripts
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
 script:
-  - ./script/build.sh
+  - ./scripts/build.sh
 before_deploy:
   - cd release
 deploy:
