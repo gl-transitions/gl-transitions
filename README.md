@@ -1,5 +1,11 @@
 [![Build Status](https://travis-ci.org/gltransitions/gl-transitions.svg?branch=master)](https://travis-ci.org/gltransitions/gl-transitions)
 
+Each commit that gets to master automatically generate a new npm minor release.
+
+See https://www.npmjs.com/package/gl-transitions
+
+# Specification
+
 ## What is a transition?
 
 A Transition is an animation that smoothly animates the intermediary steps between 2 textures.
