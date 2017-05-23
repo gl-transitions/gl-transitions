@@ -23,8 +23,6 @@ deploy:
   provider: npm
   email: renaudeau.gaetan+gltransitions@gmail.com
   skip_cleanup: true
-  api_key:
-    secure: J7IYgJydgra/uHWvv56my88O4w8Mp9rlP80ano8MFHjBogOCRqFH1mwgvE1fGTfrHwJjF02WxCN2yeq4oMOsWl7P2MWCxzMHzZ+BQxXhZEmyUM/XJ+d4+0soQsnrC6M4YNqtmfF+ZX/z2Vc7Zl9pmCtk/dCL6ycIgMM3PUdwPc4k84VOuzB4oIpBTIDXiPdwHib5hOqvi8cc/WKZFlL2uWG/SSBczrGx0zV/WN72nlhuQM40VynWZVYAeIejBclWiN3uk3TRLPsH700RNYrMgA3du3rOBtcqBWNV1qahIoMOCiMPUQkSYW/lSGbjwhE7J+ANynXKKRj8SwDHvkUgGJk77g7EkvIfvZxAXXVMOjZi1Ilt05aliSlXPOpMgjAcBpEW1q+09n3BiCzF9rCBk+cyEWf0ebXjlRY8vLxB3lZ4epkEIzpMAxj9p0kN1ZuWiaTtgvMfOpG5nG9XVNfxNFJVZgKZPJFZSJSYAEtS2pZ2NIUzoqx3yZSuRKa4SagVvlfancXHlhX5dLjCqC/9NPbSWv8vRmdanlVMLZGtnPvdb/HlHMemzf/ZtLyBEskLxzGRoVMSNA5jMjub+WQ8osjFEQRmClwvWU3/OCBFJcLaJdZy7RXgxhcqSclfWsvtRFRQ2EX5GMyiLHyIuot79+NfiZ80wCryY72OZDHCtMI=
   on:
     repo: gltransitions/gl-transitions
     branch: master
