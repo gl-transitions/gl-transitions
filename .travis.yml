@@ -29,4 +29,4 @@ deploy:
     repo: gltransitions/gl-transitions
     branch: master
 after_deploy:
-- "../scripts/tag-and-push.sh"
+- sleep 10; ../scripts/tag-and-push.sh
