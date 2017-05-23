@@ -1,10 +1,6 @@
 cd $(dirname $0)/..
 set -e
 
-if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
-  git diff --name-only master | grep "transitions/.*\.glsl$" | node scripts/generate-review.js
-fi
-
 remoteVersion=`npm show gl-transitions version`
 
 rm -rf release/
@@ -14,7 +10,7 @@ npm version $remoteVersion --no-git-tag-version
 npm version minor --no-git-tag-version
 cd -
 
-gl-transition-transform -d transitions -o release/transitions.json
+gl-transition-transform -d transitions -o release/gl-transitions.json
 cd release
-echo "window.GLTransitions=" | cat - transitions.json > gl-transitions.js
-echo "module.exports=" | cat - transitions.json > index.js
+echo "window.GLTransitions=" | cat - gl-transitions.json > gl-transitions.js
+echo "module.exports=" | cat - gl-transitions.json > index.js

@@ -4,8 +4,6 @@ node_js:
 os: linux
 sudo: required
 dist: trusty
-install:
-  - ./scripts/travis-install.sh
 addons:
   apt:
     packages:
@@ -29,3 +27,5 @@ deploy:
   on:
     repo: gltransitions/gl-transitions
     branch: master
+after_deploy:
+   - ../scripts/tag-and-push.sh
