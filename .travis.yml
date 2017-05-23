@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "node"
+- node
 os: linux
 sudo: required
 dist: trusty
@@ -13,20 +13,20 @@ addons:
     - libglapi-mesa
     - libosmesa6
 before_script:
-  - npm i -g gl-transition-scripts
-  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+- npm i -g gl-transition-scripts
+- export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
 script:
-  - ./scripts/build.sh
+- "./scripts/build.sh"
 before_deploy:
-  - cd release
+- cd release
 deploy:
   provider: npm
   email: renaudeau.gaetan@gmail.com
   skip_cleanup: true
   api_key:
-    secure: QyW9GsET57UCYjOecJPxRc8Of0YWtKCgXKDWpsOy15wNmCZrKNp+xebjn/lBy2QDh5NRAlOQG4hyvcdo78Rskg7mvYPRBuGdSUv36LsvOZUPcCIvU/E8JV8DMh3Sc19OGgups2JHu9SZhU8+O5t3mDpA6HpM3qCSyTmML4meup6XIPgCvgXF36a9ZE1mDx9Tl7bz7TTyquBrjuHc8hetsVEKpzGIIKp/GD9k6dw+KslbIedy+B8V59CnlU2Agaka/Y6vDlYVAxUUg+81JG0p8x8fN3aTkZgOE4Hjl2hCfB9RUb+R+Ycn6E3BcCnmr+kBQfcLQZpyDurg6UcHhZjJ0TmP2CnWx79DIcUv+1c5uNgmm0teqO3bn0+b7uFHDNnMIBVT/xU4kcXMpUmAjaCILChB8Hm/7xhVpHXKH+dx69IHlqJ7sXK1/UuB7S97u7zgrsOMVzXKreE2M6e05NM0gMNq4bvp93qAsYopQSWmnjvRvAbrd3fsYKE0o5jdGUxjmaZcMHdTrc9xR/DFbH+usMXTmFIyHB8Q2DJYvCz+d63fK12E/CcX8dH355i86DMJCENF1GwcmcwdeUBnh7XY1JM7y84Mk6Kv3nmPVCVURompDGn8sg/9HCtmDwTBXrcuxRFufrAPnwih8ToLv02GLpzVrq/WwijzfQE0eDm8qJE=
+    secure: fyjUm2mDcCXLZOwf70aiAUAblCfHx5qfWrlKV2JoCIUkgdSgHfY99RlXS0yYXzTTSwbDrrGkjwgQNWjtmtdUQw5cipMnrVdBckYYLjWrGQm1elItfMF0yVT58rzLGYcMq9EWJifQKBTZJbWS+jQmyAV/bgU/fIAUn+U9xJ8sNHJH/sagPRF1VjOrJa8KcfpSITppj7nBomCWTSfEOZxjXjMyKIINYedB5xMLPy9JbNfPO9Mw7rZeFsM60Kj6cgeXM2Tc/s1FBz36AF28iyJCG2CPT1UPA8b9m5mpfKDLCgr6LDinCUniHk2KYAgg68sT1wQ/BAr/nEkNnUGTUQ4ZccEB5g537WarAQ6qTFfStbvXX+zSOtDgF0HOXibYFuOR+fOveAJn/Xb53V4IIRt9v5cYEDlfrvpA0ckZ3JreaMIyergP/GZEFfi4hvezicP4naq8RXME7F89jS7gGVv7A4etGDBp6AfWIwCJAOrTzY11HbFizdXfyDYgBMP+O/pEWMALlbmbEQOZJDFVND2eRMZi5D8NGkAV41bnlzNDWafrMlNNOmF8JcNKvoCwiMpBdgFXIHFnRJn0IAGBq3pGWfchEKv8NiyZdzCY4VWhzb0JRC/x8hd/9EbA120EFeQFwDs+j6uNwT1iEFlAQZPQdS+hOfZ6ffUxuilcpm448KI=
   on:
     repo: gltransitions/gl-transitions
     branch: master
 after_deploy:
-   - ../scripts/tag-and-push.sh
+- "../scripts/tag-and-push.sh"
