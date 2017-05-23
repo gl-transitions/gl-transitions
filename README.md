@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/gltransitions/gl-transitions.svg?branch=master)](https://travis-ci.org/gre/gl-transitions)
+[![Build Status](https://travis-ci.org/gltransitions/gl-transitions.svg?branch=master)](https://travis-ci.org/gltransitions/gl-transitions)
 
 ## What is a transition?
 
