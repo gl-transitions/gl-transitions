@@ -2,11 +2,8 @@
 // License: MIT
 uniform float smoothness; // = 0.3
 uniform bool opening; // = true
-TYPOOOOOOOO
 const vec2 center = vec2(0.5, 0.5);
 const float SQRT_2 = 1.414213562373;
-
-MMMMMMM
 
 vec4 transition (vec2 uv) {
   float x = opening ? progress : 1.-progress;
@@ -15,4 +12,3 @@ vec4 transition (vec2 uv) {
 }
 
 
-ahaha
