@@ -14,6 +14,8 @@ a Transition is an object with following shape:
   glsl: string,
   defaultParams: { [key: string]: mixed },
   paramsTypes: { [key: string]: string },
+  createdAt: string,
+  updatedAt: string,
 }
 ```
 
