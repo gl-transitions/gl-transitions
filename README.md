@@ -4,24 +4,53 @@ Each commit that gets to master automatically generate a new npm minor release.
 
 See https://www.npmjs.com/package/gl-transitions
 
-# Specification
+# GL Transition Specification
+
+This document specifies GL Transition Specification **v0**, `0` as in `gl-transitions @ 0` (consistently to the NPM package major). For any breaking changes in this specification, semver will be respected and the major will get bumped.
+
+> NB: we should soon release v1 to get in sync with the current v1 libs.
 
 ## What is a transition?
 
-A Transition is an animation that smoothly animates the intermediary steps between 2 textures.
-
-The step is specified by a `progress` value that moves from 0.0 to 1.0.
+A Transition is an animation that smoothly animates the intermediary steps between 2 textures: `from` and `to`. The step is specified by a `progress` value that moves from `0.0` to `1.0`.
 
 > important feature to respect: When progress is 0.0, exclusively the `from` texture must be rendered. When progress is 1.0, exclusively the `to` texture must be rendered.
 
 ## GL Transition
 
-A GL Transition is defined in the GLSL language and implements a function `vec4 transition (vec2 uv)`. It takes the current coordinate position to render and returns the color of that pixel.
+```glsl
+// transition of a simple fade.
+vec4 transition (vec2 uv) {
+  return mix(
+    getFromColor(uv),
+    getToColor(uv),
+    progress
+  );
+}
+```
+
+A GL Transition is a GLSL code that implements a `transition` function which takes a `vec2 uv` pixel position and returns a `vec4` color. This color represents the mix of the `from` to the `to` textures based on the variation of a contextual `progress` value from `0.0` to `1.0`.
+
+### Contextual variables
+
+- `progress` (float): a value that **moves from 0.0 to 1.0** during the transition.
+- `ratio` (float): the ratio of the viewport. It equals `width / height`. *(width and height are not exposed because you don't need them. A transition code should be scalable to any size. ratio can still be used to preserve some shape ratio, e.g. you want to draw squares)*
+
+### Contextual functions
+
+- `vec4 getFromColor(vec2 uv)`: lookup the "from" texture at a given uv coordinate.
+- `vec4 getToColor(vec2 uv)`: lookup the "to" texture at a given uv coordinate.
+
+> don't directly use `texture2D` to get a texture pixel out of from and to textures. Instead, use `getFromColor(vec2)` and `getToColor(vec2)`. That way, the "implementer" can properly implement ratio preserving support as well as chosing a different color for the "out of bound" case.
+
 
 ### Transition parameters
 
-If you need extra parameters for a transition, don't define them as "constant", instead expose them as uniforms.
-When you do so, define a default value following with a comment `// = value`
+Transition parameters are parameters than the final user can set to tweak the transition. They are constant over a full run of a transition *(no parameter changes when progress moves from 0.0 to 1.0)*.
+
+> any constant you define in your transitions are potential parameters to expose.
+
+When you define a transition parameter, you must also define a default value that will get set in case the final user didn't provided it. It's unfortunately not possible to initialize a uniform in GLSL 120 (WebGL 1) but we support commented code `// = value`
 
 Examples:
 
@@ -30,16 +59,18 @@ uniform float foo; // = 42.0
 uniform vec2 foo; // = vec2(42.0, 42.0)
 ```
 
-### Context
+The following variants are also supported:
 
-#### Variables in context (uniforms)
 
-- `progress` float that **moves from 0.0 to 1.0**
-- `ratio` a float equals to `width / height`. *(width and height are not available because your code should be scalable to any size, however you can use this ratio to preserve your ratio, e.g. you want to draw squares)*
+```glsl
+uniform float foo/* = 42.0 */;
+uniform vec2 foo /*= vec2(42.0, 42.0)*/, bar /* = vec2(1.) */;
+uniform vec2 foo, bar; // = vec2(1.0, 2.0); // both at the same time ! (needs a ';' if you have this second //, like usual glsl code)
+```
 
-#### extra functions
 
-- `vec4 getFromColor(vec2 uv)`: lookup the "from" texture at a given uv coordinate.
-- `vec4 getToColor(vec2 uv)`: lookup the "to" texture at a given uv coordinate.
+# `gl-transitions`
 
-> don't use directly `texture2D` to get a texture pixel out of from and to. Instead, use `getFromColor(vec2)` and `getToColor(vec2)`. That way, the "implementer" can properly implement ratio preserving support as well as chosing a different color for the "out of bound" case.
+> TBD this is not finished to be written. just keeping these notes around...
+
+- If we have duplicated transitions or one transition is more generic than another one, we don't necessary drop the less generic one: it might be more performant and might fit for some users. We also want to keep backward compat'. if we still want to drop it, what we will do is to deprecate it and drop it at the next major bump.
