@@ -9,6 +9,8 @@ See https://www.npmjs.com/package/gl-transitions
 
 # GL Transition Specification
 
+**NB. This is a technical documentation, for more informal information, please see https://gl-transitions.netlify.com/ homepage.**
+
 This document specifies GL Transition Specification **v0**, `0` as in `gl-transitions @ 0` (consistently to the NPM package major). For any breaking changes in this specification, semver will be respected and the major will get bumped.
 
 > NB: we should soon release v1 to get in sync with the current v1 libs.
