@@ -1,11 +1,14 @@
 [![Build Status](https://travis-ci.org/gltransitions/gl-transitions.svg?branch=master)](https://travis-ci.org/gltransitions/gl-transitions)
 
-Each commit that gets to master automatically generate a new npm minor release.
-
-See https://www.npmjs.com/package/gl-transitions
+Each commit that gets to [gltransitions/gl-transitions](https://github.com/gltransitions/gl-transitions)'s master automatically generate a new npm minor release.
 
 <img src="https://camo.githubusercontent.com/c42ecc6197b0f51a106fb50723f9bc6d2e1f925c/687474703a2f2f692e696d6775722e636f6d2f74573331704a452e676966" /><img src="https://camo.githubusercontent.com/7e34cd12d5a9afa94f470395b04b0914c978ce01/687474703a2f2f692e696d6775722e636f6d2f555a5a727775552e676966" /><img src="https://camo.githubusercontent.com/0456d4ed8753fbce027f1174dc8b22da548eeade/687474703a2f2f692e696d6775722e636f6d2f654974426a33582e676966" />
 
+- Website: https://gl-transitions.com
+- NPM package: https://www.npmjs.com/package/gl-transitions
+- Libraries for gl-transitions: https://github.com/gre/gl-transition-libs
+
+---
 
 # GL Transition Specification
 
