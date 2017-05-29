@@ -12,4 +12,3 @@ vec4 transition(vec2 uv) {
   vec2 p = mix((floor(uv / squareSize - 0.5) + 0.5) * squareSize, uv, step(dist, 0.0));
   return mix(getFromColor(p), getToColor(p), progress);
 }
-
