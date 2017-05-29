@@ -26,7 +26,7 @@ deploy:
   api_key:
     secure: yap09dCRc4qPySbZ2g4wIzwLbnFYbWFSyqY+eB6tj1WlcnBRt0EuD0igo4qaz5nAAtMQE1ZLK+HR3KXNiHLybfVvwngAEuEHp3TvkspygYlrQLTXckx8NNN/DgkNEYEqYRbCDbx5OaJZJwDy4zy7SVlRaFmaPkAk76W23xO6BUdRFBanAbiDWILB5GZLSxy9lLzmA6EzCOm8ASJw9N/3mUravfqZqYQnP/Vk/DguQ/GraE9/dNwBRBRuMt/0Y1CxwCkCRHdg7dvQxs3+O++JqYweX6JNGZUb5PZ4xlX2k7IILaRcrJQ6Xawb6GYSxcKzFQsQxtMbQt+JOkciSmG6WUzaXDZIXawXxSXW+v8COLp5ZD7ZagWaYWtKRylB6U0XlrZu/vTWaE5wI1MaPc6sOe3OhDsinDulruJD258MuywSeS8nwfWoZ7cLvcbJHyILYv7gBBPDo9zyBAze2yW1ZbUmvvQdGGJr+3PU5YDpp1SqRLeZWj1z8rbkXrHM5ieka/rFwKsuA/J0nRAnHWq1tJm/MVuSwFTl6o5At/jo5rpyLZOxL89o16xF9fdyQt0sMJt+NpDnCBqwp5dbvPoketW62BOLSAV25dx2CuXWahAWgTVh06brLLLgf8ugrAd752pn78VXdv9foZrnoqAtzeoOUtvf1zEMlTwo3dym/Fk=
   on:
-    repo: gltransitions/gl-transitions
+    repo: gl-transitions/gl-transitions
     branch: master
 after_deploy:
 - sleep 10; ../scripts/tag-and-push.sh

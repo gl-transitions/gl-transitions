@@ -5,10 +5,10 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/gltransitions/gl-transitions.git"
+    "url": "git+https://github.com/gl-transitions/gl-transitions.git"
   },
   "bugs": {
-    "url": "https://github.com/gltransitions/gl-transitions/issues"
+    "url": "https://github.com/gl-transitions/gl-transitions/issues"
   },
-  "homepage": "https://github.com/gltransitions/gl-transitions#readme"
+  "homepage": "https://github.com/gl-transitions/gl-transitions#readme"
 }
