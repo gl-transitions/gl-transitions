@@ -9,6 +9,6 @@ vec4 transition(vec2 uv) {
   float dist = min(progress, 1.0 - progress);
   dist = mix(ceil(dist * steps) / steps, dist, step(steps, 0.0));
   vec2 squareSize = 2.0 * dist / squaresMin;
-  vec2 p = mix((floor(uv / squareSize - 0.5) + 0.5) * squareSize, uv, step(dist, 0.0));
+  vec2 p = mix((floor(uv / squareSize - 0.5) + 0.5) * squareSize, uv, step(dist, 0.001));
   return mix(getFromColor(p), getToColor(p), progress);
 }
