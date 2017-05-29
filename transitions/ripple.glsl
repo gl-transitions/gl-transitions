@@ -1,6 +1,5 @@
 // Author: gre
 // License: MIT
- 
 uniform float amplitude; // = 100.0
 uniform float speed; // = 50.0
 
