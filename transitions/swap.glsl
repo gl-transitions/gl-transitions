@@ -1,6 +1,6 @@
 // Author: gre
 // License: MIT
-// General parameters
+
 uniform float reflection; // = 0.4
 uniform float perspective; // = 0.2
 uniform float depth; // = 3.0
