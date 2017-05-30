@@ -2,6 +2,8 @@
 // License: MIT
 // forked from https://gist.github.com/benraziel/c528607361d90a072e98
 
+// FIXME something was kinda better in this one: https://gist.github.com/corporateshark/21d2fdd24c706952dc8c
+
 uniform vec2 squaresMin/* = vec2(20.0) */; // minimum number of squares (when the effect is at its higher level)
 uniform float steps /* = 50 */; // zero disable the stepping
 
