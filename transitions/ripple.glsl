@@ -13,4 +13,3 @@ vec4 transition (vec2 uv) {
     smoothstep(0.2, 1.0, progress)
   );
 }
-
