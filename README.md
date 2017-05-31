@@ -13,7 +13,7 @@ Each commit that gets to [gl-transitions/gl-transitions](https://github.com/gl-t
 
 ---
 
-# GL Transition Specification
+# GL Transition Specification v1
 
 **NB. This is a technical documentation, for more informal information, please see https://gl-transitions.com/ homepage.**
 
@@ -53,7 +53,6 @@ A GL Transition is a GLSL code that implements a `transition` function which tak
 - `vec4 getToColor(vec2 uv)`: lookup the "to" texture at a given uv coordinate.
 
 > don't directly use `texture2D` to get a texture pixel out of from and to textures. Instead, use `getFromColor(vec2)` and `getToColor(vec2)`. That way, the "implementer" can properly implement ratio preserving support as well as chosing a different color for the "out of bound" case.
-
 
 ### Transition parameters
 
