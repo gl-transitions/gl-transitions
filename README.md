@@ -1,5 +1,5 @@
 
-- Website: https://gl-transitions.com
+- Website: https://gl-transitions.com  *( alternative hosting: https://gl-transitions.surge.sh/ )*
 - NPM package: https://www.npmjs.com/package/gl-transitions
 - Libraries for gl-transitions: https://github.com/gre/gl-transition-libs
 
