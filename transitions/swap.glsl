@@ -1,6 +1,7 @@
 // Author: gre
 // License: MIT
-// General parameters
+
+
 uniform float reflection; // = 0.4
 uniform float perspective; // = 0.2
 uniform float depth; // = 3.0
@@ -12,7 +13,7 @@ const vec2 boundMax = vec2(1.0, 1.0);
 bool inBounds (vec2 p) {
   return all(lessThan(boundMin, p)) && all(lessThan(p, boundMax));
 }
- 
+
 vec2 project (vec2 p) {
   return p * vec2(1.0, -1.2) + vec2(0.0, -0.02);
 }
