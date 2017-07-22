@@ -1,7 +1,6 @@
 // Author: gre
 // License: MIT
 
-// Custom parameters
 uniform float size; // = 0.2
 
 float rand (vec2 co) {
