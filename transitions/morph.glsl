@@ -2,8 +2,7 @@
 // License: MIT
 uniform float strength; // = 0.1
 
-vec4 transition(vec2 uv) {
-  vec2 p = uv.xy / vec2(1.0).xy;
+vec4 transition(vec2 p) {
   vec4 ca = getFromColor(p);
   vec4 cb = getToColor(p);
   
