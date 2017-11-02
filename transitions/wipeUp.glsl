@@ -1,4 +1,4 @@
-// Author: Jake Nelson github.com/jnelson180
+// Author: Jake Nelson
 // License: MIT
 
 vec4 transition(vec2 uv) {
