@@ -19,8 +19,6 @@ Each commit that gets to [gl-transitions/gl-transitions](https://github.com/gl-t
 
 This document specifies GL Transition Specification **v1**, `1` as in `gl-transitions @ 1` (consistently to the NPM package major). For any breaking changes in this specification, semver will be respected and the major will get bumped.
 
-> NB: we should soon release v1 to get in sync with the current v1 libs.
-
 ## What is a transition?
 
 A Transition is an animation that smoothly animates the intermediary steps between 2 textures: `from` and `to`. The step is specified by a `progress` value that moves from `0.0` to `1.0`.
