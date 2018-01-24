@@ -44,14 +44,15 @@ vec4 transition (vec2 uv) {
   vec4 to = getToColor(uv);
   float n = noise(uv * scale);
   
-  float lower = max(n - smoothness, 0.0);
-  float higher = min(n + smoothness, 1.0);
+  float p = mix(-smoothness, 1.0 + smoothness, progress);
+  float lower = p - smoothness;
+  float higher = p + smoothness;
   
-  float q = (progress - lower) / (higher - lower);
+  float q = smoothstep(lower, higher, n);
   
   return mix(
     from,
     to,
-    q
+    1.0 - q
   );
 }
