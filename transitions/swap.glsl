@@ -40,29 +40,20 @@ vec4 transition(vec2 p) {
   size = mix(1.0, depth, 1.-progress);
   persp = perspective * (1.-progress);
   pto = (p + vec2(-1.0, -0.5)) * vec2(size/(1.0-perspective*(1.0-progress)), size/(1.0-size*persp*(0.5-p.x))) + vec2(1.0, 0.5);
- 
-  bool fromOver = progress < 0.5;
- 
-  if (fromOver) {
+
+  if (progress < 0.5) {
     if (inBounds(pfr)) {
       return getFromColor(pfr);
     }
-    else if (inBounds(pto)) {
-      return getToColor(pto);
-    }
-    else {
-      return bgColor(p, pfr, pto);
-    }
-  }
-  else {
     if (inBounds(pto)) {
       return getToColor(pto);
-    }
-    else if (inBounds(pfr)) {
-      return getFromColor(pfr);
-    }
-    else {
-      return bgColor(p, pfr, pto);
-    }
+    }  
   }
+  if (inBounds(pto)) {
+    return getToColor(pto);
+  }
+  if (inBounds(pfr)) {
+    return getFromColor(pfr);
+  }
+  return bgColor(p, pfr, pto);
 }
