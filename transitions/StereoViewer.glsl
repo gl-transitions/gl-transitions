@@ -98,7 +98,7 @@ vec4 simple_sample_with_corners_to(vec2 p, vec2 corner_size, float zoom_amt) {
   if (!test_rounded_mask(p, corner_size)) {
     return black;
   }
-  return getFromColor(p);
+  return getToColor(p);
 }
 
 // Basic 2D affine transform matrix helpers
