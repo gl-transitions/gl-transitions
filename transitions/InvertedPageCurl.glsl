@@ -1,5 +1,5 @@
 // author: Hewlett-Packard
-// license: bsd 3-clause
+// license: BSD 3 Clause
 // Adapted by Sergey Kosarevsky from:
 // http://rectalogic.github.io/webvfx/examples_2transition-shader-pagecurl_8html-example.html
 
