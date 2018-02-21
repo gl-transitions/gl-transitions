@@ -5,7 +5,7 @@ uniform float zoom; // = 0.88
 uniform float corner_radius;  // = 0.22
 
 // author: Ted Schundler
-// license: BSD 2 clause
+// license: BSD 2 Clause
 // Free for use and modification by anyone with credit
 
 // Copyright (c) 2016, Theodore K Schundler
