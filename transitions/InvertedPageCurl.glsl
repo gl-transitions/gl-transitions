@@ -210,5 +210,5 @@ vec4 transition(vec2 p) {
         vec4 cl = seeThroughWithShadow(yc, p, point, rotation, rrotation);
         float dist = distanceToEdge(point);
 
-        gl_FragColor = antiAlias(color, cl, dist);
+        return antiAlias(color, cl, dist);
 }
