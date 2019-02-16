@@ -2,7 +2,7 @@
 // License: MIT
 
 #ifdef GL_ES
-precision mediump float;
+precision highp float;
 #endif
 
 uniform float scale; // = 4.0
@@ -13,11 +13,11 @@ uniform float seed; // = 12.9898
 // http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
 float random(vec2 co)
 {
-    highp float a = seed;
-    highp float b = 78.233;
-    highp float c = 43758.5453;
-    highp float dt= dot(co.xy ,vec2(a,b));
-    highp float sn= mod(dt,3.14);
+    float a = seed;
+    float b = 78.233;
+    float c = 43758.5453;
+    float dt= dot(co.xy ,vec2(a,b));
+    float sn= mod(dt,3.14);
     return fract(sin(sn) * c);
 }
 
@@ -49,13 +49,13 @@ vec4 transition (vec2 uv) {
   vec4 from = getFromColor(uv);
   vec4 to = getToColor(uv);
   float n = noise(uv * scale);
-  
+
   float p = mix(-smoothness, 1.0 + smoothness, progress);
   float lower = p - smoothness;
   float higher = p + smoothness;
-  
+
   float q = smoothstep(lower, higher, n);
-  
+
   return mix(
     from,
     to,
