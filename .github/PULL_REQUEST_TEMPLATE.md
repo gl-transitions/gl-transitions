@@ -5,5 +5,5 @@ If you create a new transition, or update an existing one, our bot🤖 will come
 
 Last Minute Tips':
 - Please check if your transition is not already covered by an existing one.
-- It is great (but not mandatory) if your transitions can include uniforms parameters to be customizable but the final user.
+- It is great (but not mandatory) if your transitions can include uniforms parameters to be customizable by the final user.
 -->
