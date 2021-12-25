@@ -42,7 +42,7 @@ vec4 mainImage(vec2 uv)
   uv -= 0.5;
   uv.x /= ratio;
   uv += 0.5;
-  uv = mod(uv, 1.);
+  uv = 2.*abs(uv/2.-floor(uv/2.+0.5));
   vec2 uvMix = mix(uv,uv0,cos(progress*PI*2.)/2.+0.5);
   vec4 color = mix(getFromColor(uvMix),getToColor(uvMix),cos((progress-1.)*PI)/2.+0.5);
 	return color;
