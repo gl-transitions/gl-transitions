@@ -28,7 +28,7 @@ else if (type == 7) { cx = cy = 0.0; xc1 = 0.0; yc1 = 0.0; }
 else if (type == 8) { cx = cy = .5; xc1 = .5 - rad2; yc1 = .5 - rad2; }
 uv.y = 1.0 - uv.y;
 vec2 uv2;
-if ((uv.x >= xc1) && (uv.x < xc1 + rad) && (uv.y >= yc1) && (uv.y < yc1 + rad))
+if ((uv.x >= xc1) && (uv.x <= xc1 + rad) && (uv.y >= yc1) && (uv.y <= yc1 + rad))
 	{
 	uv2 = vec2((uv.x - xc1) / rad, 1.0 - (uv.y - yc1) / rad);
 	return(In ? getToColor(uv2) : getFromColor(uv2));
