@@ -13,16 +13,12 @@ uniform bool ReverseRotation; // = false
 
 vec4 transition(vec2 uv)
 {
-if (progress == 0.0) { return(getFromColor(uv)); }
-else if (progress == 1.0) { return(getToColor(uv)); }
 vec2 iResolution = vec2(ratio, 1.0);
-float t;
-if (ReverseEffect) { t = 1.0 - progress; } else { t = progress; }
+float t = ReverseEffect ? t = 1.0 - progress : t = progress;
 float theta = ReverseRotation ? _TWOPI * t : -_TWOPI * t;
 float c1 = cos(theta);
 float s1 = sin(theta);
-float rad = 1.0 - t;
-if (rad <= 0.0) { rad = 0.00001; }
+float rad = max(0.00001, 1.0 - t);
 float xc1 = (uv.x - 0.5) * iResolution.x;
 float yc1 = (uv.y - 0.5) * iResolution.y;
 float xc2 = (xc1 * c1 - yc1 * s1) / rad;
