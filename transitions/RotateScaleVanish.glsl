@@ -14,7 +14,7 @@ uniform bool ReverseRotation; // = false
 vec4 transition(vec2 uv)
 {
 vec2 iResolution = vec2(ratio, 1.0);
-float t = ReverseEffect ? t = 1.0 - progress : t = progress;
+float t = ReverseEffect ? 1.0 - progress : progress;
 float theta = ReverseRotation ? _TWOPI * t : -_TWOPI * t;
 float c1 = cos(theta);
 float s1 = sin(theta);
