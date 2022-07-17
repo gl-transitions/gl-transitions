@@ -15,17 +15,17 @@ vec4 transition(vec2 uv)
 {
 vec2 uv0 = uv;
 float rad = In ? progress : 1.0 - progress;
-float xc1, yc1, cx, cy;
+float xc1, yc1;
 // I used if/else instead of switch in case it's an old GPU
-if (type == 0) { cx = .5; cy = 0.0; xc1 = .5 - rad2; yc1 = 0.0; }
-else if (type == 1) { cx = 1.0; cy = .5; xc1 = 1.0 - rad; yc1 = .5 - rad2; }
-else if (type == 2) { cx = .5; cy = 1.0; xc1 = .5 - rad2; yc1 = 1.0 - rad; }
-else if (type == 3) { cx = 0.0; cy = .5; xc1 = 0.0; yc1 = .5 - rad2; }
-else if (type == 4) { cx = 1.0; cy = 0.0; xc1 = 1.0 - rad; yc1 = 0.0; }
-else if (type == 5) { cx = cy = 1.0; xc1 = 1.0 - rad; yc1 = 1.0 - rad; }
-else if (type == 6) { cx = 0.0; cy = 1.0; xc1 = 0.0; yc1 = 1.0 - rad; }
-else if (type == 7) { cx = cy = 0.0; xc1 = 0.0; yc1 = 0.0; }
-else if (type == 8) { cx = cy = .5; xc1 = .5 - rad2; yc1 = .5 - rad2; }
+if (type == 0) { xc1 = .5 - rad2; yc1 = 0.0; }
+else if (type == 1) { xc1 = 1.0 - rad; yc1 = .5 - rad2; }
+else if (type == 2) { xc1 = .5 - rad2; yc1 = 1.0 - rad; }
+else if (type == 3) { xc1 = 0.0; yc1 = .5 - rad2; }
+else if (type == 4) { xc1 = 1.0 - rad; yc1 = 0.0; }
+else if (type == 5) { xc1 = 1.0 - rad; yc1 = 1.0 - rad; }
+else if (type == 6) { xc1 = 0.0; yc1 = 1.0 - rad; }
+else if (type == 7) { xc1 = 0.0; yc1 = 0.0; }
+else if (type == 8) { xc1 = .5 - rad2; yc1 = .5 - rad2; }
 uv.y = 1.0 - uv.y;
 vec2 uv2;
 if ((uv.x >= xc1) && (uv.x <= xc1 + rad) && (uv.y >= yc1) && (uv.y <= yc1 + rad))
