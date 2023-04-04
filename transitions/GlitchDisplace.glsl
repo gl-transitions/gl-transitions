@@ -1,6 +1,9 @@
 // Author: Matt DesLauriers
 // License: MIT
 
+uniform bool usebgcolor; // = false
+uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
+
 highp float random(vec2 co)
 {
     highp float a = 12.9898;
@@ -64,7 +67,7 @@ vec4 transition(vec2 uv) {
   vec4 dColor2 = getFromColor(disp2);
   float val = ease1(progress);
   vec3 gray = vec3(dot(min(dColor2, dColor1).rgb, vec3(0.299, 0.587, 0.114)));
-  dColor2 = vec4(gray, 1.0);
+  dColor2 = usebgcolor ? bgcolor : vec4(gray, 1.0);
   dColor2 *= 2.0;
   color1 = mix(color1, dColor2, smoothstep(0.0, 0.5, progress));
   color2 = mix(color2, dColor1, smoothstep(1.0, 0.5, progress));
