@@ -3,6 +3,7 @@
 uniform float amplitude; // = 1.0
 uniform float waves; // = 30.0
 uniform float colorSeparation; // = 0.3
+uniform bool transparentMode; // = false
 float PI = 3.14159265358979323846264;
 float compute(vec2 p, float progress, vec2 center) {
 vec2 o = p*sin(progress * amplitude)-center;
@@ -23,6 +24,6 @@ vec4 transition(vec2 uv) {
   getFromColor(p + progress*disp*(1.0 - colorSeparation)).r,
   getFromColor(p + progress*disp).g,
   getFromColor(p + progress*disp*(1.0 + colorSeparation)).b,
-  1.0);
+  transparentMode ? getFromColor(p).a : 1.0);
   return texTo*progress + texFrom*inv;
 }
