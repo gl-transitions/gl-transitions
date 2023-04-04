@@ -1,6 +1,7 @@
 // author: Gunnar Roth
 // based on work from natewave
 // license: MIT
+uniform bool transparentMode; // = false
 vec4 transition(vec2 p) {
   vec2 block = floor(p.xy / vec2(16));
   vec2 uv_noise = block / vec2(64);
@@ -10,6 +11,11 @@ vec4 transition(vec2 p) {
   vec2 green = p + dist * .3;
   vec2 blue = p + dist * .5;
 
-  return vec4(mix(getFromColor(red), getToColor(red), progress).r,mix(getFromColor(green), getToColor(green), progress).g,mix(getFromColor(blue), getToColor(blue), progress).b,1.0);
+  float alpha = 1.0;
+  if (transparentMode) {
+    // blend all the alphas...
+    alpha = (mix(getFromColor(red), getToColor(red), progress).a + mix(getFromColor(green), getToColor(green), progress).a + mix(getFromColor(blue), getToColor(blue), progress).a) / 3.0;
+  }
+  return vec4(mix(getFromColor(red), getToColor(red), progress).r,mix(getFromColor(green), getToColor(green), progress).g,mix(getFromColor(blue), getToColor(blue), progress).b,alpha);
 }
 
