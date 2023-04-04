@@ -3,8 +3,8 @@
 uniform float reflection; // = 0.4
 uniform float perspective; // = 0.4
 uniform float depth; // = 3
+uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
 
-const vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
 const vec2 boundMin = vec2(0.0, 0.0);
 const vec2 boundMax = vec2(1.0, 1.0);
 
@@ -17,10 +17,10 @@ vec2 project (vec2 p) {
 }
 
 vec4 bgColor (vec2 p, vec2 pto) {
-  vec4 c = black;
+  vec4 c = bgcolor;
   pto = project(pto);
   if (inBounds(pto)) {
-    c += mix(black, getToColor(pto), reflection * mix(1.0, 0.0, pto.y));
+    c += mix(bgcolor, getToColor(pto), reflection * mix(1.0, 0.0, pto.y));
   }
   return c;
 }

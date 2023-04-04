@@ -3,6 +3,8 @@
 uniform float zoom; // = 0.88
 // Corner radius as a fraction of the image height
 uniform float corner_radius;  // = 0.22
+uniform bool usebgcolor; // = false
+uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 // author: Ted Schundler
 // license: BSD 2 Clause
@@ -27,7 +29,7 @@ uniform float corner_radius;  // = 0.22
 // There is a quick zoom in / out to make the transition 'valid' for GLSL.io //
 ///////////////////////////////////////////////////////////////////////////////
 
-const vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
+vec4 black = usebgcolor ? bgcolor : vec4(0.0, 0.0, 0.0, 1.0);
 const vec2 c00 = vec2(0.0, 0.0); // the four corner points
 const vec2 c01 = vec2(0.0, 1.0);
 const vec2 c11 = vec2(1.0, 1.0);
