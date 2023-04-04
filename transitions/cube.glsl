@@ -4,7 +4,7 @@ uniform float persp; // = 0.7
 uniform float unzoom; // = 0.3
 uniform float reflection; // = 0.4
 uniform float floating; // = 3.0
-uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
+uniform bool transparentMode; // = false
 
 vec2 project (vec2 p) {
   return p * vec2(1.0, -1.2) + vec2(0.0, -floating/100.);
@@ -15,7 +15,7 @@ bool inBounds (vec2 p) {
 }
 
 vec4 bgColor (vec2 p, vec2 pfr, vec2 pto) {
-  vec4 c = bgcolor;
+  vec4 c = vec4(0.0, 0.0, 0.0, transparentMode ? 0.0 : 1.0);
   pfr = project(pfr);
   // FIXME avoid branching might help perf!
   if (inBounds(pfr)) {

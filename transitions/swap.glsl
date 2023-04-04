@@ -4,10 +4,9 @@
 uniform float reflection; // = 0.4
 uniform float perspective; // = 0.2
 uniform float depth; // = 3.0
- uniform bool usebgcolor; // = false
-uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
+uniform bool transparentMode; // = false
 
-vec4 black = usebgcolor ? bgcolor : vec4(0.0, 0.0, 0.0, 1.0);
+vec4 black = vec4(0.0, 0.0, 0.0, transparentMode ? 0.0 : 1.0);
 const vec2 boundMin = vec2(0.0, 0.0);
 const vec2 boundMax = vec2(1.0, 1.0);
  
