@@ -7,6 +7,7 @@
 // With additional easing functions from https://github.com/rectalogic/rendermix-basic-effects/blob/master/assets/com/rendermix/Easing/Easing.glsllib
 
 uniform float strength; // = 0.4
+uniform bool transparentMode; // = false
 
 const float PI = 3.141592653589793;
 
@@ -33,8 +34,8 @@ float rand (vec2 co) {
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
-vec3 crossFade(in vec2 uv, in float dissolve) {
-    return mix(getFromColor(uv).rgb, getToColor(uv).rgb, dissolve);
+vec4 crossFade(in vec2 uv, in float dissolve) {
+    return mix(getFromColor(uv).rgba, getToColor(uv).rgba, dissolve);
 }
 
 vec4 transition(vec2 uv) {
@@ -47,7 +48,7 @@ vec4 transition(vec2 uv) {
     // Mirrored sinusoidal loop. 0->strength then strength->0
     float strength = Sinusoidal_easeInOut(0.0, strength, 0.5, progress);
 
-    vec3 color = vec3(0.0);
+    vec4 color = vec4(0.0);
     float total = 0.0;
     vec2 toCenter = center - texCoord;
 
@@ -60,5 +61,9 @@ vec4 transition(vec2 uv) {
         color += crossFade(texCoord + toCenter * percent * strength, dissolve) * weight;
         total += weight;
     }
-    return vec4(color / total, 1.0);
+    vec4 result = vec4(color / total);
+    if (!transparentMode) {
+        result.a = 1.0;
+    }
+    return result;
 }
