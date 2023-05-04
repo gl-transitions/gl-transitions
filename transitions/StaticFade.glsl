@@ -1,11 +1,12 @@
 // Author: Ben Lucas
 // License: MIT
 
+uniform float n_noise_pixels ; // = 200.0
 uniform float static_luminosity ; // = 0.8
 
 float rnd (vec2 st) {
     return fract(sin(dot(st.xy,
-                         vec2(10,70)))*
+                         vec2(10.5302340293,70.23492931)))*
         12345.5453123);
 }
 
@@ -18,9 +19,11 @@ vec4 staticNoise (vec2 st, float offset, float luminosity) {
 
 float staticIntensity(float t)
 {
-  return pow(abs(2.0*(t-0.5)),2.0);
+  float transitionProgress = abs(2.0*(t-0.5));
+  float transformedThreshold =1.2*(1.0 - transitionProgress)-0.1;
+  return min(1.0, transformedThreshold);
 }
-
+  
 vec4 transition (vec2 uv) {
 
   float baseMix = step(0.5, progress);
@@ -30,10 +33,12 @@ vec4 transition (vec2 uv) {
     baseMix
   );
   
-  vec4 staticColor = staticNoise(uv, progress, static_luminosity);
+  vec2 uvStatic = floor(uv * n_noise_pixels)/n_noise_pixels;
+  
+  vec4 staticColor = staticNoise(uvStatic, progress, static_luminosity);
 
-  float staticThresh = 1.0 - staticIntensity(progress);
-  float staticMix = step(rnd(uv), staticThresh);
+  float staticThresh = staticIntensity(progress);
+  float staticMix = step(rnd(uvStatic), staticThresh);
 
   return mix(transitionMix, staticColor, staticMix);
 }
