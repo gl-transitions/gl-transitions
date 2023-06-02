@@ -1,9 +1,9 @@
 // Author: pschroen
 // License: MIT
 
+uniform float smoothness; // = 0.1
 uniform vec2 direction; // = vec2(-1.0, 1.0)
 
-const float smoothness = 0.5;
 const vec2 center = vec2(0.5, 0.5);
 
 vec4 transition (vec2 uv) {
