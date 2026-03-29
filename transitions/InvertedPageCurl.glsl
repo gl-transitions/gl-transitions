@@ -34,6 +34,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 in vec2 texCoord;
 */
 
+uniform bool transparentMode; // = false
+
 const float MIN_AMOUNT = -0.16;
 const float MAX_AMOUNT = 1.5;
 float amount = progress * (MAX_AMOUNT - MIN_AMOUNT) + MIN_AMOUNT;
@@ -138,7 +140,7 @@ vec4 behindSurface(vec2 p, float yc, vec3 point, mat3 rrotation)
         {
                 shado = 0.0;
         }
-        return vec4(getToColor(p).rgb - shado, 1.0);
+        return vec4(getToColor(p).rgb - shado, transparentMode ? getToColor(p).a : 1.0);
 }
 
 vec4 transition(vec2 p) {
