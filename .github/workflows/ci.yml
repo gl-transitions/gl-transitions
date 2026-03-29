@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build
+        run: ./scripts/build.sh
+
+  publish:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: https://registry.npmjs.org
+
+      - name: Build
+        run: ./scripts/build.sh
+
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+        working-directory: release
+
+      - name: Tag and push
+        run: |
+          VERSION=$(node -p "require('./release/package.json').version")
+          git fetch --tags origin
+          if git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null; then
+            echo "Tag v${VERSION} already exists; skipping."
+          else
+            git tag "v${VERSION}"
+            git push origin "v${VERSION}"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

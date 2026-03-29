@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "The open collection of GL Transitions",
   "main": "index.js",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gl-transitions/gl-transitions.git"
@@ -10,5 +11,14 @@
   "bugs": {
     "url": "https://github.com/gl-transitions/gl-transitions/issues"
   },
-  "homepage": "https://github.com/gl-transitions/gl-transitions#readme"
+  "homepage": "https://gl-transitions.com",
+  "keywords": [
+    "glsl",
+    "webgl",
+    "transitions",
+    "shader",
+    "opengl",
+    "video",
+    "animation"
+  ]
 }
