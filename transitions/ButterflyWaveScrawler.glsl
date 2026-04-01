@@ -13,16 +13,16 @@ float theta = acos(dot(o, h)) * waves;
 return (exp(cos(theta)) - 2.*cos(4.*theta) + pow(sin((2.*theta - PI) / 24.), 5.)) / 10.;
 }
 vec4 transition(vec2 uv) {
-  vec2 p = uv.xy / vec2(1.0).xy;
+  if (progress <= 0.0) return getFromColor(uv);
+  if (progress >= 1.0) return getToColor(uv);
+  vec2 p = uv;
   float inv = 1. - progress;
-  vec2 dir = p - vec2(.5);
-  float dist = length(dir);
-  float disp = compute(p, progress, vec2(0.5, 0.5)) ;
+  float disp = compute(p, progress, vec2(0.5, 0.5));
   vec4 texTo = getToColor(p + inv*disp);
   vec4 texFrom = vec4(
-  getFromColor(p + progress*disp*(1.0 - colorSeparation)).r,
-  getFromColor(p + progress*disp).g,
-  getFromColor(p + progress*disp*(1.0 + colorSeparation)).b,
-  1.0);
+    getFromColor(p + progress*disp*(1.0 - colorSeparation)).r,
+    getFromColor(p + progress*disp).g,
+    getFromColor(p + progress*disp*(1.0 + colorSeparation)).b,
+    1.0);
   return texTo*progress + texFrom*inv;
 }
