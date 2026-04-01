@@ -3,7 +3,7 @@
 #define PI 3.141592653589793
 #define STAR_ANGLE 1.2566370614359172
 
-uniform float boder_thickness;// = 0.01;
+uniform float border_thickness;// = 0.01;
 uniform float star_rotation;// = 0.75;
 uniform vec4 border_color; // = vec4(1.0);
 uniform vec2 star_center;// = vec2(0.5);
@@ -35,10 +35,10 @@ bool inStar(vec2 uv, vec2 center, float radius){
 
 
 vec4 transition (vec2 uv) {
-  float progressScaled = (2.0 * boder_thickness + 1.0) * progress - boder_thickness;
+  float progressScaled = (2.0 * border_thickness + 1.0) * progress - border_thickness;
   if(inStar(uv, star_center, progressScaled)){
     return getToColor(uv);
-  } else if(inStar(uv, star_center, progressScaled+boder_thickness)){
+  } else if(inStar(uv, star_center, progressScaled+border_thickness)){
     return border_color;
   }
   else{
