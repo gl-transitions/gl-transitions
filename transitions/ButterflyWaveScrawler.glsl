@@ -3,7 +3,7 @@
 uniform float amplitude; // = 1.0
 uniform float waves; // = 30.0
 uniform float colorSeparation; // = 0.3
-float PI = 3.14159265358979323846264;
+const float PI = 3.14159265358979323846264;
 float compute(vec2 p, float progress, vec2 center) {
 vec2 o = p*sin(progress * amplitude)-center;
 // horizontal vector
