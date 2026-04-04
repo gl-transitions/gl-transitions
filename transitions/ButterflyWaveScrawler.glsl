@@ -10,7 +10,9 @@ vec2 o = p*sin(progress * amplitude)-center;
 vec2 h = vec2(1., 0.);
 // butterfly polar function (don't ask me why this one :))
 float theta = acos(dot(o, h)) * waves;
-return (exp(cos(theta)) - 2.*cos(4.*theta) + pow(sin((2.*theta - PI) / 24.), 5.)) / 10.;
+float s = sin((2.*theta - PI) / 24.);
+float s2 = s * s;
+return (exp(cos(theta)) - 2.*cos(4.*theta) + s2 * s2 * s) / 10.;
 }
 vec4 transition(vec2 uv) {
   if (progress <= 0.0) return getFromColor(uv);
