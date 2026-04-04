@@ -1,6 +1,6 @@
 // Author: mandubian
 // License: MIT
-uniform float amplitude; // = 1.0
+uniform float amplitude; // = 3.14159
 uniform float waves; // = 30.0
 uniform float colorSeparation; // = 0.3
 const float PI = 3.14159265358979323846264;
