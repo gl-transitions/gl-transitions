@@ -113,7 +113,7 @@ vec4 backside(float yc, vec3 point)
 {
         vec4 color = getFromColor(point.xy);
         float gray = (color.r + color.b + color.g) / 15.0;
-        gray += (8.0 / 10.0) * (pow(1.0 - abs(yc / cylinderRadius), 2.0 / 10.0) / 2.0 + (5.0 / 10.0));
+        gray += (8.0 / 10.0) * (pow(max(0.0, 1.0 - abs(yc / cylinderRadius)), 2.0 / 10.0) / 2.0 + (5.0 / 10.0));
         color.rgb = vec3(gray);
         return color;
 }
@@ -130,8 +130,11 @@ vec4 behindSurface(vec2 p, float yc, vec3 point, mat3 rrotation)
 
         if (yc < 0.0 && point.x >= 0.0 && point.y >= 0.0 && point.x <= 1.0 && point.y <= 1.0 && (hitAngle < PI || amount > 0.5))
         {
-                shado = 1.0 - (sqrt(pow(point.x - 0.5, 2.0) + pow(point.y - 0.5, 2.0)) / (71.0 / 100.0));
-                shado *= pow(-yc / cylinderRadius, 3.0);
+                float dx = point.x - 0.5;
+                float dy = point.y - 0.5;
+                shado = 1.0 - (sqrt(dx * dx + dy * dy) / (71.0 / 100.0));
+                float nyc = -yc / cylinderRadius;
+                shado *= nyc * nyc * nyc;
                 shado *= 0.5;
         }
         else
@@ -195,8 +198,11 @@ vec4 transition(vec2 p) {
         vec4 otherColor;
         if (yc < 0.0)
         {
-                float shado = 1.0 - (sqrt(pow(point.x - 0.5, 2.0) + pow(point.y - 0.5, 2.0)) / 0.71);
-                shado *= pow(-yc / cylinderRadius, 3.0);
+                float dx2 = point.x - 0.5;
+                float dy2 = point.y - 0.5;
+                float shado = 1.0 - (sqrt(dx2 * dx2 + dy2 * dy2) / 0.71);
+                float nyc2 = -yc / cylinderRadius;
+                shado *= nyc2 * nyc2 * nyc2;
                 shado *= 0.5;
                 otherColor = vec4(0.0, 0.0, 0.0, shado);
         }

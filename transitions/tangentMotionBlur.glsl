@@ -76,7 +76,8 @@ float KeySpline(float aX, float mX1, float mY1, float mX2, float mY2) {
 
 // norm distribution
 float normpdf(float x) {
-    return exp(-20.*pow(x-.5,2.));
+    float d = x - .5;
+    return exp(-20.*d*d);
 }
 
 vec2 rotateUv(vec2 uv, float angle, vec2 anchor, float zDirection) {
