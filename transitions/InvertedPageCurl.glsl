@@ -36,18 +36,19 @@ in vec2 texCoord;
 
 const float MIN_AMOUNT = -0.16;
 const float MAX_AMOUNT = 1.5;
-float amount = progress * (MAX_AMOUNT - MIN_AMOUNT) + MIN_AMOUNT;
 
 const float PI = 3.141592653589793;
 
 const float scale = 512.0;
 const float sharpness = 3.0;
 
-float cylinderCenter = amount;
-// 360 degrees * amount
-float cylinderAngle = 2.0 * PI * amount;
-
 const float cylinderRadius = 1.0 / PI / 2.0;
+
+// These depend on the progress uniform and must be computed per-fragment.
+// Global initializers with uniforms are invalid in GLSL ES and fail on Mesa.
+float amount;
+float cylinderCenter;
+float cylinderAngle;
 
 vec3 hitPoint(float hitAngle, float yc, vec3 point, mat3 rrotation)
 {
@@ -145,6 +146,9 @@ vec4 behindSurface(vec2 p, float yc, vec3 point, mat3 rrotation)
 }
 
 vec4 transition(vec2 p) {
+  amount = progress * (MAX_AMOUNT - MIN_AMOUNT) + MIN_AMOUNT;
+  cylinderCenter = amount;
+  cylinderAngle = 2.0 * PI * amount;
 
   const float angle = 100.0 * PI / 180.0;
         float c = cos(-angle);
