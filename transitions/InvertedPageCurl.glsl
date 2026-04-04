@@ -80,7 +80,7 @@ float distanceToEdge(vec3 point)
 
 vec4 seeThrough(float yc, vec2 p, mat3 rotation, mat3 rrotation)
 {
-        float hitAngle = PI - (acos(yc / cylinderRadius) - cylinderAngle);
+        float hitAngle = PI - (acos(clamp(yc / cylinderRadius, -1.0, 1.0)) - cylinderAngle);
         vec3 point = hitPoint(hitAngle, yc, rotation * vec3(p, 1.0), rrotation);
         if (yc <= 0.0 && (point.x < 0.0 || point.y < 0.0 || point.x > 1.0 || point.y > 1.0))
         {
@@ -121,12 +121,13 @@ vec4 backside(float yc, vec3 point)
 
 vec4 behindSurface(vec2 p, float yc, vec3 point, mat3 rrotation)
 {
-        float shado = (1.0 - ((-cylinderRadius - yc) / amount * 7.0)) / 6.0;
+        float safeAmount = amount >= 0.0 ? max(amount, 1e-4) : min(amount, -1e-4);
+        float shado = (1.0 - ((-cylinderRadius - yc) / safeAmount * 7.0)) / 6.0;
         shado *= 1.0 - abs(point.x - 0.5);
 
         yc = (-cylinderRadius - cylinderRadius - yc);
 
-        float hitAngle = (acos(yc / cylinderRadius) + cylinderAngle) - PI;
+        float hitAngle = (acos(clamp(yc / cylinderRadius, -1.0, 1.0)) + cylinderAngle) - PI;
         point = hitPoint(hitAngle, yc, point, rrotation);
 
         if (yc < 0.0 && point.x >= 0.0 && point.y >= 0.0 && point.x <= 1.0 && point.y <= 1.0 && (hitAngle < PI || amount > 0.5))
@@ -182,7 +183,7 @@ vec4 transition(vec2 p) {
                 return getFromColor(p);
         }
 
-        float hitAngle = (acos(yc / cylinderRadius) + cylinderAngle) - PI;
+        float hitAngle = (acos(clamp(yc / cylinderRadius, -1.0, 1.0)) + cylinderAngle) - PI;
 
         float hitAngleMod = mod(hitAngle, 2.0 * PI);
         if ((hitAngleMod > PI && amount < 0.5) || (hitAngleMod > PI/2.0 && amount < 0.0))
