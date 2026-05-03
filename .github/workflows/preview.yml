@@ -179,7 +179,12 @@ jobs:
           script: |
             const fs = require('fs');
             const path = require('path');
-            const pr = parseInt(process.env.PR_NUMBER, 10);
+            const prRaw = process.env.PR_NUMBER || '';
+            if (!/^\d+$/.test(prRaw)) {
+              core.setFailed(`Invalid PR number: ${JSON.stringify(prRaw)}`);
+              return;
+            }
+            const pr = Number(prRaw);
             const prefix = process.env.PREFIX;
             const baseUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/preview-assets`;
 
