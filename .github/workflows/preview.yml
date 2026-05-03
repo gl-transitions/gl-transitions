@@ -102,10 +102,12 @@ jobs:
 
       - name: Validate and render previews
         if: steps.detect.outputs.files != ''
+        env:
+          FILES: ${{ steps.detect.outputs.files }}
         run: |
           mkdir -p /tmp/previews
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
-            for file in ${{ steps.detect.outputs.files }}; do
+            for file in $FILES; do
               name=$(basename "$file" .glsl)
               echo "=== Validating $name ==="
               node scripts/preview/validate-transition.js \
@@ -169,12 +171,16 @@ jobs:
       - name: Post preview comment with inline GIFs
         if: steps.upload.outputs.pushed == 'true' && steps.detect.outputs.pr != '' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
         uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.detect.outputs.pr }}
+          PREFIX: ${{ steps.upload.outputs.prefix }}
+          FILES: ${{ steps.detect.outputs.files }}
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
-            const pr = ${{ steps.detect.outputs.pr }};
-            const prefix = '${{ steps.upload.outputs.prefix }}';
+            const pr = parseInt(process.env.PR_NUMBER, 10);
+            const prefix = process.env.PREFIX;
             const baseUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/preview-assets`;
 
             const comments = await github.paginate(github.rest.issues.listComments, {
@@ -186,7 +192,7 @@ jobs:
               c.user.type === 'Bot' && c.body.includes('## Transition Preview')
             );
 
-            const files = '${{ steps.detect.outputs.files }}'.split(' ').filter(Boolean);
+            const files = (process.env.FILES || '').split(' ').filter(Boolean);
             let body = '## Transition Preview\n\n';
 
             for (const file of files) {
