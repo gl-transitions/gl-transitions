@@ -13,7 +13,7 @@ vec4 transition(vec2 uv) {
   float countTiles = float(tileCount.x * tileCount.y);
 
   // Diagonal wave from bottom-left to top-right
-  float offset = (tileNum.y + tileNum.x * float(tileCount.y)) / (sqrt(countTiles) * 2.0);
+  float offset = (tileNum.y + tileNum.x * float(tileCount.y)) / countTiles;
   float timeOffset = clamp((progress - offset) * countTiles, 0.0, 0.5);
   float sinTime = 1.0 - abs(cos(fract(timeOffset) * 3.1415926));
 
