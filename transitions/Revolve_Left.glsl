@@ -1,7 +1,6 @@
 // Author: bread
 // License: MIT
 // gl-transitions v1 compatible
-const float PI = 3.141592653589793;
 
 uniform vec2 center;       // = vec2(0.46, 0.52)
 uniform float direction;   // = -1.0
