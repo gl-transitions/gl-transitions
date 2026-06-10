@@ -1,7 +1,6 @@
-// Revolve_Left_Replica.glsl
-// gl-transitions v1 compatible
-// author:bread
+// Author: bread
 // License: MIT
+// gl-transitions v1 compatible
 const float PI = 3.141592653589793;
 
 uniform vec2 center;       // = vec2(0.46, 0.52)
