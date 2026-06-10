@@ -1,7 +1,7 @@
-// Drop_Zone_Flicker_Replica.glsl
-// gl-transitions compatible: progress, ratio, getFromColor, getToColor
-// author:bread
+// Author: bread
 // License: MIT
+// Drop_Zone_Flicker.glsl
+// gl-transitions compatible: progress, ratio, getFromColor, getToColor
 uniform float frameRate;    // = 24.0
 uniform float rgbOffset;    // = 0.014
 uniform float blockAmount;  // = 0.72
