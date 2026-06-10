@@ -21,13 +21,16 @@ concurrency:
   group: preview-${{ github.event.pull_request.number || inputs.pr_number || github.run_id }}
   cancel-in-progress: true
 
+# SECURITY: executes untrusted PR code (renders the contributed shader), so it runs
+# read-only with no secrets. Publishing GIFs and commenting happens in the trusted
+# preview-comment.yml (workflow_run), which never executes PR code.
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   preview:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      issues: write
-      contents: write
     env:
       TRANSITION_NAME: ${{ inputs.transition }}
     steps:
@@ -104,8 +107,11 @@ jobs:
         if: steps.detect.outputs.files != ''
         env:
           FILES: ${{ steps.detect.outputs.files }}
+          PR_NUMBER: ${{ steps.detect.outputs.pr }}
         run: |
           mkdir -p /tmp/previews
+          # PR number travels via the artifact since workflow_run data is empty for forks.
+          printf '%s' "$PR_NUMBER" > /tmp/previews/pr.txt
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
             for file in $FILES; do
               name=$(basename "$file" .glsl)
@@ -121,134 +127,13 @@ jobs:
             done
           '
 
-      - name: Upload GIFs to preview-assets branch
-        if: steps.detect.outputs.files != '' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
-        id: upload
-        run: |
-          PREFIX="run-${{ github.run_id }}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # Reset working tree — PR branch checkout may have modified tracked files
-          git reset --hard HEAD
-          git clean -fd
-
-          git fetch origin preview-assets 2>/dev/null || true
-          if git rev-parse --verify origin/preview-assets >/dev/null 2>&1; then
-            git checkout origin/preview-assets
-          else
-            git checkout --orphan preview-assets
-            git rm -rf . 2>/dev/null || true
-          fi
-
-          HAS_FILES=false
-          for gif in /tmp/previews/*.gif; do
-            [ -f "$gif" ] || continue
-            cp "$gif" "${PREFIX}-$(basename "$gif")"
-            git add "${PREFIX}-$(basename "$gif")"
-            HAS_FILES=true
-          done
-
-          if [ "$HAS_FILES" = "true" ]; then
-            git commit -m "Preview GIFs for run ${{ github.run_id }}"
-            git push -f origin HEAD:preview-assets
-            echo "pushed=true" >> $GITHUB_OUTPUT
-            echo "prefix=$PREFIX" >> $GITHUB_OUTPUT
-          else
-            echo "pushed=false" >> $GITHUB_OUTPUT
-          fi
-
-          git checkout -
-
-      - name: Upload preview GIFs as artifacts
+      - name: Upload previews as artifact
         if: steps.detect.outputs.files != ''
         uses: actions/upload-artifact@v4
         with:
           name: transition-previews
-          path: /tmp/previews/*.gif
+          path: |
+            /tmp/previews/*.gif
+            /tmp/previews/*.validation.json
+            /tmp/previews/pr.txt
           if-no-files-found: warn
-
-      - name: Post preview comment with inline GIFs
-        if: steps.upload.outputs.pushed == 'true' && steps.detect.outputs.pr != '' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
-        uses: actions/github-script@v7
-        env:
-          PR_NUMBER: ${{ steps.detect.outputs.pr }}
-          PREFIX: ${{ steps.upload.outputs.prefix }}
-          FILES: ${{ steps.detect.outputs.files }}
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const prRaw = process.env.PR_NUMBER || '';
-            if (!/^\d+$/.test(prRaw)) {
-              core.setFailed(`Invalid PR number: ${JSON.stringify(prRaw)}`);
-              return;
-            }
-            const pr = Number(prRaw);
-            const prefix = process.env.PREFIX;
-            const baseUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/preview-assets`;
-
-            const comments = await github.paginate(github.rest.issues.listComments, {
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: pr,
-            });
-            const botComment = comments.find(c =>
-              c.user.type === 'Bot' && c.body.includes('## Transition Preview')
-            );
-
-            const files = (process.env.FILES || '').split(' ').filter(Boolean);
-            let body = '## Transition Preview\n\n';
-
-            for (const file of files) {
-              const name = path.basename(file, '.glsl');
-              const gifPath = `/tmp/previews/${name}.gif`;
-              const validationPath = `/tmp/previews/${name}.validation.json`;
-
-              // Read validation results
-              let validation = null;
-              try {
-                validation = JSON.parse(fs.readFileSync(validationPath, 'utf8'));
-              } catch {}
-
-              const hasGif = fs.existsSync(gifPath);
-              const icon = validation?.valid === true ? '✅' : validation?.valid === false ? '❌' : '⚠️';
-              body += `### ${icon} ${name}\n\n`;
-
-              if (hasGif) {
-                const gifUrl = `${baseUrl}/${prefix}-${name}.gif`;
-                body += `![${name}](${gifUrl})\n\n`;
-              } else {
-                body += `⚠️ Failed to render preview\n\n`;
-              }
-
-              if (validation) {
-                if (validation.errors?.length > 0) {
-                  body += `**Errors:**\n${validation.errors.map(e => `- ${e}`).join('\n')}\n\n`;
-                }
-                if (validation.warnings?.length > 0) {
-                  body += `**Warnings:**\n${validation.warnings.map(w => `- ${w}`).join('\n')}\n\n`;
-                }
-                if (validation.valid) {
-                  body += `Shader validation passed.\n\n`;
-                }
-              }
-            }
-
-            body += `---\n🤖 Generated by the [preview bot](${process.env.GITHUB_SERVER_URL}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
-
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                comment_id: botComment.id,
-                body,
-              });
-            } else {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr,
-                body,
-              });
-            }
