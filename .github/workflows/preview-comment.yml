@@ -1,0 +1,203 @@
+name: Preview Comment
+
+# Trusted companion to preview.yml: consumes the artifact (GIFs, validation JSON,
+# PR number) to publish GIFs and comment. Runs with write perms but never executes PR code.
+on:
+  workflow_run:
+    workflows: ["Preview"]
+    types:
+      - completed
+
+# Single global group: every run force-pushes the shared preview-assets branch.
+concurrency:
+  group: preview-assets-publish
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
+jobs:
+  comment:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      # fetch-depth: 0 so origin/preview-assets resolves; else the publish step wipes it.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download previews artifact
+        id: download
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: transition-previews
+          path: previews
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read and validate PR number
+        if: steps.download.outcome == 'success'
+        id: meta
+        run: |
+          if [ ! -f previews/pr.txt ]; then
+            echo "No pr.txt in artifact — nothing to comment on."
+            echo "pr=" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          PR=$(cat previews/pr.txt)
+          # Untrusted artifact input.
+          if ! printf '%s' "$PR" | grep -qE '^[1-9][0-9]*$'; then
+            echo "::error::Invalid PR number from artifact: '$PR'"
+            exit 1
+          fi
+          echo "pr=$PR" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GIFs to preview-assets branch
+        if: steps.meta.outputs.pr != ''
+        env:
+          PREFIX: run-${{ github.event.workflow_run.id }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin preview-assets 2>/dev/null || true
+          if git rev-parse --verify origin/preview-assets >/dev/null 2>&1; then
+            git checkout origin/preview-assets
+          else
+            git checkout --orphan preview-assets
+            git rm -rf . 2>/dev/null || true
+          fi
+
+          HAS_FILES=false
+          for gif in previews/*.gif; do
+            # Untrusted artifact: don't dereference symlinks.
+            [ -f "$gif" ] && [ ! -L "$gif" ] || continue
+            dest="${PREFIX}-$(basename -- "$gif")"
+            cp -- "$gif" "$dest"
+            git add -- "$dest"
+            HAS_FILES=true
+          done
+
+          # Commit only when something is staged, so reruns stay idempotent.
+          if [ "$HAS_FILES" = "true" ] && ! git diff --cached --quiet; then
+            git commit -m "Preview GIFs for ${PREFIX}"
+            git push -f origin HEAD:preview-assets
+          fi
+
+      - name: Post preview comment with inline GIFs
+        if: steps.meta.outputs.pr != ''
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.meta.outputs.pr }}
+          PREFIX: run-${{ github.event.workflow_run.id }}
+          GIF_DIR: previews
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const prRaw = process.env.PR_NUMBER || '';
+            if (!/^[1-9]\d*$/.test(prRaw)) {
+              core.setFailed(`Invalid PR number: ${JSON.stringify(prRaw)}`);
+              return;
+            }
+            const pr = Number(prRaw);
+            // pr.txt is written before untrusted PR code runs, so a fork PR could forge it.
+            // For pull_request runs, bind the comment to the PR that actually produced this
+            // run; workflow_dispatch is maintainer-chosen, so skip it.
+            const wr = context.payload.workflow_run;
+            if (wr.event === 'pull_request') {
+              const { data: prData } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr,
+              });
+              // head_sha may be the PR head or the merge commit checked out for the run.
+              const allowed = [prData.head.sha, prData.merge_commit_sha].filter(Boolean);
+              if (!allowed.includes(wr.head_sha)) {
+                core.setFailed(`PR #${pr} (head ${prData.head.sha}) does not match the Preview run head (${wr.head_sha}); refusing to comment.`);
+                return;
+              }
+            }
+            const prefix = process.env.PREFIX;
+            const dir = process.env.GIF_DIR;
+            // Wrap untrusted strings in an inline-code span (no backticks/newlines, capped)
+            // so a fork PR can't inject @mentions or Markdown into the bot comment.
+            const code = s => '`' + String(s).replace(/`/g, "'").replace(/[\r\n]+/g, ' ').slice(0, 300) + '`';
+            const baseUrl = `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/preview-assets`;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr,
+            });
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('## Transition Preview')
+            );
+
+            // Untrusted artifact: regular files only (skip symlinks).
+            const isRegular = f => {
+              try { return fs.lstatSync(path.join(dir, f)).isFile(); } catch { return false; }
+            };
+            // Cap at 20 (like the render step) to keep the comment within API size limits.
+            const names = fs.readdirSync(dir)
+              .filter(f => f.endsWith('.validation.json') && isRegular(f))
+              .map(f => f.slice(0, -'.validation.json'.length))
+              .sort()
+              .slice(0, 20);
+
+            let body = '## Transition Preview\n\n';
+
+            for (const name of names) {
+              const validationPath = path.join(dir, `${name}.validation.json`);
+
+              let validation = null;
+              try {
+                validation = JSON.parse(fs.readFileSync(validationPath, 'utf8'));
+              } catch {}
+
+              // Publish skips symlinked GIFs, so only link a regular file.
+              const hasGif = isRegular(`${name}.gif`);
+              const icon = validation?.valid === true ? '✅' : validation?.valid === false ? '❌' : '⚠️';
+              body += `### ${icon} ${code(name)}\n\n`;
+
+              if (hasGif) {
+                const gifUrl = `${baseUrl}/${prefix}-${encodeURIComponent(name)}.gif`;
+                body += `![preview](${gifUrl})\n\n`;
+              } else {
+                body += `⚠️ Failed to render preview\n\n`;
+              }
+
+              if (validation) {
+                if (Array.isArray(validation.errors) && validation.errors.length > 0) {
+                  body += `**Errors:**\n${validation.errors.map(e => `- ${code(e)}`).join('\n')}\n\n`;
+                }
+                if (Array.isArray(validation.warnings) && validation.warnings.length > 0) {
+                  body += `**Warnings:**\n${validation.warnings.map(w => `- ${code(w)}`).join('\n')}\n\n`;
+                }
+                if (validation.valid) {
+                  body += `Shader validation passed.\n\n`;
+                }
+              }
+            }
+
+            body += `---\n🤖 Generated by the [preview bot](${process.env.GITHUB_SERVER_URL}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr,
+                body,
+              });
+            }
