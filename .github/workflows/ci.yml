@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: 24
 
+      - name: Test
+        run: node --test 'scripts/test/*.test.js'
+
       - name: Build
         run: ./scripts/build.sh
 
@@ -48,7 +51,7 @@ jobs:
             echo "should_publish=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          CHANGED=$(git diff --name-only "$LAST_TAG" -- transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/release-skeleton/)
+          CHANGED=$(git diff --name-only "$LAST_TAG" -- transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/lib/ scripts/release-skeleton/)
           if [ -n "$CHANGED" ]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "Changed files affecting package:"

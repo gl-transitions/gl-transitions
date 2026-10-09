@@ -10,12 +10,14 @@
 // 5. No unused uniform parameters
 // 6. Has required metadata (Author, License)
 // 7. Contains a transition(vec2) function
+// 8. Description, Tags and parameter annotations are well formed
 //
 // Exit code 0 = pass, 1 = errors found
 // Outputs JSON to stdout: { name, valid, errors[], warnings[] }
 
 const fs = require("fs");
 const path = require("path");
+const { parseMeta } = require("../lib/transition-meta");
 
 const args = process.argv.slice(2);
 let transitionPath = null;
@@ -105,6 +107,17 @@ while ((m = defaultRegex.exec(glsl)) !== null) {
   if (type === "sampler2D") continue;
   uniformTypes[uname] = type;
   if (val) uniformDefaults[uname] = parseGLSLValue(type, val);
+}
+
+// Catalog metadata: Description, Tags and parameter annotations
+const meta = parseMeta(glsl, uniformTypes, uniformDefaults);
+errors.push(...meta.errors);
+warnings.push(...meta.warnings);
+if (!meta.description) {
+  warnings.push("Missing '// Description:' comment (one line describing the effect)");
+}
+if (meta.tags.length === 0) {
+  warnings.push("Missing '// Tags:' comment (e.g. '// Tags: wipe, directional')");
 }
 
 // If static checks already found critical errors, skip GL validation

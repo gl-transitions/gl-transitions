@@ -1,0 +1,90 @@
+// Run with: node --test scripts/test
+const { test } = require("node:test");
+const assert = require("node:assert/strict");
+const { parseHeader, parseParamAnnotations, parseTextures, parseMeta } = require("../lib/transition-meta");
+
+test("header: description and tags", () => {
+  const h = parseHeader("// Author: a\n// License: MIT\n// Description: A thing: with colon\n// Tags: Zoom-In, wipe, wipe\n");
+  assert.equal(h.description, "A thing: with colon");
+  assert.deepEqual(h.tags, ["zoom-in", "wipe"]);
+  assert.deepEqual(h.errors, []);
+});
+
+test("header: absent metadata is not an error", () => {
+  const h = parseHeader("// Author: a\n// License: MIT\n");
+  assert.equal(h.description, undefined);
+  assert.deepEqual(h.tags, []);
+  assert.deepEqual(h.errors, []);
+});
+
+test("header: invalid tag", () => {
+  const h = parseHeader("// Tags: ok, not ok!\n");
+  assert.deepEqual(h.tags, ["ok"]);
+  assert.equal(h.errors.length, 1);
+});
+
+test("annotations: range, color, description, multi-line, multi-name uniforms", () => {
+  const { hints, errors } = parseParamAnnotations(
+    [
+      "// @range(1, 10, 1) Number of bounces",
+      "uniform float bounces; // = 3.0",
+      "// @color",
+      "// Shadow color",
+      "uniform vec4 shadow; // = vec4(0.)",
+      "// @range(0, 1)",
+      "uniform vec2 a /* = vec2(0.5) */, b; // = vec2(1.0)",
+      "// @param Reverse direction",
+      "uniform bool reversed; // = false",
+      "// a regular comment",
+      "uniform float plain; // = 1.0",
+    ].join("\n")
+  );
+  assert.deepEqual(errors, []);
+  assert.deepEqual(hints.bounces, { min: 1, max: 10, step: 1, description: "Number of bounces" });
+  assert.deepEqual(hints.shadow, { color: true });
+  assert.deepEqual(hints.a, { min: 0, max: 1 });
+  assert.deepEqual(hints.b, { min: 0, max: 1 });
+  assert.deepEqual(hints.reversed, { description: "Reverse direction" });
+  assert.equal(hints.plain, undefined);
+});
+
+test("annotations: errors", () => {
+  const { errors } = parseParamAnnotations(
+    [
+      "// @range(5, 1)",
+      "uniform float a; // = 1.0",
+      "// @range(oops)",
+      "uniform float b; // = 1.0",
+      "// @unknown",
+      "uniform float c; // = 1.0",
+      "// @color",
+      "float notAUniform = 1.0;",
+      "// @range(0, 1)",
+    ].join("\n")
+  );
+  assert.equal(errors.length, 5);
+  assert.match(errors[0], /min \(5\) must be lower than max/);
+  assert.match(errors[1], /@range expects/);
+  assert.match(errors[2], /unknown annotation '@unknown'/);
+  assert.match(errors[3], /line 7: annotation must be directly above a uniform/);
+  assert.match(errors[4], /line 9: annotation must be directly above a uniform/);
+});
+
+test("meta: params catalog combines types, defaults and hints", () => {
+  const glsl = [
+    "// @range(0, 1) Size",
+    "uniform float size; // = 2.0",
+    "// @color",
+    "uniform float notColor; // = 1.0",
+    "uniform float plain; // = 1.0",
+  ].join("\n");
+  const meta = parseMeta(glsl, { size: "float", notColor: "float", plain: "float" }, { size: 2, notColor: 1, plain: 1 });
+  assert.deepEqual(meta.params.size, { type: "float", default: 2, min: 0, max: 1, description: "Size" });
+  assert.deepEqual(meta.params.plain, { type: "float", default: 1 });
+  assert.deepEqual(meta.errors, ["@color requires vec3 or vec4, 'notColor' is float"]);
+  assert.deepEqual(meta.warnings, ["default of 'size' is outside its @range(0, 1)"]);
+});
+
+test("textures: extra sampler2D inputs", () => {
+  assert.deepEqual(parseTextures("uniform sampler2D luma;\nuniform sampler2D a, b;"), ["luma", "a", "b"]);
+});

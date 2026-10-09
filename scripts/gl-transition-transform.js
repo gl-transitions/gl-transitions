@@ -7,6 +7,7 @@
 const fs = require("fs");
 const path = require("path");
 const { execSync } = require("child_process");
+const { parseMeta } = require("./lib/transition-meta");
 
 const args = process.argv.slice(2);
 let transitionsDir = "transitions";
@@ -72,7 +73,24 @@ function parseTransition(glsl, filename) {
     }
   }
 
-  return { name, paramsTypes, defaultParams, glsl, author, license };
+  const meta = parseMeta(glsl, paramsTypes, defaultParams);
+
+  return {
+    transition: {
+      name,
+      paramsTypes,
+      defaultParams,
+      glsl,
+      author,
+      license,
+      description: meta.description,
+      tags: meta.tags,
+      params: meta.params,
+      textures: meta.textures,
+    },
+    errors: meta.errors,
+    warnings: meta.warnings,
+  };
 }
 
 function getGitDatesMap(dir) {
@@ -127,16 +145,25 @@ const files = fs
 
 const dates = getGitDatesMap(transitionsDir);
 
+let errorCount = 0;
 const transitions = files.map((file) => {
   const filepath = path.join(transitionsDir, file);
   const glsl = fs.readFileSync(filepath, "utf8");
-  const parsed = parseTransition(glsl, file);
+  const { transition, errors, warnings } = parseTransition(glsl, file);
+  for (const w of warnings) process.stderr.write(`Warning: ${file}: ${w}\n`);
+  for (const e of errors) process.stderr.write(`Error: ${file}: ${e}\n`);
+  errorCount += errors.length;
   return {
-    ...parsed,
+    ...transition,
     createdAt: dates.created[file] || undefined,
     updatedAt: dates.updated[file] || undefined,
   };
 });
+
+if (errorCount > 0) {
+  process.stderr.write(`${errorCount} annotation error(s), aborting\n`);
+  process.exit(1);
+}
 
 const json = JSON.stringify(transitions);
 
