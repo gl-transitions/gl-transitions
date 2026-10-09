@@ -18,6 +18,7 @@
 const fs = require("fs");
 const path = require("path");
 const { parseMeta } = require("../lib/transition-meta");
+const { checkEncoding } = require("../lib/file-checks");
 
 const args = process.argv.slice(2);
 let transitionPath = null;
@@ -47,8 +48,8 @@ if (!/\/\/\s*[Aa]uthor\s*:/.test(glsl)) {
 if (!/\/\/\s*[Ll]icense\s*:/.test(glsl)) {
   errors.push("Missing '// License:' comment");
 }
-if (glsl.includes("\r")) {
-  errors.push("Use LF line endings, not CRLF");
+for (const e of checkEncoding(fs.readFileSync(transitionPath))) {
+  errors.push(e.charAt(0).toUpperCase() + e.slice(1));
 }
 if (!/vec4\s+transition\s*\(\s*vec2/.test(glsl)) {
   errors.push("Missing 'vec4 transition(vec2 uv)' function");
