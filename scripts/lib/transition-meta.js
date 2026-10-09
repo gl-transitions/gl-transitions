@@ -20,13 +20,29 @@ const NUMERIC_TYPES = ["float", "int", "vec2", "vec3", "vec4", "ivec2", "ivec3",
 const COLOR_TYPES = ["vec3", "vec4"];
 const TAG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
+// The header is the contiguous block of `//` lines holding the first Author or License
+// line, so that comments copied from elsewhere in the file (e.g. a noise function's own
+// "Description :" line) are not taken for the transition's metadata.
+function headerBlock(glsl) {
+  const lines = glsl.split(/\r?\n/);
+  const isComment = (l) => /^\s*\/\//.test(l);
+  const first = lines.findIndex((l) => /^\s*\/\/\s*(author|license)\s*:/i.test(l));
+  if (first === -1) return "";
+  let start = first;
+  let end = first;
+  while (start > 0 && isComment(lines[start - 1])) start--;
+  while (end < lines.length - 1 && isComment(lines[end + 1])) end++;
+  return lines.slice(start, end + 1).join("\n");
+}
+
 function parseHeader(glsl) {
   const errors = [];
-  const descriptionMatch = glsl.match(/^\s*\/\/\s*[Dd]escription\s*:\s*(.*)$/m);
+  const header = headerBlock(glsl);
+  const descriptionMatch = header.match(/^\s*\/\/\s*[Dd]escription\s*:\s*(.*)$/m);
   const description = descriptionMatch ? descriptionMatch[1].trim() : undefined;
   if (descriptionMatch && !description) errors.push("'// Description:' is empty");
 
-  const tagsMatch = glsl.match(/^\s*\/\/\s*[Tt]ags\s*:\s*(.*)$/m);
+  const tagsMatch = header.match(/^\s*\/\/\s*[Tt]ags\s*:\s*(.*)$/m);
   const tags = [];
   if (tagsMatch) {
     for (const raw of tagsMatch[1].split(",")) {
@@ -54,7 +70,8 @@ function parseAnnotationLine(body, lineNumber) {
     const [whole, key, args] = m;
     rest = rest.slice(whole.length);
     if (key === "range") {
-      const nums = (args || "").split(",").map((s) => s.trim()).filter(Boolean).map(Number);
+      const parts = (args || "").split(",").map((s) => s.trim());
+      const nums = parts.map((s) => (s === "" ? NaN : Number(s)));
       if ((nums.length !== 2 && nums.length !== 3) || nums.some((n) => !Number.isFinite(n))) {
         errors.push(`line ${lineNumber}: @range expects (min, max) or (min, max, step), got '@range(${args || ""})'`);
         continue;

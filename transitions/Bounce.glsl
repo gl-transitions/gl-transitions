@@ -5,7 +5,7 @@
 
 // @color Color of the shadow cast on the incoming image
 uniform vec4 shadow_colour; // = vec4(0.,0.,0.,.6)
-// @range(0, 0.5) Height of the shadow, relative to the image height
+// @range(0.01, 0.5) Height of the shadow, relative to the image height
 uniform float shadow_height; // = 0.075
 // @range(1, 10, 1) Number of bounces before settling
 uniform float bounces; // = 3.0

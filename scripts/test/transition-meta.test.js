@@ -2,6 +2,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { parseHeader, parseParamAnnotations, parseTextures, parseMeta } = require("../lib/transition-meta");
+const { parseTransition } = require("../lib/parse-transition");
 
 test("header: description and tags", () => {
   const h = parseHeader("// Author: a\n// License: MIT\n// Description: A thing: with colon\n// Tags: Zoom-In, wipe, wipe\n");
@@ -17,8 +18,14 @@ test("header: absent metadata is not an error", () => {
   assert.deepEqual(h.errors, []);
 });
 
+test("header: only the Author/License comment block counts", () => {
+  const h = parseHeader("// Author: a\n// License: MIT\n\nfloat x;\n// Description : a copied noise function\n// Tags: nope\n");
+  assert.equal(h.description, undefined);
+  assert.deepEqual(h.tags, []);
+});
+
 test("header: invalid tag", () => {
-  const h = parseHeader("// Tags: ok, not ok!\n");
+  const h = parseHeader("// Author: a\n// Tags: ok, not ok!\n");
   assert.deepEqual(h.tags, ["ok"]);
   assert.equal(h.errors.length, 1);
 });
@@ -63,6 +70,10 @@ test("annotations: errors", () => {
     ].join("\n")
   );
   assert.equal(errors.length, 5);
+  for (const malformed of ["@range(0,,1)", "@range(0,1,)", "@range(,1)"]) {
+    const r = parseParamAnnotations(`// ${malformed}\nuniform float x; // = 0.5`);
+    assert.match(r.errors[0], /@range expects/, malformed);
+  }
   assert.match(errors[0], /min \(5\) must be lower than max/);
   assert.match(errors[1], /@range expects/);
   assert.match(errors[2], /unknown annotation '@unknown'/);
@@ -87,4 +98,30 @@ test("meta: params catalog combines types, defaults and hints", () => {
 
 test("textures: extra sampler2D inputs", () => {
   assert.deepEqual(parseTextures("uniform sampler2D luma;\nuniform sampler2D a, b;"), ["luma", "a", "b"]);
+});
+
+test("parseTransition: every uniform declaration form of the spec, with hints", () => {
+  const glsl = [
+    "// Author: a",
+    "// License: MIT",
+    "// @range(0, 100)",
+    "uniform float a; // = 42.0",
+    "uniform float b/* = 1.0 */;",
+    "// @color",
+    "uniform vec3 c /* = vec3(0.9, 0.4, 0.2) */;",
+    "// @range(0, 2) Both of them",
+    "uniform vec2 d /*= vec2(1.0, 1.0)*/, e /* = vec2(2.) */;",
+    "uniform vec2 f, g; // = vec2(1.0, 2.0); // both at once",
+    "uniform float noDefault;",
+    "uniform sampler2D luma;",
+    "vec4 transition(vec2 uv) { return getToColor(uv); }",
+  ].join("\n");
+  const { transition, errors } = parseTransition(glsl, "t.glsl");
+  assert.deepEqual(errors, []);
+  assert.deepEqual(transition.defaultParams, {
+    a: 42, b: 1, c: [0.9, 0.4, 0.2], d: [1, 1], e: [2, 2], f: [1, 2], g: [1, 2],
+  });
+  assert.deepEqual(transition.params.c, { type: "vec3", default: [0.9, 0.4, 0.2], color: true });
+  assert.deepEqual(transition.params.e, { type: "vec2", default: [2, 2], min: 0, max: 2, description: "Both of them" });
+  assert.deepEqual(transition.textures, ["luma"]);
 });
