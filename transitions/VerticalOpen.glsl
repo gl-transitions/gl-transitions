@@ -1,5 +1,7 @@
 // Author: martiniti
 // License: MIT
+// Description: The incoming image opens from a line in the middle toward the left and right edges
+// Tags: wipe, split
 
 vec4 transition (vec2 uv) {
 

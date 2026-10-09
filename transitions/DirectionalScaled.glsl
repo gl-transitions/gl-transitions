@@ -2,9 +2,12 @@
 // based on Directional transition by Gaëtan Renaudeau
 // https://gl-transitions.com/editor/Directional
 // License: MIT
+// Description: Like Directional, with both images scaled down while they slide
+// Tags: slide, push, zoom, directional
 
 #define PI acos(-1.0)
 
+// @param Direction of the movement
 uniform vec2 direction; // = vec2(0.0, 1.0)
 uniform float scale; // = .7
 

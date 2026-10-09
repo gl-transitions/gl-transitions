@@ -1,5 +1,7 @@
 // Author: haiyoucuv
 // License: MIT
+// Description: The images spin around the center while crossfading
+// Tags: rotate, spin, blend
 
 #define PI 3.1415926
 

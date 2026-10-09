@@ -1,5 +1,7 @@
 // Author: mernking gitlab: Godswork
 // License: MIT
+// Description: A crossfade with drifting tracking lines and tearing, like a TV losing its signal
+// Tags: retro, glitch, scanlines
 
 float hash(vec2 p) {
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);

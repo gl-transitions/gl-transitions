@@ -1,5 +1,7 @@
 // Author: mikolalysenko
 // License: MIT
+// Description: A crossfade with a gentle wavy distortion
+// Tags: wave, blend
 
 vec2 offset(float progress, float x, float theta) {
   float phase = progress*progress + progress + theta;

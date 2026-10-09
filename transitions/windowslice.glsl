@@ -1,7 +1,11 @@
 // Author: gre
 // License: MIT
+// Description: The incoming image appears through vertical slices that widen
+// Tags: slices, stripes, wipe
 
+// @param Number of slices
 uniform float count; // = 10.0
+// @param Softness of the slices' edges
 uniform float smoothness; // = 0.5
 
 vec4 transition (vec2 p) {

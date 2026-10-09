@@ -1,11 +1,14 @@
 // Tunable parameters
 // How much to zoom (out) for the effect ~ 0.5 - 1.0
+// @range(0.5, 1) How much the images zoom out
 uniform float zoom; // = 0.88
 // Corner radius as a fraction of the image height
 uniform float corner_radius;  // = 0.22
 
 // Author: Ted Schundler
 // License: BSD 2 Clause
+// Description: Both images shrink into rounded cards that swap, like a stereo viewer toy
+// Tags: cards, zoom, retro
 // Free for use and modification by anyone with credit
 
 // Copyright (c) 2016, Theodore K Schundler

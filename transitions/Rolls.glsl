@@ -1,10 +1,14 @@
 // Author: Mark Craig
 // mrmcsoftware on github and youtube ( http://www.youtube.com/MrMcSoftware )
 // License: MIT
+// Description: The outgoing image rolls away around a corner, revealing the incoming one
+// Tags: rotate, roll
 
 // Rolls Transition by Mark Craig (Copyright © 2022)
 
+// @range(0, 3, 1) Corner to roll around
 uniform int type; // = 0
+// @param Roll the outgoing image down instead of up
 uniform bool RotDown; // = false
 // type (0-3): Rotate/Roll from which corner
 // RotDown: if true rotate old image down, otherwise rotate old image up

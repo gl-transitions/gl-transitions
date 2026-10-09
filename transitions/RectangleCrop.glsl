@@ -1,6 +1,9 @@
 // License: MIT
 // Author: martiniti
+// Description: The outgoing image shrinks into a small rectangle over a background color, then the incoming one grows from it
+// Tags: box, iris, zoom
 
+// @color Background color
 uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 vec4 transition(vec2 uv) {

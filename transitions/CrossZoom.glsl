@@ -1,11 +1,14 @@
 // License: MIT
 // Author: rectalogic
+// Description: A crossfade through a strong zoom blur
+// Tags: zoom, blur, blend
 // ported by gre from https://gist.github.com/rectalogic/b86b90161503a0023231
 
 // Converted from https://github.com/rectalogic/rendermix-basic-effects/blob/master/assets/com/rendermix/CrossZoom/CrossZoom.frag
 // Which is based on https://github.com/evanw/glfx.js/blob/master/src/filters/blur/zoomblur.js
 // With additional easing functions from https://github.com/rectalogic/rendermix-basic-effects/blob/master/assets/com/rendermix/Easing/Easing.glsllib
 
+// @range(0, 1) Blur strength
 uniform float strength; // = 0.4
 
 const float PI = 3.141592653589793;

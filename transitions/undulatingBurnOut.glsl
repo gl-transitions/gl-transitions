@@ -1,9 +1,14 @@
 // License: MIT
 // Author: pthrasher
+// Description: A circle with a wavy edge burns out from the center to reveal the incoming image
+// Tags: circle, burn, wipe
 // adapted by gre from https://gist.github.com/pthrasher/8e6226b215548ba12734
 
+// @param Softness of the edge
 uniform float smoothness; // = 0.03
+// @param Center of the circle
 uniform vec2 center; // = vec2(0.5)
+// @color Color of the burning edge
 uniform vec3 color; // = vec3(0.0)
 
 const float M_PI = 3.14159265358979323846;

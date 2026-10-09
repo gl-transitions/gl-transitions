@@ -1,7 +1,11 @@
 // Author: gre
 // License: MIT
+// Description: The two images swap places in 3D, with a floor reflection
+// Tags: 3d, swap, reflection
 // General parameters
+// @param Strength of the reflection
 uniform float reflection; // = 0.4
+// @param Amount of perspective
 uniform float perspective; // = 0.2
 uniform float depth; // = 3.0
  

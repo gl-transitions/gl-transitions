@@ -1,5 +1,7 @@
 // License: MIT
 // Author: Xaychru
+// Description: A radial wipe that sweeps around the center like a clock hand
+// Tags: wipe, radial, clock
 // ported by gre from https://gist.github.com/Xaychru/ce1d48f0ce00bb379750
 
 uniform float smoothness; // = 1.0

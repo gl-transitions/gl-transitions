@@ -1,5 +1,7 @@
 // Author: Ben Lucas
 // License: MIT
+// Description: A crossfade through TV static
+// Tags: static, noise, retro
 
 uniform float n_noise_pixels ; // = 200.0
 uniform float static_luminosity ; // = 0.8

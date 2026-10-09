@@ -1,6 +1,8 @@
 // Author: Gunnar Roth
 // based on work from natewave
 // License: MIT
+// Description: A crossfade with glitchy, color-shifted blocks
+// Tags: glitch, chromatic, blend
 vec4 transition(vec2 p) {
   vec2 block = floor(p.xy / vec2(16));
   vec2 uv_noise = block / vec2(64);

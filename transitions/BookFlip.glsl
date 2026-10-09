@@ -1,5 +1,7 @@
 // Author: hong
 // License: MIT
+// Description: The outgoing image turns like a book page from right to left, revealing the incoming one
+// Tags: page, flip, 3d
 
 // Avoids dividing by zero when the page is edge-on (progress = 0.5).
 float nonZero(float x) {

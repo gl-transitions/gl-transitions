@@ -1,7 +1,10 @@
 // License: MIT
 // Author: pthrasher
+// Description: The incoming image appears through a crosshatch of lines spreading from the center
+// Tags: pattern, lines, noise
 // adapted by gre from https://gist.github.com/pthrasher/04fd9a7de4012cbb03f6
 
+// @param Point the lines spread from
 uniform vec2 center; // = vec2(0.5)
 uniform float threshold; // = 3.0
 uniform float fadeEdge; // = 0.1

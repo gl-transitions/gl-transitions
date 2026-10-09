@@ -1,6 +1,8 @@
 // Name: Power Kaleido
 // Author: Boundless
 // License: MIT
+// Description: The image folds into an animated kaleidoscope before revealing the incoming one
+// Tags: kaleidoscope, distort
 #define PI 3.14159265358979
 const float rad = 120.; // change this value to get different mirror effects
 const float deg = rad / 180. * PI;

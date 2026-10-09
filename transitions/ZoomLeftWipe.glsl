@@ -1,6 +1,9 @@
 // Author: Handk
 // License: MIT
+// Description: Zooms into the outgoing image, then the incoming one wipes in from right to left
+// Tags: zoom, wipe, horizontal
 
+// @param How quickly the zoom happens
 uniform float zoom_quickness; // = 0.8
 vec2 zoom(vec2 uv, float amount) {
   if(amount<0.5)

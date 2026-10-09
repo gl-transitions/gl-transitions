@@ -1,11 +1,14 @@
 // Author: Travis Fischer
 // License: MIT
+// Description: A crossfade in which a displacement map (an extra grayscale texture) warps both images
+// Tags: displace, distort, blend
 //
 // Adapted from a Codrops article by Robin Delaporte
 // https://tympanus.net/Development/DistortionHoverEffect
 
 uniform sampler2D displacementMap;
 
+// @param Strength of the displacement
 uniform float strength; // = 0.5
 
 vec4 transition (vec2 uv) {

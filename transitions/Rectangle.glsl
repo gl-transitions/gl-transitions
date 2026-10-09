@@ -1,6 +1,9 @@
 // Author: martiniti
 // License: MIT
+// Description: A rectangle grows from the center to cover the outgoing image, then shrinks to reveal the incoming one
+// Tags: box, shape, iris
 
+// @color Color of the rectangle
 uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 vec4 transition(vec2 p) {

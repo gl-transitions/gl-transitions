@@ -1,5 +1,7 @@
 // Author: nwoeanhinnogaehr
 // License: MIT
+// Description: The outgoing image flips around the vertical axis into the incoming one
+// Tags: flip, horizontal
 // Ported from https://gist.github.com/nwoeanhinnogaehr/408045772d255df97520
 
 vec4 transition(vec2 uv) {

@@ -1,5 +1,7 @@
 // License: MIT
 // Author: dycm8009
+// Description: Concentric rings of the outgoing image zoom at different speeds before revealing the incoming one
+// Tags: zoom, circle
 // ported by gre from https://gist.github.com/dycm8009/948e99b1800e81ad909a
 
 vec2 zoom(vec2 uv, float amount) {

@@ -1,5 +1,7 @@
 // Author: Matt DesLauriers
 // License: MIT
+// Description: Blocks of the image are displaced in a glitch that flashes into the incoming image
+// Tags: glitch, displace
 
 float random(vec2 co)
 {

@@ -1,6 +1,9 @@
 // Author: bobylito
 // License: MIT
+// Description: The incoming image appears through growing polka dots
+// Tags: dots, pattern
 const float SQRT_2 = 1.414213562373;
+// @param Number of dots across the image
 uniform float dots; // = 20.0
 uniform vec2 center; // = vec2(0, 0)
 

@@ -1,6 +1,9 @@
 // Author: Ben Zhang
 // License: MIT
+// Description: A crossfade through a washed-out, overexposed white
+// Tags: flash, light, fade
 
+// @param Amount of overexposure
 uniform float strength; // = 0.6
 const float PI = 3.141592653589793;
 

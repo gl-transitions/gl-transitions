@@ -1,5 +1,8 @@
 // Author: Anastasia Dunbar
 // License: MIT
+// Description: Glowing film-burn light leaks wash over the image and reveal the incoming one
+// Tags: burn, film, light-leak
+// @param Random seed
 uniform float Seed; // = 2.31
 float sigmoid(float x, float a) {
     float b = pow(x*2.,a)/2.;

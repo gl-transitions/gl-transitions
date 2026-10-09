@@ -1,5 +1,7 @@
 // Author: huynx
 // License: MIT
+// Description: Two triangles grow from the top and bottom edges into a bow tie that reveals the incoming image
+// Tags: wipe, shape, vertical
 
 float check(vec2 p1, vec2 p2, vec2 p3)
 {

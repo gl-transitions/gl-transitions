@@ -1,5 +1,7 @@
 // Author: Hewlett-Packard
 // License: BSD 3 Clause
+// Description: The outgoing image curls away like a page, revealing the incoming one
+// Tags: page, curl, 3d
 // Adapted by Sergey Kosarevsky from:
 // http://rectalogic.github.io/webvfx/examples_2transition-shader-pagecurl_8html-example.html
 

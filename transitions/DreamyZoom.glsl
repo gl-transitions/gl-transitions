@@ -1,5 +1,7 @@
 // Author: Zeh Fernando
 // License: MIT
+// Description: Zooms and rotates into a bright flash, then out to the incoming image
+// Tags: zoom, rotate, flash
 
 // Definitions --------
 #define DEG2RAD 0.03926990816987241548078304229099 // 1/180*PI

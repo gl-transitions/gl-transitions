@@ -1,6 +1,10 @@
 // Author: gre
 // License: MIT
+// Description: Ripples spread from the center while crossfading
+// Tags: ripple, wave, blend
+// @param Strength of the ripples
 uniform float amplitude; // = 100.0
+// @param Speed of the ripples
 uniform float speed; // = 50.0
 
 vec4 transition (vec2 uv) {

@@ -1,7 +1,11 @@
 // Author: pschroen
 // License: MIT
+// Description: A diagonal wipe with a warped, smeared edge
+// Tags: wipe, warp, directional
 
+// @param Softness of the edge
 uniform float smoothness; // = 0.1
+// @param Direction of the wipe
 uniform vec2 direction; // = vec2(-1.0, 1.0)
 
 const vec2 center = vec2(0.5, 0.5);

@@ -1,7 +1,10 @@
 // License: MIT
 // Author: fkuteken
+// Description: The outgoing image closes into a circle over a background color, then the incoming one opens from it
+// Tags: circle, iris, shape
 // ported by gre from https://gist.github.com/fkuteken/f63e3009c1143950dee9063c3b83fb88
 
+// @color Background color
 uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 vec4 transition(vec2 p) {

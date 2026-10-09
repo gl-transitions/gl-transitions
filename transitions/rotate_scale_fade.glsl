@@ -1,11 +1,17 @@
 // Author: Fernando Kuteken
 // License: MIT
+// Description: The outgoing image spins and zooms while fading to the incoming one, over a background color
+// Tags: rotate, zoom, fade
 
 #define PI 3.14159265359
 
+// @param Center of the rotation
 uniform vec2 center; // = vec2(0.5, 0.5)
+// @param Number of turns
 uniform float rotations; // = 1
+// @param Maximum zoom
 uniform float scale; // = 8
+// @color Background color
 uniform vec4 backColor; // = vec4(0.15, 0.15, 0.15, 1.0)
 
 vec4 transition (vec2 uv) {

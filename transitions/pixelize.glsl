@@ -1,10 +1,14 @@
 // Author: gre
 // License: MIT
+// Description: Both images pixelate, crossfade, then sharpen again
+// Tags: pixelate, blend
 // forked from https://gist.github.com/benraziel/c528607361d90a072e98
 
 // minimum number of squares (when the effect is at its higher level)
+// @param Number of squares at the strongest pixelation
 uniform ivec2 squaresMin; // = ivec2(20)
 // zero disable the stepping
+// @param Number of pixelation steps; 0 for a continuous effect
 uniform int steps; // = 50
 
 vec4 transition(vec2 uv) {

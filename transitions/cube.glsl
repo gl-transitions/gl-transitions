@@ -1,7 +1,11 @@
 // Author: gre
 // License: MIT
+// Description: The two images are faces of a rotating 3D cube, with a floor reflection
+// Tags: 3d, cube, rotate, reflection
+// @range(0, 1) Amount of perspective
 uniform float persp; // = 0.7
 uniform float unzoom; // = 0.3
+// @range(0, 1) Strength of the reflection
 uniform float reflection; // = 0.4
 uniform float floating; // = 3.0
 

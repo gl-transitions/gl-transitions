@@ -1,8 +1,13 @@
 // Author: gre
 // License: MIT
+// Description: Squares grow along a diagonal sweep to reveal the incoming image
+// Tags: squares, grid, wipe, directional
  
+// @param Number of squares (columns, rows)
 uniform ivec2 squares;// = ivec2(10,10)
+// @param Direction of the sweep
 uniform vec2 direction;// = vec2(1.0, -0.5)
+// @param Softness of the sweep
 uniform float smoothness; // = 1.6
 
 const vec2 center = vec2(0.5, 0.5);

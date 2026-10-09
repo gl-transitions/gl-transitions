@@ -1,5 +1,7 @@
 // Author: nwoeanhinnogaehr
 // License: MIT
+// Description: A crossfade through a spinning kaleidoscope
+// Tags: kaleidoscope, distort, blend
 
 uniform float speed; // = 1.0
 uniform float angle; // = 1.0
