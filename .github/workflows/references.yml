@@ -6,7 +6,6 @@ name: Reference renders
 
 on:
   pull_request:
-    branches: [master]
     paths:
       - 'transitions/**'
       - 'scripts/preview/**'
