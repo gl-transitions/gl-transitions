@@ -1,0 +1,89 @@
+name: Reference renders
+
+# Renders every transition on the base branch and on the PR with the same
+# software GL (Mesa llvmpipe) and reports transitions whose output changed.
+# Informational: fails only when a transition does not render.
+
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'transitions/**'
+      - 'scripts/preview/**'
+      - 'scripts/lib/**'
+      - '.github/workflows/references.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: references-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6
+
+      - name: Install preview dependencies
+        run: cd scripts/preview && npm install
+
+      - name: Check out base transitions
+        env:
+          BASE_REF: ${{ github.base_ref || 'master' }}
+        run: |
+          mkdir -p /tmp/base
+          git archive "origin/${BASE_REF}" transitions | tar -x -C /tmp/base
+
+      - name: Render base and head
+        run: |
+          xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
+            node scripts/preview/render-references.js --transitions /tmp/base/transitions --out /tmp/refs/base > /tmp/refs-base.json &&
+            node scripts/preview/render-references.js --out /tmp/refs/head > /tmp/refs-head.json;
+            node scripts/preview/render-references.js --check --out /tmp/refs/base > /tmp/refs-diff.json
+          '
+
+      - name: Summary
+        if: always()
+        run: |
+          node -e '
+            const fs = require("fs");
+            const read = (f) => { try { return JSON.parse(fs.readFileSync(f, "utf8")); } catch { return null; } };
+            const head = read("/tmp/refs-head.json"), diff = read("/tmp/refs-diff.json");
+            const out = ["## Reference renders", ""];
+            if (!head || !diff) { out.push("Rendering did not complete, see the logs."); }
+            else {
+              out.push(`Rendered ${head.rendered} transitions.`, "");
+              out.push(`**Output changed:** ${diff.changed.length ? diff.changed.map(c => `\`${c.name}\` (progress ${c.progress.join(", ")})`).join(", ") : "none"}`);
+              out.push(`**New:** ${diff.missing.length ? diff.missing.map(n => `\`${n}\``).join(", ") : "none"}`);
+              if (head.failed.length) {
+                out.push("", "**Failed to render:**");
+                for (const f of head.failed) out.push(`- \`${f.name}\`: ${f.error.split("\n")[0]}`);
+              }
+            }
+            fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
+          '
+
+      - name: Upload renders
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference-renders
+          path: /tmp/refs/
+          if-no-files-found: warn
+
+      - name: Fail on render errors
+        run: node -e 'process.exit(JSON.parse(require("fs").readFileSync("/tmp/refs-head.json","utf8")).failed.length ? 1 : 0)'

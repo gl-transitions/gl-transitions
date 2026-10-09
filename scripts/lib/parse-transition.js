@@ -1,4 +1,5 @@
 // Parses a gl-transition source into its catalog entry.
+// Shared by gl-transition-transform.js (build) and the reference renderer.
 
 const path = require("path");
 const { parseMeta } = require("./transition-meta");
