@@ -27,6 +27,9 @@ jobs:
       - name: Test
         run: node --test 'scripts/test/*.test.js' 'tools/test/*.test.js'
 
+      - name: Install tools dependencies
+        run: cd tools && npm install
+
       - name: Build
         run: ./scripts/build.sh
 
@@ -50,7 +53,7 @@ jobs:
             echo "should_publish=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          CHANGED=$(git diff --name-only "$LAST_TAG" -- transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/lib/ scripts/release-skeleton/)
+          CHANGED=$(git diff --name-only "$LAST_TAG" -- transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/lib/ scripts/release-skeleton/ tools/)
           if [ -n "$CHANGED" ]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "Changed files affecting package:"
@@ -75,6 +78,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+
+      - name: Install tools dependencies
+        run: cd tools && npm install
 
       - name: Build
         run: ./scripts/build.sh

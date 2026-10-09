@@ -16,3 +16,7 @@ echo "window.GLTransitions=" | cat - gl-transitions.json > gl-transitions.js
 echo "module.exports=" | cat - gl-transitions.json > index.js
 mkdir transitions && cp ../transitions/*.glsl transitions/.
 cp ../LICENSE .
+cd -
+
+# SkSL (Skia) versions of the transitions that compile; see tools/README.md
+node tools/build-sksl.js --out release/sksl
