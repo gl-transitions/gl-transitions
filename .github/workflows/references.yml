@@ -85,4 +85,5 @@ jobs:
           if-no-files-found: warn
 
       - name: Fail on render errors
-        run: node -e 'process.exit(JSON.parse(require("fs").readFileSync("/tmp/refs-head.json","utf8")).failed.length ? 1 : 0)'
+        run: |
+          node -e 'process.exit(JSON.parse(require("fs").readFileSync("/tmp/refs-head.json","utf8")).failed.length ? 1 : 0)'
