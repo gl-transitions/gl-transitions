@@ -1,10 +1,6 @@
 // Author: Rich Harris
 // License: MIT
 
-#ifdef GL_ES
-precision highp float;
-#endif
-
 uniform float scale; // = 4.0
 uniform float smoothness; // = 0.01
 

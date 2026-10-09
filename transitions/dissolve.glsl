@@ -1,10 +1,6 @@
 // Author: hjm1fb
 // License: MIT
 
-#ifdef GL_ES
-precision mediump float;
-#endif
-
 uniform float uLineWidth; // = 0.1
 uniform vec3 uSpreadClr; // = vec3(1.0, 0.0, 0.0)
 uniform vec3 uHotClr; // = vec3(0.9, 0.9, 0.2)

@@ -1,10 +1,6 @@
 // Author: Matt DesLauriers
 // License: MIT
 
-#ifdef GL_ES
-precision highp float;
-#endif
-
 float random(vec2 co)
 {
     float a = 12.9898;
