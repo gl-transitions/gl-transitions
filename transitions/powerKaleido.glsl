@@ -6,7 +6,6 @@ const float rad = 120.; // change this value to get different mirror effects
 const float deg = rad / 180. * PI;
 uniform float scale; // = 2.0
 uniform float z; // = 1.5
-float dist = scale / 10.;
 uniform float speed; // = 5.
 vec2 refl(vec2 p,vec2 o,vec2 n)
 {
@@ -22,6 +21,7 @@ vec2 rot(vec2 p, vec2 o, float a)
 
 vec4 mainImage(vec2 uv)
 {
+  float dist = scale / 10.;
   vec2 uv0 = uv;
 	uv -= 0.5;
   uv.x *= ratio;

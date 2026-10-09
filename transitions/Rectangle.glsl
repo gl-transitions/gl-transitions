@@ -3,9 +3,8 @@
 
 uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
 
-float s = pow(2.0 * abs(progress - 0.5), 3.0);
-
 vec4 transition(vec2 p) {
+  float s = pow(2.0 * abs(progress - 0.5), 3.0);
   
    vec2 sq = p.xy / vec2(1.0).xy;
    
