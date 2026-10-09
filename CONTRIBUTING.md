@@ -13,6 +13,8 @@ transitions/MyTransition.glsl    <-- correct
 transitions/MyTransition.glsl/MyTransition.glsl   <-- WRONG (GitHub web UI sometimes creates this)
 ```
 
+Use UTF-8 and LF (Unix) line endings; CI checks both with `node scripts/lint-transitions.js`.
+
 If you use the GitHub web UI to create a file, make sure you type the full path `transitions/MyTransition.glsl` in the filename field, not just `MyTransition.glsl` after navigating into the `transitions/` folder.
 
 ### File format

@@ -24,6 +24,9 @@ jobs:
         with:
           node-version: 24
 
+      - name: Lint transitions
+        run: node scripts/lint-transitions.js
+
       - name: Test
         run: node --test 'scripts/test/*.test.js' 'tools/test/*.test.js'
 
@@ -53,7 +56,7 @@ jobs:
             echo "should_publish=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          CHANGED=$(git diff --name-only "$LAST_TAG" -- transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/lib/ scripts/release-skeleton/ tools/)
+          CHANGED=$(git diff --name-only "$LAST_TAG" -- transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/lint-transitions.js scripts/lib/ scripts/release-skeleton/ tools/)
           if [ -n "$CHANGED" ]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "Changed files affecting package:"

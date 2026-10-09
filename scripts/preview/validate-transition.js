@@ -47,6 +47,9 @@ if (!/\/\/\s*[Aa]uthor\s*:/.test(glsl)) {
 if (!/\/\/\s*[Ll]icense\s*:/.test(glsl)) {
   errors.push("Missing '// License:' comment");
 }
+if (glsl.includes("\r")) {
+  errors.push("Use LF line endings, not CRLF");
+}
 if (!/vec4\s+transition\s*\(\s*vec2/.test(glsl)) {
   errors.push("Missing 'vec4 transition(vec2 uv)' function");
 }
