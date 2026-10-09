@@ -25,7 +25,7 @@ jobs:
           node-version: 24
 
       - name: Test
-        run: node --test 'scripts/test/*.test.js'
+        run: node --test 'scripts/test/*.test.js' 'tools/test/*.test.js'
 
       - name: Build
         run: ./scripts/build.sh

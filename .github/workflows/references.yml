@@ -2,7 +2,9 @@ name: Reference renders
 
 # Renders every transition on the base branch and on the PR with the same
 # software GL (Mesa llvmpipe) and reports transitions whose output changed.
-# Informational: fails only when a transition does not render.
+# Then converts every transition to SkSL, renders it with Skia (CanvasKit) and
+# reports how it compares with the GLSL render.
+# Informational: fails only when a GLSL transition does not render.
 
 on:
   pull_request:
@@ -10,6 +12,7 @@ on:
       - 'transitions/**'
       - 'scripts/preview/**'
       - 'scripts/lib/**'
+      - 'tools/**'
       - '.github/workflows/references.yml'
   workflow_dispatch:
 
@@ -55,6 +58,12 @@ jobs:
             node scripts/preview/render-references.js --check --out /tmp/refs/base > /tmp/refs-diff.json
           '
 
+      - name: Install tools dependencies
+        run: cd tools && npm install
+
+      - name: Build and compare SkSL
+        run: node tools/build-sksl.js --out /tmp/sksl/shaders --refs /tmp/refs/head --renders /tmp/sksl/renders --report /tmp/sksl/report.json
+
       - name: Summary
         if: always()
         run: |
@@ -73,6 +82,22 @@ jobs:
                 for (const f of head.failed) out.push(`- \`${f.name}\`: ${f.error.split("\n")[0]}`);
               }
             }
+            const sksl = read("/tmp/sksl/report.json");
+            if (sksl) {
+              const order = ["match", "noise-only", "close", "differs", "compile-error", "unsupported"];
+              out.push("", "## SkSL", "", "| Status | Count |", "|---|---|");
+              for (const s of order) if (sksl.counts[s]) out.push(`| ${s} | ${sksl.counts[s]} |`);
+              const notes = sksl.transitions.filter((t) => t.status !== "match");
+              if (notes.length) {
+                out.push("", "<details><summary>Transitions that do not match</summary>", "", "| Transition | Status | Differing pixels | Notes |", "|---|---|---|---|");
+                for (const t of notes) {
+                  const pct = t.differingPixels !== undefined ? `${(t.differingPixels * 100).toFixed(1)}%` : "";
+                  const note = [t.hashNoise ? "hash noise" : "", (t.error || "").split("\n")[0].replace(/\|/g, "\\|")].filter(Boolean).join("; ");
+                  out.push(`| \`${t.name}\` | ${t.status} | ${pct} | ${note} |`);
+                }
+                out.push("", "</details>");
+              }
+            }
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
           '
 
@@ -81,7 +106,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: reference-renders
-          path: /tmp/refs/
+          path: |
+            /tmp/refs/
+            /tmp/sksl/
           if-no-files-found: warn
 
       - name: Fail on render errors
