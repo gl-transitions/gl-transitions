@@ -16,14 +16,28 @@ The effect flips `uv` internally, so images are drawn the usual Skia way (no man
 
 ## CanvasKit (browser or Node)
 
+Load the SkSL source. In Node:
+
+```js
+import fs from "node:fs";
+const loadSksl = async (name) => fs.readFileSync(`node_modules/gl-transitions/sksl/${name}.sksl`, "utf8");
+```
+
+In the browser (CanvasKit also needs `locateFile` to find its `.wasm`, see its README):
+
+```js
+const loadSksl = (name) => fetch(`https://cdn.jsdelivr.net/npm/gl-transitions@1/sksl/${name}.sksl`).then((r) => r.text());
+```
+
+Then, in both:
+
 ```js
 import CanvasKitInit from "canvaskit-wasm";
 import transitions from "gl-transitions";
-import fs from "node:fs";
 
 const CanvasKit = await CanvasKitInit();
 const transition = transitions.find((t) => t.name === "cube");
-const sksl = fs.readFileSync(`node_modules/gl-transitions/sksl/${transition.name}.sksl`, "utf8"); // or fetch() it
+const sksl = await loadSksl(transition.name);
 let error = "";
 const effect = CanvasKit.RuntimeEffect.Make(sksl, (e) => (error += e));
 if (!effect) throw new Error(error);
@@ -49,14 +63,17 @@ function uniforms(values) {
   return out;
 }
 
-function draw(progress, fromImage, toImage, params = {}) {
+// extraImages: one image per transition.textures entry, in that order (e.g. the luma map of `luma`).
+function draw(progress, fromImage, toImage, params = {}, extraImages = []) {
   const values = { _resolution: [width, height], progress, ratio: width / height };
   for (const [name, p] of Object.entries(transition.params)) values[name] = params[name] ?? p.default; // never unset
-  const children = [imageShader(fromImage), imageShader(toImage)]; // + one per transition.textures entry
+  const children = [fromImage, toImage, ...extraImages].map(imageShader);
   const shader = effect.makeShaderWithChildren(uniforms(values), children);
   const paint = new CanvasKit.Paint();
   paint.setShader(shader);
-  surface.getCanvas().drawPaint(paint);
+  const canvas = surface.getCanvas();
+  canvas.clear(CanvasKit.TRANSPARENT); // don't blend over the previous frame
+  canvas.drawPaint(paint);
   paint.delete();
   shader.delete();
   children.forEach((c) => c.delete());

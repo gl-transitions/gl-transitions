@@ -40,7 +40,7 @@ The host defines `progress`, `ratio`, `getFromColor(uv)`, `getToColor(uv)` and o
 
 ## 4. Check the result
 
-- At `progress = 0` the output must be exactly the outgoing image, at `progress = 1` exactly the incoming one. Render both ends and one middle frame.
+- At `progress = 0` the output must be the outgoing image, at `progress = 1` the incoming one (the specification; a few transitions are off by a pixel or a slight blur at the ends, e.g. `AdvancedMosaic`, `tangentMotionBlur`). Render both ends and one middle frame.
 - An upside-down result means the image rows are flipped: `uv` has its origin at the bottom left (see each reference).
 - A black or frozen result usually means a parameter was left unset or an extra texture is missing.
 - Credit the author and license from the catalog when the user ships the result (most are MIT).

@@ -1,6 +1,6 @@
 # WebGL
 
-A transition is the body of a fragment shader. Put it between a header that defines the contextual variables and a `main` that calls `transition`. This works in WebGL 1 and WebGL 2 (GLSL ES 1.00 shaders are accepted by both), and in any OpenGL host that takes GLSL ES 1.00 or GLSL 1.20.
+A transition is the body of a fragment shader. Put it between a header that defines the contextual variables and a `main` that calls `transition`. This works in WebGL 1 and WebGL 2 (a WebGL 2 context also accepts GLSL ES 1.00 shaders, as long as they have no `#version` line), and in OpenGL ES hosts. For desktop OpenGL (GLSL 1.20), drop the `precision` line.
 
 ## Shaders
 
@@ -105,7 +105,10 @@ function createTexture(gl, source) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  return { texture, width: source.width || source.videoWidth, height: source.height || source.videoHeight };
+  // Intrinsic size first: an <img> or <video> width/height may be its displayed size.
+  const width = source.naturalWidth || source.videoWidth || source.width;
+  const height = source.naturalHeight || source.videoHeight || source.height;
+  return { texture, width, height };
 }
 ```
 
