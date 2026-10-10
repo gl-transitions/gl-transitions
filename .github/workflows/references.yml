@@ -4,7 +4,9 @@ name: Reference renders
 # software GL (Mesa llvmpipe) and reports transitions whose output changed.
 # Then converts every transition to SkSL, renders it with Skia (CanvasKit) and
 # reports how it compares with the GLSL render.
-# Informational: fails only when a GLSL transition does not render.
+# Also validates every transition against the spec (validate-transition.mjs).
+# The comparisons are informational: fails only when a GLSL transition does not
+# render or breaks the spec.
 
 on:
   pull_request:
@@ -62,6 +64,16 @@ jobs:
 
       - name: Build and compare SkSL
         run: node scripts/targets/build-sksl.mjs --out /tmp/sksl/shaders --refs /tmp/refs/head --renders /tmp/sksl/renders --report /tmp/sksl/report.json
+
+      - name: Validate transitions against the spec
+        run: |
+          xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
+            failed=0
+            for file in transitions/*.glsl; do
+              node scripts/checks/validate-transition.mjs --transition "$file" > /tmp/validation.json || { cat /tmp/validation.json; failed=1; }
+            done
+            exit $failed
+          '
 
       - name: Summary
         if: always()

@@ -55,6 +55,8 @@ uniform vec2 direction; // = vec2(1.0, 0.0)
 uniform bool invert; // = false
 ```
 
+Defaults must match the type: `true` or `false` for `bool` (not `1`), integers for `int`, `vec2(…)` with 1 or 2 values for `vec2`. `npm run lint` checks this.
+
 ### Description, tags and parameter hints (recommended)
 
 Help people find and use your transition by describing it:

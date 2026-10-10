@@ -40,7 +40,10 @@ float getWave(vec2 p){
   float offset = mix(40.0, 30.0, smoothstep(0.0, 1.0, x));
   float ease_degs = quadraticInOut(sin(degs));
   float deg_wave_pos = (ease_degs * magnitude) * sin(x * offset);
-  return x + deg_wave_pos;
+  // The soft edge reaches `smoothness` beyond the radius and the burn band 0.005 inside it:
+  // start the radius below both so nothing but the outgoing image shows at progress 0
+  // (unchanged from progress 0.1 on).
+  return x - max(smoothness, 0.01) * (1.0 - smoothstep(0.0, 0.1, x)) + deg_wave_pos;
 }
 
 vec4 transition(vec2 p) {

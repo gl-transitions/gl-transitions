@@ -13,7 +13,7 @@
 
 //direction of movement :  0 : up, 1, down
 // @param Direction of the melt (false: up, true: down)
-uniform bool direction; // = 1 
+uniform bool direction; // = true
 //luminance threshold
 // @range(0, 1) Luminance threshold
 uniform float l_threshold; // = 0.8 
