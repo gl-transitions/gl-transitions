@@ -27,7 +27,7 @@ A Transition is an object with the following shape (TypeScript types are include
   },
   textures: string[],    // extra sampler2D inputs, beyond from/to
   paramsTypes: { [name: string]: string },   // legacy, prefer params
-  defaultParams: { [name: string]: mixed },  // legacy, prefer params
+  defaultParams: { [name: string]: number | boolean | number[] },  // legacy, prefer params
   createdAt: string,
   updatedAt: string,
 }
