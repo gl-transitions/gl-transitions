@@ -26,14 +26,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # fetch-depth: 0 so origin/preview-assets resolves; else the publish step wipes it.
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
       - name: Download previews artifact
         id: download
         continue-on-error: true
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: transition-previews
           path: previews
@@ -61,7 +61,7 @@ jobs:
       # run was produced by that PR before publishing or commenting anything.
       - name: Check the run belongs to the PR
         if: steps.meta.outputs.pr != ''
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PR_NUMBER: ${{ steps.meta.outputs.pr }}
         with:
@@ -132,7 +132,7 @@ jobs:
 
       - name: Post preview comment with inline GIFs
         if: steps.meta.outputs.pr != ''
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           PR_NUMBER: ${{ steps.meta.outputs.pr }}
           PREFIX: run-${{ github.event.workflow_run.id }}
