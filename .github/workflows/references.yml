@@ -10,9 +10,10 @@ on:
   pull_request:
     paths:
       - 'transitions/**'
-      - 'scripts/preview/**'
-      - 'scripts/lib/**'
-      - 'tools/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.nvmrc'
       - '.github/workflows/references.yml'
   workflow_dispatch:
 
@@ -27,21 +28,22 @@ jobs:
   render:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6
 
-      - name: Install preview dependencies
-        run: cd scripts/preview && npm install
+      - name: Install dependencies
+        run: npm ci --omit=dev
 
       - name: Check out base transitions
         env:
@@ -53,16 +55,13 @@ jobs:
       - name: Render base and head
         run: |
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
-            node scripts/preview/render-references.js --transitions /tmp/base/transitions --out /tmp/refs/base > /tmp/refs-base.json &&
-            node scripts/preview/render-references.js --out /tmp/refs/head > /tmp/refs-head.json;
-            node scripts/preview/render-references.js --check --out /tmp/refs/base > /tmp/refs-diff.json
+            node scripts/rendering/render-references.mjs --transitions /tmp/base/transitions --out /tmp/refs/base > /tmp/refs-base.json &&
+            node scripts/rendering/render-references.mjs --out /tmp/refs/head > /tmp/refs-head.json;
+            node scripts/rendering/render-references.mjs --check --out /tmp/refs/base > /tmp/refs-diff.json
           '
 
-      - name: Install tools dependencies
-        run: cd tools && npm install
-
       - name: Build and compare SkSL
-        run: node tools/build-sksl.js --out /tmp/sksl/shaders --refs /tmp/refs/head --renders /tmp/sksl/renders --report /tmp/sksl/report.json
+        run: node scripts/targets/build-sksl.mjs --out /tmp/sksl/shaders --refs /tmp/refs/head --renders /tmp/sksl/renders --report /tmp/sksl/report.json
 
       - name: Summary
         if: always()
@@ -103,7 +102,7 @@ jobs:
 
       - name: Upload renders
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: reference-renders
           path: |

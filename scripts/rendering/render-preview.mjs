@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 // Renders a gl-transition to a GIF preview.
-// Usage: node render-transition.js --transition path/to/fade.glsl --output preview.gif
+// Usage: npm run render:preview -- --transition path/to/fade.glsl --output preview.gif
 //
 // Requires: gl npm package, ffmpeg system binary
 
-const fs = require("fs");
-const path = require("path");
-const { execSync } = require("child_process");
+import fs from "node:fs";
+import path from "node:path";
+import { execSync } from "node:child_process";
+import { parseTransition } from "../catalog/parse-transition.mjs";
 
 const args = process.argv.slice(2);
 let transitionPath = null;
@@ -25,42 +26,12 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!transitionPath) {
-  console.error("Usage: render-transition.js --transition <file.glsl> [--output <out.gif>]");
+  console.error("Usage: npm run render:preview -- --transition <file.glsl> [--output <out.gif>]");
   process.exit(1);
 }
 
 const transitionGlsl = fs.readFileSync(transitionPath, "utf8");
 const transitionName = path.basename(transitionPath, ".glsl");
-
-// Handles vec broadcast: vec2(0.5) -> [0.5, 0.5]
-function parseGLSLValue(type, valueStr) {
-  valueStr = valueStr.trim();
-  if (type === "bool") return valueStr === "true";
-  if (type === "int") return parseInt(valueStr, 10);
-  if (type === "float") return parseFloat(valueStr);
-  const vecMatch = valueStr.match(/^(i)?vec(\d)\s*\(([^)]+)\)/);
-  if (vecMatch) {
-    const arity = parseInt(vecMatch[2], 10);
-    const parse = vecMatch[1] ? (v) => parseInt(v, 10) : parseFloat;
-    const values = vecMatch[3].split(",").map((v) => parse(v.trim()));
-    return values.length === 1 && arity > 1 ? Array(arity).fill(values[0]) : values;
-  }
-  const num = parseFloat(valueStr);
-  return isNaN(num) ? valueStr : num;
-}
-
-function parseUniforms(glsl) {
-  const result = {};
-  const regex = /uniform\s+(bool|int|float|vec[234]|ivec[234]|mat[234]|sampler2D)\s+(\w+)\s*[;,]\s*(?:\/\/\s*=\s*(.+?)(?:\s*;.*)?$|\/\*\s*=\s*(.+?)\s*\*\/)/gm;
-  let m;
-  while ((m = regex.exec(glsl)) !== null) {
-    const [, type, name] = m;
-    const val = (m[3] || m[4] || "").trim();
-    if (type === "sampler2D") continue;
-    if (val) result[name] = { type, value: parseGLSLValue(type, val) };
-  }
-  return result;
-}
 
 const uniformSetters = {
   float: (gl, loc, v) => gl.uniform1f(loc, v),
@@ -74,9 +45,12 @@ const uniformSetters = {
   ivec4: (gl, loc, v) => gl.uniform4iv(loc, v),
 };
 
-const createGL = require("gl");
+const { default: createGL } = await import("gl");
 const gl = createGL(width, height, { preserveDrawingBuffer: true });
-if (!gl) { console.error("Failed to create GL context"); process.exit(1); }
+if (!gl) {
+  console.error("Failed to create GL context");
+  process.exit(1);
+}
 gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
 function compileShader(type, source) {
@@ -141,10 +115,12 @@ function loadImage(imgPath, w, h) {
   try {
     const raw = execSync(
       `ffmpeg -v fatal -i "${imgPath}" -vf "scale=${w}:${h}:force_original_aspect_ratio=decrease,pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2" -f rawvideo -pix_fmt rgba -`,
-      { maxBuffer: w * h * 4 + 1024 }
+      { maxBuffer: w * h * 4 + 1024 },
     );
     return new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength);
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 function generateGradient(w, h, tl, br) {
@@ -162,18 +138,19 @@ function generateGradient(w, h, tl, br) {
   return data;
 }
 
-const imagesDir = path.join(__dirname, "images");
+const imagesDir = path.join(import.meta.dirname, "sample-images");
 const fallbackGradients = [
-  { tl: [30, 80, 180],  br: [120, 40, 200] },
+  { tl: [30, 80, 180], br: [120, 40, 200] },
   { tl: [220, 120, 30], br: [240, 60, 80] },
-  { tl: [40, 180, 80],  br: [200, 120, 40] },
+  { tl: [40, 180, 80], br: [200, 120, 40] },
 ];
 const textures = [1, 2, 3].map((n, i) =>
   createTexture(
     loadImage(path.join(imagesDir, `${n}.jpg`), width, height) ||
       generateGradient(width, height, fallbackGradients[i].tl, fallbackGradients[i].br),
-    width, height
-  )
+    width,
+    height,
+  ),
 );
 
 const progressLoc = gl.getUniformLocation(program, "progress");
@@ -181,8 +158,9 @@ gl.uniform1f(gl.getUniformLocation(program, "ratio"), width / height);
 gl.uniform1i(gl.getUniformLocation(program, "from"), 0);
 gl.uniform1i(gl.getUniformLocation(program, "to"), 1);
 
-const uniforms = parseUniforms(transitionGlsl);
-for (const [name, { type, value }] of Object.entries(uniforms)) {
+const { transition } = parseTransition(transitionGlsl, path.basename(transitionPath));
+for (const [name, type] of Object.entries(transition.paramsTypes)) {
+  const value = transition.defaultParams[name];
   const loc = gl.getUniformLocation(program, name);
   if (loc && uniformSetters[type]) uniformSetters[type](gl, loc, value);
 }
@@ -190,7 +168,11 @@ for (const [name, { type, value }] of Object.entries(uniforms)) {
 gl.viewport(0, 0, width, height);
 
 // Render 3 transitions: A->B, B->C, C->A (seamless loop)
-const segments = [[0, 1], [1, 2], [2, 0]];
+const segments = [
+  [0, 1],
+  [1, 2],
+  [2, 0],
+];
 const framesPerSegment = delay + frames;
 const totalFrames = framesPerSegment * segments.length;
 const pixelData = new Uint8Array(width * height * 4);
@@ -226,7 +208,7 @@ const filters = "scale=320:-1:flags=lanczos";
 try {
   execSync(
     `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 -vf "${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 -y "${outputPath}"`,
-    { input: allFrames, maxBuffer: 100 * 1024 * 1024 }
+    { input: allFrames, maxBuffer: 100 * 1024 * 1024 },
   );
   const size = fs.statSync(outputPath).size;
   console.error(`Generated ${outputPath} (${(size / 1024).toFixed(0)} KB)`);

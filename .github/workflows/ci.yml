@@ -16,25 +16,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: npm ci --omit=optional
 
       - name: Lint transitions
-        run: node scripts/lint-transitions.js
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
 
       - name: Test
-        run: node --test 'scripts/test/*.test.js' 'tools/test/*.test.js'
-
-      - name: Install tools dependencies
-        run: cd tools && npm install
+        run: npm test
 
       - name: Build
-        run: ./scripts/build.sh
+        run: npm run build
 
   check-publish:
     needs: build
@@ -43,9 +47,10 @@ jobs:
     outputs:
       should_publish: ${{ steps.check.outputs.should_publish }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Check if transitions or build changed
         id: check
@@ -56,10 +61,9 @@ jobs:
             echo "should_publish=true" >> $GITHUB_OUTPUT
             exit 0
           fi
+          # Only what ends up in the npm package (not tests, dev tooling or devDependencies).
           CHANGED=$(git diff --name-only "$LAST_TAG" -- \
-            transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/release-skeleton/ \
-            scripts/lib/parse-transition.js scripts/lib/transition-meta.js \
-            tools/build-sksl.js tools/lib/ tools/package.json)
+            transitions/ scripts/npm-package/ scripts/catalog/ scripts/targets/ ':!*.test.mjs')
           if [ -n "$CHANGED" ]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "Changed files affecting package:"
@@ -77,19 +81,26 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 24
+          node-version-file: .nvmrc
 
-      - name: Install tools dependencies
-        run: cd tools && npm install
+      # Runs with id-token (npm trusted publishing) and contents: write, so no dependency
+      # install scripts here; gl (optional) and the dev tooling are not needed to build.
+      - name: Install dependencies
+        run: npm ci --omit=optional --omit=dev --ignore-scripts
 
       - name: Build
-        run: ./scripts/build.sh
+        run: npm run build
+
+      # npm trusted publishing (OIDC, no token) needs npm >= 11.5.1; Node 22 ships npm 10.
+      - name: Upgrade npm for trusted publishing
+        run: npm install --global --ignore-scripts npm@11
 
       - name: Publish to npm
         run: npm publish --provenance --access public
@@ -103,7 +114,7 @@ jobs:
             echo "Tag v${VERSION} already exists; skipping."
           else
             git tag "v${VERSION}"
-            git push origin "v${VERSION}"
+            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "v${VERSION}"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

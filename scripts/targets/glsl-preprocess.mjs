@@ -5,9 +5,7 @@
 
 function stripComments(src) {
   // Keep newlines so line numbers in error messages still match the source.
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " "))
-    .replace(/\/\/.*$/gm, "");
+  return src.replace(/\/\*[\s\S]*?\*\//g, (m) => m.replace(/[^\n]/g, " ")).replace(/\/\/.*$/gm, "");
 }
 
 const IDENT = /[A-Za-z_]\w*/y;
@@ -92,7 +90,12 @@ function preprocess(src, predefined = {}) {
         if (!isActive()) break;
         const m = rest.match(/^([A-Za-z_]\w*)(\(([^)]*)\))?\s*(.*)$/);
         if (!m) throw new Error(`${where}: invalid #define`);
-        const params = m[2] ? m[3].split(",").map((s) => s.trim()).filter(Boolean) : null;
+        const params = m[2]
+          ? m[3]
+              .split(",")
+              .map((s) => s.trim())
+              .filter(Boolean)
+          : null;
         macros.set(m[1], { params, body: m[4].trim() });
         break;
       }
@@ -124,4 +127,4 @@ function preprocess(src, predefined = {}) {
   return out.join("\n");
 }
 
-module.exports = { preprocess, stripComments };
+export { preprocess, stripComments };

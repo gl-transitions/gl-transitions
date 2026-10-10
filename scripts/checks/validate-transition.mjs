@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Validates a gl-transition shader against the spec.
-// Usage: node validate-transition.js --transition path/to/fade.glsl
+// Usage: npm run validate -- --transition path/to/fade.glsl
 //
 // Checks:
 // 1. Shader compiles
@@ -15,10 +15,10 @@
 // Exit code 0 = pass, 1 = errors found
 // Outputs JSON to stdout: { name, valid, errors[], warnings[] }
 
-const fs = require("fs");
-const path = require("path");
-const { parseMeta } = require("../lib/transition-meta");
-const { checkEncoding } = require("../lib/file-checks");
+import fs from "node:fs";
+import path from "node:path";
+import { parseTransition, parseUniformNames } from "../catalog/parse-transition.mjs";
+import { checkEncoding } from "./encoding.mjs";
 
 const args = process.argv.slice(2);
 let transitionPath = null;
@@ -26,7 +26,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === "--transition" || args[i] === "-t") transitionPath = args[++i];
 }
 if (!transitionPath) {
-  console.error("Usage: validate-transition.js --transition <file.glsl>");
+  console.error("Usage: npm run validate -- --transition <file.glsl>");
   process.exit(1);
 }
 
@@ -55,9 +55,7 @@ if (!/vec4\s+transition\s*\(\s*vec2/.test(glsl)) {
   errors.push("Missing 'vec4 transition(vec2 uv)' function");
 }
 // Strip comments before checking for forbidden tokens
-const glslNoComments = glsl
-  .replace(/\/\/.*$/gm, "")
-  .replace(/\/\*[\s\S]*?\*\//g, "");
+const glslNoComments = glsl.replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
 
 if (/\bgl_FragColor\b/.test(glslNoComments)) {
   warnings.push("Should not use gl_FragColor — return from transition() instead");
@@ -75,61 +73,27 @@ if (/\bvoid\s+main\s*\(/.test(glslNoComments)) {
   errors.push("Should not define main() — only define transition(vec2 uv)");
 }
 
-// Parse declared uniforms
-// Handles: uniform float a; | uniform float a, b; | uniform vec3 color /* = ... */;
-const declaredUniforms = new Set();
-const uniformDeclRegex = /uniform\s+\w+\s+([\w\s,]+?)(?:\s*\/\*.*?\*\/)?\s*;/g;
-let m;
-while ((m = uniformDeclRegex.exec(glsl)) !== null) {
-  m[1].split(",").map(s => s.trim()).filter(Boolean).forEach(n => declaredUniforms.add(n));
-}
+const declaredUniforms = new Set(parseUniformNames(glsl));
 
-function parseGLSLValue(type, valueStr) {
-  valueStr = valueStr.trim();
-  if (type === "bool") return valueStr === "true";
-  if (type === "int") return parseInt(valueStr, 10);
-  if (type === "float") return parseFloat(valueStr);
-  const vecMatch = valueStr.match(/^(i)?vec(\d)\s*\(([^)]+)\)/);
-  if (vecMatch) {
-    const arity = parseInt(vecMatch[2], 10);
-    const parse = vecMatch[1] ? (v) => parseInt(v, 10) : parseFloat;
-    const values = vecMatch[3].split(",").map((v) => parse(v.trim()));
-    return values.length === 1 && arity > 1 ? Array(arity).fill(values[0]) : values;
-  }
-  return parseFloat(valueStr);
-}
-
-// Parse default values — supports both comment styles:
-//   uniform float foo; // = 1.0
-//   uniform vec3 color /* = vec3(0.0) */;
-const uniformDefaults = {};
-const uniformTypes = {};
-const defaultRegex = /uniform\s+(bool|int|float|vec[234]|ivec[234]|mat[234]|sampler2D)\s+(\w+)\s*(?:[;,]\s*(?:\/\/\s*=\s*(.+?)(?:\s*;.*)?$)|(?:\s*\/\*\s*=\s*(.+?)\s*\*\/))/gm;
-while ((m = defaultRegex.exec(glsl)) !== null) {
-  const [, type, uname] = m;
-  const val = (m[3] || m[4] || "").trim();
-  if (type === "sampler2D") continue;
-  uniformTypes[uname] = type;
-  if (val) uniformDefaults[uname] = parseGLSLValue(type, val);
-}
-
-// Catalog metadata: Description, Tags and parameter annotations
-const meta = parseMeta(glsl, uniformTypes, uniformDefaults);
-errors.push(...meta.errors);
-warnings.push(...meta.warnings);
-if (!meta.description) {
+// Parameters (types and defaults) and catalog metadata, parsed like the build does
+const { transition, errors: metaErrors, warnings: metaWarnings } = parseTransition(glsl, path.basename(transitionPath));
+const uniformTypes = transition.paramsTypes;
+const uniformDefaults = transition.defaultParams;
+errors.push(...metaErrors);
+warnings.push(...metaWarnings);
+if (!transition.description) {
   warnings.push("Missing '// Description:' comment (one line describing the effect)");
 }
-if (meta.tags.length === 0) {
+if (transition.tags.length === 0) {
   warnings.push("Missing '// Tags:' comment (e.g. '// Tags: wipe, directional')");
 }
 
 // If static checks already found critical errors, skip GL validation
-if (errors.some(e => e.includes("transition(vec2"))) fail();
+if (errors.some((e) => e.includes("transition(vec2"))) fail();
 
 // --- GL validation ---
 
-const createGL = require("gl");
+const { default: createGL } = await import("gl");
 const width = 64;
 const height = 64;
 const gl = createGL(width, height, { preserveDrawingBuffer: true });
@@ -176,7 +140,7 @@ if (vs.error) {
 const fragShader = compileShader(gl.FRAGMENT_SHADER, fragSrc);
 if (fragShader.error) {
   // Extract meaningful error lines
-  const lines = fragShader.error.split("\n").filter(l => l.includes("ERROR"));
+  const lines = fragShader.error.split("\n").filter((l) => l.includes("ERROR"));
   errors.push(`Fragment shader compile error: ${lines.join("; ") || fragShader.error}`);
   fail();
 }
@@ -311,9 +275,11 @@ drawAndRead(0.5);
 let allSame = true;
 const firstPixel = colorAt(0, 0);
 for (let i = 0; i < width * height * 4; i += 4) {
-  if (Math.abs(pixels[i] - firstPixel[0]) > 2 ||
-      Math.abs(pixels[i + 1] - firstPixel[1]) > 2 ||
-      Math.abs(pixels[i + 2] - firstPixel[2]) > 2) {
+  if (
+    Math.abs(pixels[i] - firstPixel[0]) > 2 ||
+    Math.abs(pixels[i + 1] - firstPixel[1]) > 2 ||
+    Math.abs(pixels[i + 2] - firstPixel[2]) > 2
+  ) {
     allSame = false;
     break;
   }
