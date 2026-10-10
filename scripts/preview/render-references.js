@@ -250,8 +250,12 @@ for (const file of files) {
   } else if (!fs.existsSync(target)) {
     report.missing.push(name);
   } else {
-    const expected = PNG.sync.read(fs.readFileSync(target)).data;
-    const frames = compare(strip, expected);
+    const expected = PNG.sync.read(fs.readFileSync(target));
+    // A strip of another size (other renderer settings) can't be compared pixel by pixel.
+    const frames =
+      expected.width === WIDTH * PROGRESS.length && expected.height === HEIGHT
+        ? compare(strip, expected.data)
+        : PROGRESS;
     if (frames.length) report.changed.push({ name, progress: frames });
   }
 }
