@@ -198,8 +198,13 @@ async function main() {
         fs.writeFileSync(path.join(opt.renders, `${transition.name}.png`), PNG.sync.write(png));
       }
       const ref = opt.refs && path.join(opt.refs, `${transition.name}.png`);
-      if (ref && fs.existsSync(ref)) {
-        const expected = PNG.sync.read(fs.readFileSync(ref)).data;
+      const reference = ref && fs.existsSync(ref) ? PNG.sync.read(fs.readFileSync(ref)) : null;
+      if (ref && !reference) {
+        Object.assign(result, { status: "no-reference", error: `missing ${ref}` });
+      } else if (reference && (reference.width !== WIDTH * PROGRESS.length || reference.height !== HEIGHT)) {
+        Object.assign(result, { status: "no-reference", error: `${ref} is ${reference.width}x${reference.height}, expected ${WIDTH * PROGRESS.length}x${HEIGHT}` });
+      } else if (reference) {
+        const expected = reference.data;
         const { status, worst } = compare(strip, expected);
         Object.assign(result, { status, differingPixels: Math.round(worst * 1000) / 1000 });
         if (status !== "match" && result.hashNoise && compareBlocks(strip, expected) <= CLOSE_RATIO) {

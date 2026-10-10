@@ -43,5 +43,6 @@ Transitions see straight (unpremultiplied) colors, as in the GLSL spec; the outp
 | `close` | At most 5% |
 | `noise-only` | Uses hash noise (`fract(sin(x) * 43758.5453)`) and matches when compared as 10×10 block averages |
 | `differs` | Anything else. Transitions flagged `hashNoise` pick random tiles or shapes, which legitimately differ between implementations |
+| `no-reference` | The GLSL reference render is missing or has another size, so nothing was compared |
 | `compile-error` | Skia rejected the generated shader |
 | `unsupported` | The converter can't handle the source |

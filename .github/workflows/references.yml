@@ -84,7 +84,7 @@ jobs:
             }
             const sksl = read("/tmp/sksl/report.json");
             if (sksl) {
-              const order = ["match", "noise-only", "close", "differs", "compile-error", "unsupported"];
+              const order = ["match", "noise-only", "close", "differs", "no-reference", "compile-error", "unsupported"];
               out.push("", "## SkSL", "", "| Status | Count |", "|---|---|");
               for (const s of order) if (sksl.counts[s]) out.push(`| ${s} | ${sksl.counts[s]} |`);
               const notes = sksl.transitions.filter((t) => t.status !== "match");
