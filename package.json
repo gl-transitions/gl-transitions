@@ -18,6 +18,7 @@
     "build:agent-docs": "node scripts/agents/build-agent-docs.mjs --out release",
     "build:glsl3": "node scripts/targets/build-glsl3.mjs",
     "build:wgsl-msl": "node scripts/targets/build-wgsl-msl.mjs",
+    "build:compatibility": "node scripts/targets/build-compatibility.mjs",
     "format": "prettier --write \"scripts/**/*.mjs\"",
     "format:check": "prettier --check \"scripts/**/*.mjs\""
   },

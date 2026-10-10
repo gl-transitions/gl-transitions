@@ -101,3 +101,14 @@ naga has no prebuilt release, so `targets/toolchain.mjs` builds the pinned versi
 ```sh
 npm run build:wgsl-msl -- --wgsl /tmp/wgsl --msl /tmp/msl --layouts /tmp/layouts.json --refs /tmp/refs --report /tmp/wgsl-msl.json
 ```
+
+## Compatibility matrix
+
+`targets/build-compatibility.mjs` merges the targets' `--report` files into `compatibility.json` (shipped in the package, documented in its README) and a Markdown table for the CI job summary. `npm-package/build.sh` runs every target with a report; with `REFERENCE_RENDERS=<dir>` it also renders SkSL and WGSL and compares them with the GLSL renders in `<dir>`, which is what the publishing workflow does.
+
+```sh
+npm run build:compatibility -- --out /tmp/compatibility.json --summary /tmp/compatibility.md /tmp/sksl.json /tmp/glsl3.json /tmp/wgsl-msl.json
+REFERENCE_RENDERS=/tmp/refs npm run build
+```
+
+The **Reference renders** workflow shows the table on every PR that touches transitions or scripts.

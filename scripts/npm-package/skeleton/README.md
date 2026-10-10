@@ -46,6 +46,7 @@ A Transition is an object with the following shape (TypeScript types are include
 | `wgsl/<name>.wgsl` | Each transition that translates to WGSL, as a fragment shader, for WebGPU |
 | `msl/<name>.metal` | Each transition that translates to Metal, as a Metal Shading Language fragment shader |
 | `layouts.json` | Uniform buffer layout and textures of the WGSL and Metal shaders |
+| `compatibility.json` | Status of every transition in every target (see below) |
 | `llms.txt`, `llms-full.txt` | The collection for LLMs and coding agents ([llms.txt](https://llmstxt.org/) format) |
 | `skills/gl-transitions/` | An [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) that teaches coding agents to pick a transition and wire it into WebGL, Skia, editly or FFmpeg |
 
@@ -86,6 +87,30 @@ Each file is compiled in this wrapper with glslang, the Khronos reference compil
 The entry point is `main` in WGSL and `main_` in Metal. Images are sampled with a top-left origin (as WebGPU and Metal upload them) at mip level 0. `layouts.json` gives the uniform buffer of every transition: `{ [name]: { uniforms: [{ name, type, offset }], size, textures } }`, with offsets and size in bytes.
 
 In CI, each WGSL file is validated by naga and rendered with Dawn (Chrome's WebGPU) to compare with the GLSL rendering. Metal files are translated by naga from the same SPIR-V; they are compiled with Apple's Metal compiler on macOS during development, not in CI.
+
+### Compatibility
+
+`compatibility.json` says how each transition fares in each target (types: `Compatibility` in `index.d.ts`):
+
+```json
+{
+  "targets": { "wgsl": { "language": "WGSL", "path": "wgsl/{name}.wgsl", "rendered": true }, ... },
+  "transitions": { "fade": { "sksl": { "status": "match", "differingPixels": 0 }, "glsl3": { "status": "compiled" }, ... } }
+}
+```
+
+| Status | Meaning |
+|---|---|
+| `match` | Renders like the GLSL reference (at most 1% of pixels differ by more than 16/255) |
+| `close` | At most 5% of pixels differ |
+| `noise-only` | Same picture with a different random noise grain (hash noise varies between GPUs) |
+| `differs` | Renders differently, usually random tiles or shapes picked by hash noise (`hashNoise: true`) |
+| `compiled` | Accepted by the target's compiler; not rendered (GLSL ES 3.00, Metal) |
+| `translated` | Generated, but the target's compiler was not available in the build |
+| `no-reference` | Rendered, but there was no GLSL reference to compare with |
+| `compile-error`, `unsupported` | Not shipped for this target; `error` says why |
+
+Files are shipped for every status except the last row.
 
 ### SkSL contract
 
