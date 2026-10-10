@@ -1,15 +1,18 @@
 // Pinned native shader tools used by the targets, installed on first use into
 // node_modules/.cache/gl-transitions-toolchain (so `npm ci` starts clean).
 //
-//   glslang  Khronos reference compiler: validates GLSL ES 3.00. Prebuilt release
-//            archive, checked against the SHA-256 below before anything is extracted.
+//   glslang  Khronos reference compiler: validates GLSL ES 3.00 and compiles Vulkan GLSL
+//            to SPIR-V. Prebuilt release archive, checked against the SHA-256 below
+//            before anything is extracted.
+//   naga     The wgpu project's shader translator: SPIR-V to WGSL and MSL. No prebuilt
+//            release, so `cargo install --locked` builds the pinned version (needs Rust).
 //
-// Set GLSLANG_VALIDATOR to use another binary (e.g. on a platform without a prebuilt archive).
+// Set GLSLANG_VALIDATOR or NAGA to use other binaries.
 
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 
 const ROOT = path.join(import.meta.dirname, "..", "..");
 const CACHE = path.join(ROOT, "node_modules", ".cache", "gl-transitions-toolchain");
@@ -22,6 +25,8 @@ const GLSLANG = {
     "linux-x64": ["linux-x86_64", "2c34071f56ecf39d16233294d3739cf43f981fd39080f2fd9dccb782101191ce"],
   },
 };
+
+const NAGA_VERSION = "30.0.1";
 
 async function download(url, sha256, file) {
   const res = await fetch(url);
@@ -55,4 +60,22 @@ async function glslangValidator() {
   return bin;
 }
 
-export { glslangValidator };
+// Returns the path of naga, building it with cargo if needed.
+function naga() {
+  if (process.env.NAGA) return process.env.NAGA;
+  const dir = path.join(CACHE, `naga-${NAGA_VERSION}`);
+  const bin = path.join(dir, "bin", process.platform === "win32" ? "naga.exe" : "naga");
+  if (fs.existsSync(bin)) return bin;
+  console.error(`Building naga-cli ${NAGA_VERSION} with cargo (once)…`);
+  const { status, error } = spawnSync(
+    "cargo",
+    ["install", "naga-cli", "--version", NAGA_VERSION, "--locked", "--root", dir],
+    { stdio: ["ignore", "inherit", "inherit"] },
+  );
+  if (error || status !== 0) {
+    throw new Error(`Could not build naga-cli ${NAGA_VERSION}: install Rust (https://rustup.rs) or set NAGA`);
+  }
+  return bin;
+}
+
+export { glslangValidator, naga };

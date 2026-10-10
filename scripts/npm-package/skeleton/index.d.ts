@@ -41,5 +41,18 @@ export interface Transition {
   updatedAt?: string;
 }
 
+/** Uniform buffer and textures of `wgsl/<name>.wgsl` and `msl/<name>.metal`, from `layouts.json`. */
+export interface ShaderLayout {
+  /** `progress`, `ratio`, then the parameters; offsets in bytes (std140 / WGSL uniform layout). `bool` is stored as a 32-bit int. */
+  uniforms: { name: string; type: ParamType; offset: number }[];
+  /** Uniform buffer size in bytes, a multiple of 16. */
+  size: number;
+  /** Extra textures, bound after `from` and `to`. */
+  textures: string[];
+}
+
+/** Content of `layouts.json`, by transition name. */
+export type ShaderLayouts = { [name: string]: ShaderLayout };
+
 declare const transitions: Transition[];
 export default transitions;

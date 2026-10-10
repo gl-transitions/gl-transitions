@@ -6,7 +6,7 @@ Everything that builds, checks and renders the collection. All scripts are ES mo
 npm ci             # gl (headless WebGL, for rendering) is optional: it builds on Node 22 (.nvmrc)
 npm test           # unit tests (scripts/**/*.test.mjs)
 npm run lint       # layout, encoding and parsing of transitions/
-npm run build      # the npm package, in release/
+npm run build      # the npm package, in release/ (the first run downloads glslang and builds naga: needs Rust)
 ```
 
 | Folder | What it does |
@@ -14,7 +14,7 @@ npm run build      # the npm package, in release/
 | `catalog/` | Parses each `.glsl` (uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
 | `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults) and `validate-transition.mjs` (spec checks shown in PR previews) |
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
-| `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
+| `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
 | `npm-package/` | `build.sh` and the `skeleton/` of the published package |
 
@@ -82,4 +82,22 @@ Links point to the exact package version on jsDelivr. The skill's integration gu
 
 The output keeps the spec v1 shape: the parameter uniforms (with their `// = default` comments) and `vec4 transition(vec2 uv)`, so hosts reuse their GLSL wrapper with `#version 300 es`. The only rewrite is `texture2D()` → `texture()`. Anything else GLSL ES 3.00 rejects (non-constant global initializers, keywords used as names…) is reported as `compile-error` and left out of the package.
 
-It is not rendered, because headless GL is WebGL 1 only.
+It is not rendered, because headless GL is WebGL 1 only. The WGSL target, built from the same converted source, is.
+
+## WGSL and MSL
+
+`targets/build-wgsl-msl.mjs` goes through SPIR-V, so every later target (HLSL, Godot…) can reuse the same path:
+
+1. `targets/spirv.mjs` wraps the GLSL ES 3.00 source into a Vulkan GLSL 4.50 fragment shader with a fixed binding layout (parameters in a std140 uniform block, separate texture and sampler bindings). The package README documents the layout: it is the contract adapters rely on.
+2. glslang compiles it to SPIR-V.
+3. [naga](https://github.com/gfx-rs/wgpu/tree/trunk/naga) (wgpu's translator) writes WGSL and MSL. Function names mangled by glslang are restored when unambiguous, and Metal resource indices are assigned from the layout (the naga command line leaves them as placeholders).
+4. naga validates the WGSL. With `--refs`, Dawn (the optional `webgpu` package) compiles and renders it with the reference images and compares with the GLSL renders, with the same statuses as SkSL.
+5. On macOS with the Metal toolchain, Apple's Metal compiler compiles the MSL (`compiled`); elsewhere it is reported as `translated`.
+
+Textures are sampled at an explicit level 0: WGSL only allows implicit-derivative sampling in uniform control flow, and many transitions sample inside branches.
+
+naga has no prebuilt release, so `targets/toolchain.mjs` builds the pinned version with `cargo install --locked` on first use (about a minute); install [Rust](https://rustup.rs) or set `NAGA`. On Linux, Dawn needs a Vulkan driver (`mesa-vulkan-drivers` provides the lavapipe software renderer).
+
+```sh
+npm run build:wgsl-msl -- --wgsl /tmp/wgsl --msl /tmp/msl --layouts /tmp/layouts.json --refs /tmp/refs --report /tmp/wgsl-msl.json
+```

@@ -15,24 +15,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import CanvasKitInit from "canvaskit-wasm";
-import { PNG } from "pngjs";
 import { parseTransition } from "../catalog/parse-transition.mjs";
 import { WIDTH, HEIGHT, PROGRESS, fromImage, toImage, extraImage } from "../rendering/reference-images.mjs";
 import { toSkSL } from "./sksl.mjs";
+import { usesHashNoise, checkRender, writeReport } from "./compare-renders.mjs";
 
 const ROOT = path.join(import.meta.dirname, "..", "..");
-// A pixel "differs" when a channel moves by more than PIXEL_TOLERANCE (out of 255).
-// Different GPUs and CPUs legitimately disagree on hash noise (fract(sin(x) * 43758.5453)),
-// so a frame "matches" when at most MATCH_RATIO of its pixels differ, and is "close"
-// up to CLOSE_RATIO.
-const PIXEL_TOLERANCE = 16;
-const MATCH_RATIO = 0.01;
-const CLOSE_RATIO = 0.05;
-// For hash-noise transitions, compare BLOCK x BLOCK averages instead: same structure,
-// different noise grain is reported as "noise-only".
-const BLOCK = 10;
-const BLOCK_TOLERANCE = 24;
-
 const args = process.argv.slice(2);
 const opt = {};
 for (let i = 0; i < args.length; i++) {
@@ -41,54 +29,6 @@ for (let i = 0; i < args.length; i++) {
 if (!opt.out) {
   console.error("Usage: npm run build:sksl -- --out <dir> [--refs <dir>] [--renders <dir>] [--report <file>]");
   process.exit(1);
-}
-
-function compare(actual, expected) {
-  const stripWidth = WIDTH * PROGRESS.length;
-  const bad = new Array(PROGRESS.length).fill(0);
-  for (let y = 0; y < HEIGHT; y++) {
-    for (let x = 0; x < stripWidth; x++) {
-      const i = (y * stripWidth + x) * 4;
-      if (actual[i + 3] === 0 && expected[i + 3] === 0) continue; // fully transparent: color is meaningless
-      for (let c = 0; c < 4; c++) {
-        if (Math.abs(actual[i + c] - expected[i + c]) > PIXEL_TOLERANCE) {
-          bad[Math.floor(x / WIDTH)]++;
-          break;
-        }
-      }
-    }
-  }
-  const worst = Math.max(...bad) / (WIDTH * HEIGHT);
-  return { worst, status: worst <= MATCH_RATIO ? "match" : worst <= CLOSE_RATIO ? "close" : "differs" };
-}
-
-// Ratio of BLOCK x BLOCK blocks whose average color differs, worst frame.
-function compareBlocks(actual, expected) {
-  const stripWidth = WIDTH * PROGRESS.length;
-  let worst = 0;
-  PROGRESS.forEach((_, f) => {
-    let bad = 0;
-    let total = 0;
-    for (let by = 0; by < HEIGHT; by += BLOCK) {
-      for (let bx = f * WIDTH; bx < (f + 1) * WIDTH; bx += BLOCK) {
-        const sum = [0, 0, 0, 0, 0, 0, 0, 0];
-        for (let y = by; y < by + BLOCK; y++) {
-          for (let x = bx; x < bx + BLOCK; x++) {
-            const i = (y * stripWidth + x) * 4;
-            for (let c = 0; c < 4; c++) {
-              sum[c] += actual[i + c];
-              sum[4 + c] += expected[i + c];
-            }
-          }
-        }
-        total++;
-        const n = BLOCK * BLOCK;
-        if ([0, 1, 2, 3].some((c) => Math.abs(sum[c] - sum[4 + c]) / n > BLOCK_TOLERANCE)) bad++;
-      }
-    }
-    worst = Math.max(worst, bad / total);
-  });
-  return worst;
 }
 
 async function main() {
@@ -173,9 +113,7 @@ async function main() {
   for (const file of files) {
     const { transition } = parseTransition(fs.readFileSync(path.join(dir, file), "utf8"), file);
     const result = { name: transition.name };
-    // Hash noise (fract(sin(x) * 43758.5453)) amplifies tiny sin() differences between
-    // implementations, so these transitions can't be expected to match pixel for pixel.
-    if (/fract\s*\(\s*sin\s*\(/.test(transition.glsl)) result.hashNoise = true;
+    if (usesHashNoise(transition.glsl)) result.hashNoise = true;
     results.push(result);
 
     let source;
@@ -196,49 +134,20 @@ async function main() {
 
     if (opt.refs || opt.renders) {
       const strip = render(effect, transition);
-      if (opt.renders) {
-        const png = new PNG({ width: WIDTH * PROGRESS.length, height: HEIGHT });
-        png.data = strip;
-        fs.writeFileSync(path.join(opt.renders, `${transition.name}.png`), PNG.sync.write(png));
-      }
-      const ref = opt.refs && path.join(opt.refs, `${transition.name}.png`);
-      const reference = ref && fs.existsSync(ref) ? PNG.sync.read(fs.readFileSync(ref)) : null;
-      if (ref && !reference) {
-        Object.assign(result, { status: "no-reference", error: `missing ${ref}` });
-      } else if (reference && (reference.width !== WIDTH * PROGRESS.length || reference.height !== HEIGHT)) {
-        Object.assign(result, {
-          status: "no-reference",
-          error: `${ref} is ${reference.width}x${reference.height}, expected ${WIDTH * PROGRESS.length}x${HEIGHT}`,
-        });
-      } else if (reference) {
-        const expected = reference.data;
-        const { status, worst } = compare(strip, expected);
-        Object.assign(result, { status, differingPixels: Math.round(worst * 1000) / 1000 });
-        if (status !== "match" && result.hashNoise && compareBlocks(strip, expected) <= CLOSE_RATIO) {
-          result.status = "noise-only";
-        }
-      }
+      Object.assign(
+        result,
+        checkRender(strip, {
+          name: transition.name,
+          hashNoise: result.hashNoise,
+          refsDir: opt.refs,
+          rendersDir: opt.renders,
+        }),
+      );
     }
     effect.delete();
   }
 
-  const counts = {};
-  for (const r of results) counts[r.status] = (counts[r.status] || 0) + 1;
-  const report = { target: "sksl", total: results.length, counts, transitions: results };
-  if (opt.report) fs.writeFileSync(opt.report, JSON.stringify(report, null, 2) + "\n");
-
-  console.log(
-    `SkSL: ${Object.entries(counts)
-      .map(([k, v]) => `${v} ${k}`)
-      .join(", ")} (of ${results.length})`,
-  );
-  for (const r of results) {
-    if (!["match", "compiled"].includes(r.status)) {
-      console.log(
-        `  ${r.status.padEnd(13)} ${r.name}${r.hashNoise ? " [hash noise]" : ""}${r.differingPixels !== undefined ? ` (${(r.differingPixels * 100).toFixed(1)}% of pixels differ)` : ""}${r.error ? `: ${r.error.split("\n")[0]}` : ""}`,
-      );
-    }
-  }
+  writeReport("sksl", "SkSL", results, opt.report);
 }
 
 main().catch((e) => {
