@@ -88,7 +88,7 @@ if (flagged.length) {
       const notes = [
         differingPixels !== undefined && !OK.includes(status) ? `${(differingPixels * 100).toFixed(1)}%` : "",
         hashNoise && !OK.includes(status) ? "hash noise" : "",
-        error ? error.replace(/\|/g, "\\|").slice(0, 120) : "",
+        error ? error.slice(0, 120).replace(/[\\|]/g, "\\$&") : "",
       ].filter(Boolean);
       return notes.length ? `${status} (${notes.join(", ")})` : status;
     };
