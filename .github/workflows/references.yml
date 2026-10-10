@@ -3,7 +3,8 @@ name: Reference renders
 # Renders every transition on the base branch and on the PR with the same
 # software GL (Mesa llvmpipe) and reports transitions whose output changed.
 # Then converts every transition to SkSL, renders it with Skia (CanvasKit) and
-# reports how it compares with the GLSL render.
+# reports how it compares with the GLSL render, and compiles the GLSL ES 3.00
+# versions with glslang.
 # Also validates every transition against the spec (validate-transition.mjs).
 # The comparisons are informational: fails only when a GLSL transition does not
 # render or breaks the spec.
@@ -74,6 +75,8 @@ jobs:
             done
             exit $failed
           '
+      - name: Build GLSL ES 3.00
+        run: node scripts/targets/build-glsl3.mjs --out /tmp/glsl3/shaders --report /tmp/glsl3/report.json
 
       - name: Summary
         if: always()
@@ -109,6 +112,13 @@ jobs:
                 out.push("", "</details>");
               }
             }
+            const glsl3 = read("/tmp/glsl3/report.json");
+            if (glsl3) {
+              out.push("", "## GLSL ES 3.00", "", `${glsl3.counts.compiled || 0} of ${glsl3.total} compile with glslang.`);
+              for (const t of glsl3.transitions.filter((t) => t.status !== "compiled")) {
+                out.push(`- \`${t.name}\` (${t.status}): ${(t.error || "").split("\n")[0]}`);
+              }
+            }
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
           '
 
@@ -120,6 +130,7 @@ jobs:
           path: |
             /tmp/refs/
             /tmp/sksl/
+            /tmp/glsl3/
           if-no-files-found: warn
 
       - name: Fail on render errors

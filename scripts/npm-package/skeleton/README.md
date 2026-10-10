@@ -42,8 +42,29 @@ A Transition is an object with the following shape (TypeScript types are include
 | `gl-transitions.js` | The same, as a `window.GLTransitions` script |
 | `transitions/<name>.glsl` | Each transition's GLSL source |
 | `sksl/<name>.sksl` | Each transition as a standalone [SkSL](https://skia.org/docs/user/sksl/) runtime effect, for Skia-based renderers (React Native Skia, CanvasKit, Flutter/Skia, Compose Multiplatform, skia-safe) |
+| `glsl3/<name>.glsl` | Each transition in GLSL ES 3.00, for WebGL 2, three.js (`glslVersion: THREE.GLSL3`), OpenGL ES 3 and Android Media3 |
 | `llms.txt`, `llms-full.txt` | The collection for LLMs and coding agents ([llms.txt](https://llmstxt.org/) format) |
 | `skills/gl-transitions/` | An [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) that teaches coding agents to pick a transition and wire it into WebGL, Skia, editly or FFmpeg |
+
+### GLSL ES 3.00 contract
+
+`glsl3/<name>.glsl` has the same shape as the original GLSL: it declares the parameter uniforms and `vec4 transition(vec2 uv)`, with `texture()` instead of `texture2D()`. The host provides the rest, for example:
+
+```glsl
+#version 300 es
+precision highp float;
+precision highp int;
+in vec2 _uv;
+out vec4 _fragColor;
+uniform sampler2D from, to;
+uniform float progress, ratio;
+vec4 getFromColor(vec2 uv) { return texture(from, uv); }
+vec4 getToColor(vec2 uv) { return texture(to, uv); }
+// ... contents of glsl3/<name>.glsl ...
+void main() { _fragColor = transition(_uv); }
+```
+
+Each file is compiled in this wrapper with glslang, the Khronos reference compiler, in CI.
 
 ### SkSL contract
 

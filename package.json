@@ -16,6 +16,7 @@
     "render:preview": "node scripts/rendering/render-preview.mjs",
     "build:sksl": "node scripts/targets/build-sksl.mjs",
     "build:agent-docs": "node scripts/agents/build-agent-docs.mjs --out release",
+    "build:glsl3": "node scripts/targets/build-glsl3.mjs",
     "format": "prettier --write \"scripts/**/*.mjs\"",
     "format:check": "prettier --check \"scripts/**/*.mjs\""
   },
