@@ -42,7 +42,7 @@ A Transition is an object with the following shape (TypeScript types are include
 | `gl-transitions.js` | The same, as a `window.GLTransitions` script |
 | `transitions/<name>.glsl` | Each transition's GLSL source |
 | `sksl/<name>.sksl` | Each transition as a standalone [SkSL](https://skia.org/docs/user/sksl/) runtime effect, for Skia-based renderers (React Native Skia, CanvasKit, Flutter/Skia, Compose Multiplatform, skia-safe) |
-| `glsl3/<name>.glsl` | Each transition in GLSL ES 3.00, for WebGL 2, three.js (`glslVersion: THREE.GLSL3`), OpenGL ES 3 and Android Media3 |
+| `glsl3/<name>.glsl` | Each transition that compiles in GLSL ES 3.00 (all of them today), for WebGL 2, three.js (`glslVersion: THREE.GLSL3`), OpenGL ES 3 and Android Media3 |
 | `llms.txt`, `llms-full.txt` | The collection for LLMs and coding agents ([llms.txt](https://llmstxt.org/) format) |
 | `skills/gl-transitions/` | An [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) that teaches coding agents to pick a transition and wire it into WebGL, Skia, editly or FFmpeg |
 

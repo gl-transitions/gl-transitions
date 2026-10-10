@@ -8,8 +8,7 @@
 //   --out      writes <name>.glsl for every transition that compiles
 //   --report   writes the per-transition status as JSON (also printed as a summary)
 //
-// Not rendered: headless GL is WebGL 1 only. The same converted body goes through
-// the SPIR-V targets, which are rendered and compared.
+// Compiled only, not rendered: headless GL is WebGL 1 only.
 // Only fails on unexpected crashes: per-transition compatibility is tracked in the report.
 
 import fs from "node:fs";
