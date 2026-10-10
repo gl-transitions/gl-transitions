@@ -4,14 +4,18 @@ on:
   push:
     branches: [master]
     paths:
-      - 'scripts/preview/**'
-      - 'scripts/lib/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.nvmrc'
       - '.github/workflows/test-preview.yml'
   pull_request:
     branches: [master]
     paths:
-      - 'scripts/preview/**'
-      - 'scripts/lib/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.nvmrc'
       - '.github/workflows/test-preview.yml'
   workflow_dispatch:
 
@@ -26,35 +30,35 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb mesa-utils libgl1-mesa-dri libglapi-mesa libosmesa6 ffmpeg
 
-      - name: Install preview dependencies
-        run: cd scripts/preview && npm install
+      - name: Install dependencies
+        run: npm ci --omit=dev
 
       - name: Validate test transitions
         run: |
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
-            node scripts/preview/validate-transition.js -t transitions/fade.glsl &&
-            node scripts/preview/validate-transition.js -t transitions/crosswarp.glsl &&
-            node scripts/preview/validate-transition.js -t transitions/Bounce.glsl
+            node scripts/checks/validate-transition.mjs -t transitions/fade.glsl &&
+            node scripts/checks/validate-transition.mjs -t transitions/crosswarp.glsl &&
+            node scripts/checks/validate-transition.mjs -t transitions/Bounce.glsl
           '
 
       - name: Render test transitions
         run: |
           mkdir -p /tmp/test-previews
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
-            node scripts/preview/render-transition.js \
+            node scripts/rendering/render-preview.mjs \
               --transition transitions/fade.glsl \
               --output /tmp/test-previews/fade.gif &&
-            node scripts/preview/render-transition.js \
+            node scripts/rendering/render-preview.mjs \
               --transition transitions/crosswarp.glsl \
               --output /tmp/test-previews/crosswarp.gif &&
-            node scripts/preview/render-transition.js \
+            node scripts/rendering/render-preview.mjs \
               --transition transitions/Bounce.glsl \
               --output /tmp/test-previews/Bounce.gif
           '

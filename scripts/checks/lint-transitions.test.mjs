@@ -1,11 +1,11 @@
-// Run with: node --test scripts/test
-const { test } = require("node:test");
-const assert = require("node:assert/strict");
-const fs = require("fs");
-const os = require("os");
-const path = require("path");
-const { checkEncoding } = require("../lib/file-checks");
-const { lintTransitions } = require("../lint-transitions");
+// Run with: npm test
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { checkEncoding } from "./encoding.mjs";
+import { lintTransitions } from "./lint-transitions.mjs";
 
 const ok = "// Author: a\n// License: MIT\nvec4 transition(vec2 uv) { return getToColor(uv); }\n";
 

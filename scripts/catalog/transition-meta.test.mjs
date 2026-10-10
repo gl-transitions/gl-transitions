@@ -1,11 +1,13 @@
-// Run with: node --test scripts/test
-const { test } = require("node:test");
-const assert = require("node:assert/strict");
-const { parseHeader, parseParamAnnotations, parseTextures, parseMeta } = require("../lib/transition-meta");
-const { parseTransition } = require("../lib/parse-transition");
+// Run with: npm test
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { parseHeader, parseParamAnnotations, parseTextures, parseMeta } from "./transition-meta.mjs";
+import { parseTransition } from "./parse-transition.mjs";
 
 test("header: description and tags", () => {
-  const h = parseHeader("// Author: a\n// License: MIT\n// Description: A thing: with colon\n// Tags: Zoom-In, wipe, wipe\n");
+  const h = parseHeader(
+    "// Author: a\n// License: MIT\n// Description: A thing: with colon\n// Tags: Zoom-In, wipe, wipe\n",
+  );
   assert.equal(h.description, "A thing: with colon");
   assert.deepEqual(h.tags, ["zoom-in", "wipe"]);
   assert.deepEqual(h.errors, []);
@@ -19,7 +21,9 @@ test("header: absent metadata is not an error", () => {
 });
 
 test("header: only the Author/License comment block counts", () => {
-  const h = parseHeader("// Author: a\n// License: MIT\n\nfloat x;\n// Description : a copied noise function\n// Tags: nope\n");
+  const h = parseHeader(
+    "// Author: a\n// License: MIT\n\nfloat x;\n// Description : a copied noise function\n// Tags: nope\n",
+  );
   assert.equal(h.description, undefined);
   assert.deepEqual(h.tags, []);
 });
@@ -44,7 +48,7 @@ test("annotations: range, color, description, multi-line, multi-name uniforms", 
       "uniform bool reversed; // = false",
       "// a regular comment",
       "uniform float plain; // = 1.0",
-    ].join("\n")
+    ].join("\n"),
   );
   assert.deepEqual(errors, []);
   assert.deepEqual(hints.bounces, { min: 1, max: 10, step: 1, description: "Number of bounces" });
@@ -67,7 +71,7 @@ test("annotations: errors", () => {
       "// @color",
       "float notAUniform = 1.0;",
       "// @range(0, 1)",
-    ].join("\n")
+    ].join("\n"),
   );
   assert.equal(errors.length, 5);
   for (const malformed of ["@range(0,,1)", "@range(0,1,)", "@range(,1)"]) {
@@ -89,7 +93,11 @@ test("meta: params catalog combines types, defaults and hints", () => {
     "uniform float notColor; // = 1.0",
     "uniform float plain; // = 1.0",
   ].join("\n");
-  const meta = parseMeta(glsl, { size: "float", notColor: "float", plain: "float" }, { size: 2, notColor: 1, plain: 1 });
+  const meta = parseMeta(
+    glsl,
+    { size: "float", notColor: "float", plain: "float" },
+    { size: 2, notColor: 1, plain: 1 },
+  );
   assert.deepEqual(meta.params.size, { type: "float", default: 2, min: 0, max: 1, description: "Size" });
   assert.deepEqual(meta.params.plain, { type: "float", default: 1 });
   assert.deepEqual(meta.errors, ["@color requires vec3 or vec4, 'notColor' is float"]);
@@ -119,7 +127,13 @@ test("parseTransition: every uniform declaration form of the spec, with hints", 
   const { transition, errors } = parseTransition(glsl, "t.glsl");
   assert.deepEqual(errors, []);
   assert.deepEqual(transition.defaultParams, {
-    a: 42, b: 1, c: [0.9, 0.4, 0.2], d: [1, 1], e: [2, 2], f: [1, 2], g: [1, 2],
+    a: 42,
+    b: 1,
+    c: [0.9, 0.4, 0.2],
+    d: [1, 1],
+    e: [2, 2],
+    f: [1, 2],
+    g: [1, 2],
   });
   assert.deepEqual(transition.params.c, { type: "vec3", default: [0.9, 0.4, 0.2], color: true });
   assert.deepEqual(transition.params.e, { type: "vec2", default: [2, 2], min: 0, max: 2, description: "Both of them" });

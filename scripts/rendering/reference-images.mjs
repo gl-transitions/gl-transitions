@@ -44,4 +44,4 @@ const extraImage = image((u, v) => {
   return [c, c, c];
 });
 
-module.exports = { WIDTH, HEIGHT, PROGRESS, fromImage, toImage, extraImage };
+export { WIDTH, HEIGHT, PROGRESS, fromImage, toImage, extraImage };

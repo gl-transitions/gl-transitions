@@ -3,23 +3,24 @@
 // when GLSL reference renders are given, renders it the same way and compares.
 //
 // Usage:
-//   node tools/build-sksl.js --out <dir> [--refs <glsl renders dir>] [--renders <dir>] [--report <file.json>]
+//   npm run build:sksl -- --out <dir> [--refs <glsl renders dir>] [--renders <dir>] [--report <file.json>]
 //
 //   --out      writes <name>.sksl for every transition that compiles
-//   --refs     PNG strips from scripts/preview/render-references.js to compare against
+//   --refs     PNG strips from scripts/rendering/render-references.mjs to compare against
 //   --renders  writes the SkSL renders as PNG strips, for inspection
 //   --report   writes the per-transition status as JSON (also printed as a summary)
 //
 // Only fails on unexpected crashes: per-transition compatibility is tracked in the report.
 
-const fs = require("fs");
-const path = require("path");
-const { PNG } = require("pngjs");
-const { parseTransition } = require("../scripts/lib/parse-transition");
-const { WIDTH, HEIGHT, PROGRESS, fromImage, toImage, extraImage } = require("../scripts/lib/reference-images");
-const { toSkSL } = require("./lib/sksl");
+import fs from "node:fs";
+import path from "node:path";
+import CanvasKitInit from "canvaskit-wasm";
+import { PNG } from "pngjs";
+import { parseTransition } from "../catalog/parse-transition.mjs";
+import { WIDTH, HEIGHT, PROGRESS, fromImage, toImage, extraImage } from "../rendering/reference-images.mjs";
+import { toSkSL } from "./sksl.mjs";
 
-const ROOT = path.join(__dirname, "..");
+const ROOT = path.join(import.meta.dirname, "..", "..");
 // A pixel "differs" when a channel moves by more than PIXEL_TOLERANCE (out of 255).
 // Different GPUs and CPUs legitimately disagree on hash noise (fract(sin(x) * 43758.5453)),
 // so a frame "matches" when at most MATCH_RATIO of its pixels differ, and is "close"
@@ -38,7 +39,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i].startsWith("--")) opt[args[i].slice(2)] = path.resolve(args[++i]);
 }
 if (!opt.out) {
-  console.error("Usage: build-sksl.js --out <dir> [--refs <dir>] [--renders <dir>] [--report <file>]");
+  console.error("Usage: npm run build:sksl -- --out <dir> [--refs <dir>] [--renders <dir>] [--report <file>]");
   process.exit(1);
 }
 
@@ -91,7 +92,7 @@ function compareBlocks(actual, expected) {
 }
 
 async function main() {
-  const CanvasKit = await require("canvaskit-wasm")();
+  const CanvasKit = await CanvasKitInit();
 
   function imageShader(rgba) {
     const image = CanvasKit.MakeImage(
@@ -103,13 +104,13 @@ async function main() {
         colorSpace: CanvasKit.ColorSpace.SRGB,
       },
       rgba,
-      WIDTH * 4
+      WIDTH * 4,
     );
     return image.makeShaderOptions(
       CanvasKit.TileMode.Clamp,
       CanvasKit.TileMode.Clamp,
       CanvasKit.FilterMode.Linear,
-      CanvasKit.MipmapMode.None
+      CanvasKit.MipmapMode.None,
     );
   }
   const fromShader = imageShader(fromImage);
@@ -161,7 +162,10 @@ async function main() {
   }
 
   const dir = path.join(ROOT, "transitions");
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".glsl") && fs.statSync(path.join(dir, f)).isFile()).sort();
+  const files = fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith(".glsl") && fs.statSync(path.join(dir, f)).isFile())
+    .sort();
   fs.mkdirSync(opt.out, { recursive: true });
   if (opt.renders) fs.mkdirSync(opt.renders, { recursive: true });
 
@@ -202,7 +206,10 @@ async function main() {
       if (ref && !reference) {
         Object.assign(result, { status: "no-reference", error: `missing ${ref}` });
       } else if (reference && (reference.width !== WIDTH * PROGRESS.length || reference.height !== HEIGHT)) {
-        Object.assign(result, { status: "no-reference", error: `${ref} is ${reference.width}x${reference.height}, expected ${WIDTH * PROGRESS.length}x${HEIGHT}` });
+        Object.assign(result, {
+          status: "no-reference",
+          error: `${ref} is ${reference.width}x${reference.height}, expected ${WIDTH * PROGRESS.length}x${HEIGHT}`,
+        });
       } else if (reference) {
         const expected = reference.data;
         const { status, worst } = compare(strip, expected);
@@ -220,10 +227,16 @@ async function main() {
   const report = { target: "sksl", total: results.length, counts, transitions: results };
   if (opt.report) fs.writeFileSync(opt.report, JSON.stringify(report, null, 2) + "\n");
 
-  console.log(`SkSL: ${Object.entries(counts).map(([k, v]) => `${v} ${k}`).join(", ")} (of ${results.length})`);
+  console.log(
+    `SkSL: ${Object.entries(counts)
+      .map(([k, v]) => `${v} ${k}`)
+      .join(", ")} (of ${results.length})`,
+  );
   for (const r of results) {
     if (!["match", "compiled"].includes(r.status)) {
-      console.log(`  ${r.status.padEnd(13)} ${r.name}${r.hashNoise ? " [hash noise]" : ""}${r.differingPixels !== undefined ? ` (${(r.differingPixels * 100).toFixed(1)}% of pixels differ)` : ""}${r.error ? `: ${r.error.split("\n")[0]}` : ""}`);
+      console.log(
+        `  ${r.status.padEnd(13)} ${r.name}${r.hashNoise ? " [hash noise]" : ""}${r.differingPixels !== undefined ? ` (${(r.differingPixels * 100).toFixed(1)}% of pixels differ)` : ""}${r.error ? `: ${r.error.split("\n")[0]}` : ""}`,
+      );
     }
   }
 }

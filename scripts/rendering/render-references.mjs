@@ -4,8 +4,8 @@
 // Other shader targets (SkSL, WGSL, …) are compared against these images.
 //
 // Usage:
-//   node render-references.js --out <dir> [--transitions <dir>] [file.glsl ...]
-//   node render-references.js --check --out <dir> [--strict]   # compare with images in <dir>
+//   npm run render:references -- --out <dir> [--transitions <dir>] [file.glsl ...]
+//   npm run render:references -- --check --out <dir> [--strict]   # compare with images in <dir>
 //
 // Without file arguments, renders every transition of --transitions (default: transitions/).
 // Input images are generated procedurally so the output only depends on the GL
@@ -15,14 +15,14 @@
 //
 // Requires: gl, pngjs
 
-const fs = require("fs");
-const path = require("path");
-const { PNG } = require("pngjs");
-const { parseTransition } = require("../lib/parse-transition");
+import fs from "node:fs";
+import path from "node:path";
+import { PNG } from "pngjs";
+import { parseTransition } from "../catalog/parse-transition.mjs";
 
-const { WIDTH, HEIGHT, PROGRESS, fromImage, toImage, extraImage } = require("../lib/reference-images");
+import { WIDTH, HEIGHT, PROGRESS, fromImage, toImage, extraImage } from "./reference-images.mjs";
 
-const ROOT = path.join(__dirname, "..", "..");
+const ROOT = path.join(import.meta.dirname, "..", "..");
 // --check: a frame differs when more than MAX_BAD_RATIO of its pixels move by more than CHANNEL_TOLERANCE.
 const CHANNEL_TOLERANCE = 2;
 const MAX_BAD_RATIO = 0.001;
@@ -41,7 +41,9 @@ for (let i = 0; i < args.length; i++) {
   else files.push(path.resolve(args[i]));
 }
 if (!outDir) {
-  console.error("Usage: render-references.js --out <dir> [--check [--strict]] [--transitions <dir>] [file.glsl ...]");
+  console.error(
+    "Usage: npm run render:references -- --out <dir> [--check [--strict]] [--transitions <dir>] [file.glsl ...]",
+  );
   process.exit(1);
 }
 if (files.length === 0) {
@@ -53,7 +55,8 @@ if (files.length === 0) {
 
 // --- GL setup ---
 
-const gl = require("gl")(WIDTH, HEIGHT, { preserveDrawingBuffer: true });
+const { default: createGL } = await import("gl");
+const gl = createGL(WIDTH, HEIGHT, { preserveDrawingBuffer: true });
 if (!gl) {
   console.error("Failed to create GL context");
   process.exit(1);
@@ -91,7 +94,7 @@ varying vec2 _uv;
 void main() {
   gl_Position = vec4(_p, 0.0, 1.0);
   _uv = 0.5 * (_p + 1.0);
-}`
+}`,
 );
 
 const buffer = gl.createBuffer();
@@ -123,7 +126,7 @@ uniform float progress, ratio;
 vec4 getFromColor(vec2 uv) { return texture2D(from, uv); }
 vec4 getToColor(vec2 uv) { return texture2D(to, uv); }
 ${glsl}
-void main() { gl_FragColor = transition(_uv); }`
+void main() { gl_FragColor = transition(_uv); }`,
   );
   const program = gl.createProgram();
   gl.attachShader(program, vertexShader);

@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 // Checks the layout and encoding of the transitions/ folder.
-// Usage: node scripts/lint-transitions.js [transitions-dir]
+// Usage: npm run lint  (or: node scripts/checks/lint-transitions.mjs [transitions-dir])
 //
 // - every entry is a regular `.glsl` file directly in transitions/ (the GitHub
 //   web UI sometimes creates `Foo.glsl/Foo.glsl` or drops the extension)
-// - UTF-8 without BOM, LF line endings (see scripts/lib/file-checks.js)
+// - UTF-8 without BOM, LF line endings (see encoding.mjs)
 // Hidden files (.DS_Store, …) are ignored, like the rest of the tooling does.
 
-const fs = require("fs");
-const path = require("path");
-const { checkEncoding } = require("./lib/file-checks");
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { checkEncoding } from "./encoding.mjs";
 
 // Returns { count, errors } for the transitions in `dir`.
 function lintTransitions(dir) {
@@ -21,7 +22,9 @@ function lintTransitions(dir) {
   for (const entry of entries) {
     const rel = path.join(path.basename(dir), entry.name);
     if (!entry.isFile()) {
-      errors.push(`${rel}: must be a file directly in transitions/ (found a ${entry.isDirectory() ? "directory" : "non-file"})`);
+      errors.push(
+        `${rel}: must be a file directly in transitions/ (found a ${entry.isDirectory() ? "directory" : "non-file"})`,
+      );
       continue;
     }
     if (!entry.name.endsWith(".glsl")) {
@@ -33,12 +36,14 @@ function lintTransitions(dir) {
   return { count: entries.length, errors };
 }
 
-if (require.main === module) {
-  const dir = process.argv[2] || path.join(__dirname, "..", "transitions");
+// Run as a script (also through a symlinked path), not when imported by the tests.
+const isMain = process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));
+if (isMain) {
+  const dir = process.argv[2] || path.join(import.meta.dirname, "..", "..", "transitions");
   const { count, errors } = lintTransitions(dir);
   for (const e of errors) console.error(`Error: ${e}`);
   if (errors.length) process.exit(1);
   console.log(`Linted ${count} transitions`);
 }
 
-module.exports = { lintTransitions };
+export { lintTransitions };

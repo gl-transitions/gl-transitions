@@ -52,15 +52,15 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb mesa-utils libgl1-mesa-dri libglapi-mesa libosmesa6 ffmpeg
 
-      - name: Install preview dependencies
-        run: cd scripts/preview && npm install
+      - name: Install dependencies
+        run: npm ci --omit=dev
 
       - name: Detect transitions
         id: detect
@@ -116,12 +116,12 @@ jobs:
             for file in $FILES; do
               name=$(basename "$file" .glsl)
               echo "=== Validating $name ==="
-              node scripts/preview/validate-transition.js \
+              node scripts/checks/validate-transition.mjs \
                 --transition "$file" > "/tmp/previews/${name}.validation.json" 2>/dev/null || true
               cat "/tmp/previews/${name}.validation.json"
               echo ""
               echo "=== Rendering $name ==="
-              node scripts/preview/render-transition.js \
+              node scripts/rendering/render-preview.mjs \
                 --transition "$file" \
                 --output "/tmp/previews/${name}.gif" 2>&1 || echo "Failed: $name"
             done

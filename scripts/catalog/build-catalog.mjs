@@ -4,10 +4,10 @@
 // without requiring the native `gl` module.
 // Temporary solution until gl-transition-libs is updated.
 
-const fs = require("fs");
-const path = require("path");
-const { execSync } = require("child_process");
-const { parseTransition } = require("./lib/parse-transition");
+import fs from "node:fs";
+import path from "node:path";
+import { execSync } from "node:child_process";
+import { parseTransition } from "./parse-transition.mjs";
 
 const args = process.argv.slice(2);
 let transitionsDir = "transitions";
@@ -24,10 +24,10 @@ function getGitDatesMap(dir) {
 
   try {
     // Single git command for all creation dates
-    const createdLog = execSync(
-      `git log --diff-filter=A --format="%aD" --name-only -- "${dir}"/*.glsl`,
-      { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 }
-    );
+    const createdLog = execSync(`git log --diff-filter=A --format="%aD" --name-only -- "${dir}"/*.glsl`, {
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024,
+    });
     let currentDate = null;
     for (const line of createdLog.split("\n")) {
       const trimmed = line.trim();
@@ -41,10 +41,10 @@ function getGitDatesMap(dir) {
     }
 
     // Single git command for all last-modified dates
-    const updatedLog = execSync(
-      `git log --format="%aD" --name-only -- "${dir}"/*.glsl`,
-      { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 }
-    );
+    const updatedLog = execSync(`git log --format="%aD" --name-only -- "${dir}"/*.glsl`, {
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024,
+    });
     currentDate = null;
     for (const line of updatedLog.split("\n")) {
       const trimmed = line.trim();

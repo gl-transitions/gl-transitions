@@ -1,5 +1,5 @@
-// Encoding checks for a transition file, shared by scripts/lint-transitions.js (CI)
-// and scripts/preview/validate-transition.js (PR preview comment).
+// Encoding checks for a transition file, shared by lint-transitions.mjs (CI) and
+// validate-transition.mjs (PR preview comment).
 
 const decoder = new TextDecoder("utf-8", { fatal: true });
 
@@ -20,4 +20,4 @@ function checkEncoding(bytes) {
   return errors;
 }
 
-module.exports = { checkEncoding };
+export { checkEncoding };
