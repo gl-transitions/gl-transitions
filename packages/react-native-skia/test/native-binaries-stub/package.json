@@ -1,0 +1,6 @@
+{
+  "name": "native-binaries-stub",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Stands in for the prebuilt Skia binaries of @shopify/react-native-skia (~750 MB) in this repository, where its tests only run the web build. See the overrides of the root package.json."
+}

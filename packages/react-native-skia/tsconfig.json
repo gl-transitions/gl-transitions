@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2022"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "rewriteRelativeImportExtensions": true,
+    "declaration": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "types": [],
+    // The gl-transitions types of this repository, so the package builds before they are published.
+    "paths": {
+      "gl-transitions": ["../../scripts/npm-package/skeleton/index.d.ts"],
+      "gl-transitions/sksl/index.js": ["../../scripts/npm-package/skeleton/sksl/index.d.ts"]
+    }
+  },
+  "include": ["src"]
+}
