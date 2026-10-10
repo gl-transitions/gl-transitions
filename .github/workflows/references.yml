@@ -3,8 +3,9 @@ name: Reference renders
 # Renders every transition on the base branch and on the PR with the same
 # software GL (Mesa llvmpipe) and reports transitions whose output changed.
 # Then converts every transition to SkSL, renders it with Skia (CanvasKit) and
-# reports how it compares with the GLSL render, and compiles the GLSL ES 3.00
-# versions with glslang.
+# reports how it compares with the GLSL render, compiles the GLSL ES 3.00
+# versions with glslang, and translates them through SPIR-V to WGSL (rendered
+# with Dawn on Mesa lavapipe and compared too) and MSL.
 # Also validates every transition against the spec (validate-transition.mjs).
 # The comparisons are informational: fails only when a GLSL transition does not
 # render or breaks the spec.
@@ -43,10 +44,17 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 mesa-vulkan-drivers
 
       - name: Install dependencies
         run: npm ci --omit=dev
+
+      # glslang (checksummed download) and naga (cargo build, ~1 min) for the shader targets.
+      - name: Cache shader toolchain
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: node_modules/.cache/gl-transitions-toolchain
+          key: shader-toolchain-${{ runner.os }}-${{ hashFiles('scripts/targets/toolchain.mjs') }}
 
       - name: Check out base transitions
         env:
@@ -77,6 +85,9 @@ jobs:
           '
       - name: Build GLSL ES 3.00
         run: node scripts/targets/build-glsl3.mjs --out /tmp/glsl3/shaders --report /tmp/glsl3/report.json
+
+      - name: Build WGSL and MSL, compare WGSL
+        run: node scripts/targets/build-wgsl-msl.mjs --wgsl /tmp/wgsl-msl/wgsl --msl /tmp/wgsl-msl/msl --layouts /tmp/wgsl-msl/layouts.json --refs /tmp/refs/head --renders /tmp/wgsl-msl/renders --report /tmp/wgsl-msl/report.json
 
       - name: Summary
         if: always()
@@ -119,6 +130,16 @@ jobs:
                 out.push(`- \`${t.name}\` (${t.status}): ${(t.error || "").split("\n")[0]}`);
               }
             }
+            const gpu = read("/tmp/wgsl-msl/report.json");
+            if (gpu) {
+              for (const [title, r] of [["WGSL", gpu.wgsl], ["MSL", gpu.msl]]) {
+                out.push("", `## ${title}`, "", Object.entries(r.counts).map(([k, v]) => `${v} ${k}`).join(", ") + ` (of ${r.total})`);
+                for (const t of r.transitions.filter((t) => !["match", "compiled", "translated"].includes(t.status))) {
+                  const pct = t.differingPixels !== undefined ? ` ${(t.differingPixels * 100).toFixed(1)}% of pixels differ` : "";
+                  out.push(`- \`${t.name}\` (${t.status}${t.hashNoise ? ", hash noise" : ""})${pct}${t.error ? ": " + t.error.split("\n")[0] : ""}`);
+                }
+              }
+            }
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
           '
 
@@ -131,6 +152,7 @@ jobs:
             /tmp/refs/
             /tmp/sksl/
             /tmp/glsl3/
+            /tmp/wgsl-msl/
           if-no-files-found: warn
 
       - name: Fail on render errors

@@ -28,6 +28,13 @@ jobs:
       - name: Install dependencies
         run: npm ci --omit=optional
 
+      # glslang (checksummed download) and naga (cargo build, ~1 min) for the shader targets.
+      - name: Cache shader toolchain
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: node_modules/.cache/gl-transitions-toolchain
+          key: shader-toolchain-${{ runner.os }}-${{ hashFiles('scripts/targets/toolchain.mjs') }}
+
       - name: Lint transitions
         run: npm run lint
 
@@ -73,9 +80,38 @@ jobs:
             echo "No changes to transitions or build scripts — skipping publish"
           fi
 
-  publish:
+  # Builds the package without publish rights: building runs native tools (glslang, and
+  # naga compiled by cargo), so it stays out of the job that holds the npm OIDC token.
+  # No cache here, so nothing written by other runs ends up in the published package.
+  package:
     needs: check-publish
     if: needs.check-publish.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .nvmrc
+
+      # gl (optional) and the dev tooling are not needed to build.
+      - name: Install dependencies
+        run: npm ci --omit=optional --omit=dev --ignore-scripts
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload package
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: npm-package
+          path: release/
+          if-no-files-found: error
+
+  publish:
+    needs: package
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -90,13 +126,11 @@ jobs:
         with:
           node-version-file: .nvmrc
 
-      # Runs with id-token (npm trusted publishing) and contents: write, so no dependency
-      # install scripts here; gl (optional) and the dev tooling are not needed to build.
-      - name: Install dependencies
-        run: npm ci --omit=optional --omit=dev --ignore-scripts
-
-      - name: Build
-        run: npm run build
+      - name: Download package
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: npm-package
+          path: release
 
       # npm trusted publishing (OIDC, no token) needs npm >= 11.5.1; Node 22 ships npm 10.
       - name: Upgrade npm for trusted publishing

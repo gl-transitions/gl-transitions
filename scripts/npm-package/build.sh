@@ -24,5 +24,8 @@ node scripts/targets/build-sksl.mjs --out release/sksl
 # GLSL ES 3.00 versions, validated with glslang (downloaded on first use); see scripts/README.md
 node scripts/targets/build-glsl3.mjs --out release/glsl3
 
+# WGSL and MSL through SPIR-V (glslang + naga, built with cargo on first use); see scripts/README.md
+node scripts/targets/build-wgsl-msl.mjs --wgsl release/wgsl --msl release/msl --layouts release/layouts.json
+
 # llms.txt, llms-full.txt and the Agent Skill; see scripts/README.md
 node scripts/agents/build-agent-docs.mjs --out release
