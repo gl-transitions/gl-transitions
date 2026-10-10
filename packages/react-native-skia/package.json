@@ -1,0 +1,59 @@
+{
+  "name": "@gl-transitions/react-native-skia",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Use any of the gl-transitions in React Native Skia",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gl-transitions/gl-transitions.git",
+    "directory": "packages/react-native-skia"
+  },
+  "homepage": "https://gl-transitions.com",
+  "keywords": [
+    "react-native",
+    "skia",
+    "sksl",
+    "transitions",
+    "shader",
+    "video"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "node scripts/generate-transition-types.mjs && tsc",
+    "typecheck": "node scripts/generate-transition-types.mjs && tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@shopify/react-native-skia": ">=2.0.0",
+    "gl-transitions": "^1.74.0",
+    "react": ">=19.0.0",
+    "react-native-reanimated": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "gl-transitions": {
+      "optional": true
+    },
+    "react-native-reanimated": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@shopify/react-native-skia": "2.14.0",
+    "@types/react": "^19.2.0",
+    "react": "^19.2.0",
+    "typescript": "^6.0.3"
+  }
+}

@@ -4,15 +4,18 @@ name: Reference renders
 # software GL (Mesa llvmpipe) and reports transitions whose output changed.
 # Then converts every transition to SkSL, renders it with Skia (CanvasKit) and
 # reports how it compares with the GLSL render.
-# Also validates every transition against the spec (validate-transition.mjs).
+# Also validates every transition against the spec (validate-transition.mjs),
+# and renders every transition through the React Native Skia package.
 # The comparisons are informational: fails only when a GLSL transition does not
-# render or breaks the spec.
+# render or breaks the spec, or when the React Native Skia package renders a
+# transition differently than its GLSL reference (beyond hash noise).
 
 on:
   pull_request:
     paths:
       - 'transitions/**'
       - 'scripts/**'
+      - 'packages/**'
       - 'package.json'
       - 'package-lock.json'
       - '.nvmrc'
@@ -45,7 +48,7 @@ jobs:
           sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6
 
       - name: Install dependencies
-        run: npm ci --omit=dev
+        run: npm ci
 
       - name: Check out base transitions
         env:
@@ -74,6 +77,11 @@ jobs:
             done
             exit $failed
           '
+
+      - name: Compare React Native Skia renders
+        run: |
+          npm run build -w @gl-transitions/react-native-skia
+          GL_TRANSITIONS_REFS=/tmp/refs/head node --test "packages/react-native-skia/test/*.test.mjs"
 
       - name: Summary
         if: always()

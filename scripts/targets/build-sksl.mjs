@@ -5,7 +5,8 @@
 // Usage:
 //   npm run build:sksl -- --out <dir> [--refs <glsl renders dir>] [--renders <dir>] [--report <file.json>]
 //
-//   --out      writes <name>.sksl for every transition that compiles
+//   --out      writes <name>.sksl for every transition that compiles, and index.js mapping
+//              each name to its source (for bundlers that can't import .sksl files)
 //   --refs     PNG strips from scripts/rendering/render-references.mjs to compare against
 //   --renders  writes the SkSL renders as PNG strips, for inspection
 //   --report   writes the per-transition status as JSON (also printed as a summary)
@@ -170,6 +171,7 @@ async function main() {
   if (opt.renders) fs.mkdirSync(opt.renders, { recursive: true });
 
   const results = [];
+  const sources = {};
   for (const file of files) {
     const { transition } = parseTransition(fs.readFileSync(path.join(dir, file), "utf8"), file);
     const result = { name: transition.name };
@@ -192,6 +194,7 @@ async function main() {
       continue;
     }
     fs.writeFileSync(path.join(opt.out, `${transition.name}.sksl`), source);
+    sources[transition.name] = source;
     result.status = "compiled";
 
     if (opt.refs || opt.renders) {
@@ -221,6 +224,8 @@ async function main() {
     }
     effect.delete();
   }
+
+  fs.writeFileSync(path.join(opt.out, "index.js"), `module.exports=${JSON.stringify(sources)};\n`);
 
   const counts = {};
   for (const r of results) counts[r.status] = (counts[r.status] || 0) + 1;
