@@ -1,5 +1,7 @@
 // Author: gre
 // License: MIT
+// Description: A wipe that follows the brightness of a grayscale mask (the luma texture)
+// Tags: wipe, luma, mask
 
 uniform sampler2D luma;
 

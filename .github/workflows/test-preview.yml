@@ -5,11 +5,13 @@ on:
     branches: [master]
     paths:
       - 'scripts/preview/**'
+      - 'scripts/lib/**'
       - '.github/workflows/test-preview.yml'
   pull_request:
     branches: [master]
     paths:
       - 'scripts/preview/**'
+      - 'scripts/lib/**'
       - '.github/workflows/test-preview.yml'
   workflow_dispatch:
 

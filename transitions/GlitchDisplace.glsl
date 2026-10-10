@@ -1,9 +1,7 @@
 // Author: Matt DesLauriers
 // License: MIT
-
-#ifdef GL_ES
-precision highp float;
-#endif
+// Description: Blocks of the image are displaced in a glitch that flashes into the incoming image
+// Tags: glitch, displace
 
 float random(vec2 co)
 {

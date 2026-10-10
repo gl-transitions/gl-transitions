@@ -1,5 +1,7 @@
 // Author: lbl
 // License: MIT
+// Description: The outgoing image shatters into fragments that fly away
+// Tags: shatter, fragments
 
 #define POINTS 10
 

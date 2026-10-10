@@ -1,6 +1,9 @@
 // Author: gre
 // License: MIT
+// Description: A crossfade through grayscale
+// Tags: fade, grayscale, color
 
+// @range(0, 1) How long the grayscale phase lasts
 uniform float intensity; // = 0.3; // if 0.0, the image directly turn grayscale, if 0.9, the grayscale transition phase is very important
  
 vec3 grayscale (vec3 color) {

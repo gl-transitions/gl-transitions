@@ -1,5 +1,7 @@
 // License: MIT
 // Author: Xaychru
+// Description: The view pans across a mosaic of rotated tiles from both images and settles on the incoming one
+// Tags: mosaic, tiles, zoom
 // ported by gre from https://gist.github.com/Xaychru/130bb7b7affedbda9df5
 
 #define PI 3.14159265358979323

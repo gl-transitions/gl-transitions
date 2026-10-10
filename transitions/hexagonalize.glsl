@@ -1,8 +1,11 @@
 // Author: Fernando Kuteken
 // License: MIT
+// Description: Both images turn into hexagons, crossfade, then sharpen again
+// Tags: pixelate, hexagon, blend
 // Hexagonal math from: http://www.redblobgames.com/grids/hexagons/
 
 uniform int steps; // = 50
+// @param Number of hexagons across
 uniform float horizontalHexagons; // = 20
 
 struct Hexagon {

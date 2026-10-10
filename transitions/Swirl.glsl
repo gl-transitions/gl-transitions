@@ -1,5 +1,7 @@
 // License: MIT
 // Author: Sergey Kosarevsky
+// Description: Both images swirl around the center while crossfading
+// Tags: swirl, rotate, blend
 // ( http://www.linderdaum.com )
 // ported by gre from https://gist.github.com/corporateshark/cacfedb8cca0f5ce3f7c
 

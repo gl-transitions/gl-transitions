@@ -1,6 +1,9 @@
 // Author: OllyOllyOlly
 // License: MIT
+// Description: The outgoing image slides out as two halves moving horizontally in opposite directions
+// Tags: slide, split, horizontal
 
+// @param Swap the directions of the halves
 uniform bool reverse; // = false
 
 const vec2 boundMin = vec2(0.0, 0.0);

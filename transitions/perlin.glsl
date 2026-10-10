@@ -1,13 +1,14 @@
 // Author: Rich Harris
 // License: MIT
+// Description: The incoming image appears through blobs of Perlin noise
+// Tags: noise, dissolve
 
-#ifdef GL_ES
-precision highp float;
-#endif
-
+// @param Scale of the noise; higher values make smaller blobs
 uniform float scale; // = 4.0
+// @param Softness of the blob edges
 uniform float smoothness; // = 0.01
 
+// @param Random seed
 uniform float seed; // = 12.9898
 
 // http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/

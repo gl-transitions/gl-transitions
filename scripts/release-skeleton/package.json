@@ -19,6 +19,9 @@
     "shader",
     "opengl",
     "video",
-    "animation"
-  ]
+    "animation",
+    "sksl",
+    "skia"
+  ],
+  "types": "index.d.ts"
 }

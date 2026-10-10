@@ -1,5 +1,7 @@
 // Author: mandubian
 // License: MIT
+// Description: The outgoing image is pulled along a parametric curve into a psychedelic swirl
+// Tags: distort, psychedelic
 
 uniform float a; // = 4
 uniform float b; // = 1

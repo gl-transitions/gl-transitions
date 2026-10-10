@@ -1,7 +1,11 @@
 // Author: gre
 // License: MIT
+// Description: The incoming image appears in random squares
+// Tags: squares, grid, dissolve
 
+// @param Number of squares (columns, rows)
 uniform ivec2 size; // = ivec2(10, 10)
+// @param Softness of each square's switch
 uniform float smoothness; // = 0.5
  
 float rand (vec2 co) {

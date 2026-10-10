@@ -1,7 +1,10 @@
 // Author: Sergey Kosarevsky
 // License: MIT
+// Description: A crossfade through an out-of-focus blur
+// Tags: blur, blend
 // Ported from https://gist.github.com/corporateshark/b9f8e5675c647e615419
 
+// @param Amount of blur
 uniform float blurSize; // = 0.02
 
 // 12-tap Poisson disk

@@ -1,5 +1,7 @@
 // Author: Fernando Kuteken
 // License: MIT
+// Description: A crossfade through the multiplied blend of both images
+// Tags: blend, fade
 
 vec4 blend(vec4 a, vec4 b) {
   return a * b;

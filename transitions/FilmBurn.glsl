@@ -1,5 +1,8 @@
 // Author: Anastasia Dunbar
 // License: MIT
+// Description: Glowing film-burn light leaks wash over the image and reveal the incoming one
+// Tags: burn, film, light-leak
+// @param Random seed
 uniform float Seed; // = 2.31
 float sigmoid(float x, float a) {
     float b = pow(x*2.,a)/2.;
@@ -24,7 +27,7 @@ float random(vec2 co, float shft){
 float smooth_random(vec2 co, float shft) {
 	return smooth_mix(smooth_mix(random(floor(co),shft),random(floor(co+vec2(1.,0.)),shft),fract(co.x)),smooth_mix(random(floor(co+vec2(0.,1.)),shft),random(floor(co+vec2(1.,1.)),shft),fract(co.x)),fract(co.y));
 }
-vec4 texture(vec2 p) {
+vec4 blendedColor(vec2 p) {
     return mix(getFromColor(p), getToColor(p), sigmoid(progress,10.));
 }
 #define pi 3.14159265358979323
@@ -51,7 +54,7 @@ vec4 transition(vec2 p) {
   for (float i = 0.; i < repeats; i++) { 
       vec2 q = vec2(cos(degrees((i/repeats)*360.)),sin(degrees((i/repeats)*360.))) *  (rand(vec2(i,p.x+p.y))+bluramount); 
       vec2 uv2 = p+(q*bluramount);
-      blurred_image += texture(uv2);
+      blurred_image += blendedColor(uv2);
   }
   blurred_image /= repeats;
   

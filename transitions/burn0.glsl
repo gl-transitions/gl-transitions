@@ -1,6 +1,9 @@
 // Author: liubailin2020@gmail.com
 // License: MIT
+// Description: The outgoing image burns away in noisy, glowing patches
+// Tags: burn, fire, noise
 
+// @color Color of the burning edges
 uniform vec3 burnColor; // = vec3(1.0, 0.5, 0.0)
 
 float random (in vec2 st) {

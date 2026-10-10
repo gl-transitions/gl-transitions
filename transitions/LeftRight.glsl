@@ -1,5 +1,7 @@
 // Author: zhmy
 // License: MIT
+// Description: The outgoing image shrinks away to the left while the incoming one slides in from the right
+// Tags: slide, zoom, horizontal
 
 const vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
 const vec2 boundMin = vec2(0.0, 0.0);

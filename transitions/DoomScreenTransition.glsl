@@ -1,5 +1,7 @@
 // Author: Zeh Fernando
 // License: MIT
+// Description: The outgoing image melts down in uneven columns, like the Doom screen wipe
+// Tags: melt, columns, retro
 
 
 // Transition parameters --------

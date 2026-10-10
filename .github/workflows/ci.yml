@@ -4,7 +4,6 @@ on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
 
 permissions:
   contents: read
@@ -24,6 +23,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+
+      - name: Lint transitions
+        run: node scripts/lint-transitions.js
+
+      - name: Test
+        run: node --test 'scripts/test/*.test.js' 'tools/test/*.test.js'
+
+      - name: Install tools dependencies
+        run: cd tools && npm install
 
       - name: Build
         run: ./scripts/build.sh
@@ -48,7 +56,10 @@ jobs:
             echo "should_publish=true" >> $GITHUB_OUTPUT
             exit 0
           fi
-          CHANGED=$(git diff --name-only "$LAST_TAG" -- transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/release-skeleton/)
+          CHANGED=$(git diff --name-only "$LAST_TAG" -- \
+            transitions/ scripts/build.sh scripts/gl-transition-transform.js scripts/release-skeleton/ \
+            scripts/lib/parse-transition.js scripts/lib/transition-meta.js \
+            tools/build-sksl.js tools/lib/ tools/package.json)
           if [ -n "$CHANGED" ]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "Changed files affecting package:"
@@ -73,6 +84,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+
+      - name: Install tools dependencies
+        run: cd tools && npm install
 
       - name: Build
         run: ./scripts/build.sh

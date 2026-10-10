@@ -1,11 +1,16 @@
 // Author: Mark Craig
 // mrmcsoftware on github and youtube ( http://www.youtube.com/MrMcSoftware )
 // License: MIT
+// Description: The outgoing image spins and shrinks away over the incoming one
+// Tags: rotate, zoom, spin
 
 // RotateScaleVanish Transition by Mark Craig (Copyright © 2022)
 
+// @param Fade in the incoming image
 uniform bool FadeInSecond; // = true
+// @param Run the effect in reverse
 uniform bool ReverseEffect; // = false
+// @param Rotate the other way
 uniform bool ReverseRotation; // = false
 
 #define M_PI 3.14159265358979323846

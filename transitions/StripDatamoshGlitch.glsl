@@ -1,5 +1,7 @@
 // Author: bread
 // License: MIT
+// Description: A datamosh glitch: torn strips, chroma shifts and scan noise drag the outgoing image into the incoming one
+// Tags: glitch, datamosh, chromatic
 
 uniform float strength;       // = 1.0
 uniform float horizontalBars; // = 42.0

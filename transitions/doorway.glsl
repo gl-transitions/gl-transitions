@@ -1,6 +1,10 @@
 // Author: gre
 // License: MIT
+// Description: The outgoing image opens like double doors as the incoming one comes forward, with a floor reflection
+// Tags: doors, 3d, reflection
+// @param Strength of the reflection
 uniform float reflection; // = 0.4
+// @param Amount of perspective
 uniform float perspective; // = 0.4
 uniform float depth; // = 3
 

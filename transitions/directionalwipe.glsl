@@ -1,7 +1,11 @@
 // Author: gre
 // License: MIT
+// Description: A soft-edged diagonal wipe
+// Tags: wipe, directional
 
+// @param Direction of the wipe
 uniform vec2 direction; // = vec2(1.0, -1.0)
+// @param Softness of the edge
 uniform float smoothness; // = 0.5
  
 const vec2 center = vec2(0.5, 0.5);

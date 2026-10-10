@@ -1,5 +1,7 @@
 // Author: Fabien Benetou
 // License: MIT
+// Description: A crossfade through horizontal window blinds
+// Tags: blinds, stripes, blend
 
 vec4 transition (vec2 uv) {
   float t = progress;

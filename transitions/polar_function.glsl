@@ -1,8 +1,11 @@
 // Author: Fernando Kuteken
 // License: MIT
+// Description: A flower shape with several petals grows to reveal the incoming image
+// Tags: shape, wipe, polar
 
 #define PI 3.14159265359
 
+// @param Number of petals
 uniform int segments; // = 5
 
 vec4 transition (vec2 uv) {

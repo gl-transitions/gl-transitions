@@ -1,6 +1,8 @@
 
 // License: MIT
 // Author: chenkai
+// Description: The outgoing image is flung away along a curve with motion blur
+// Tags: motion-blur, rotate, slide
 // ported from https://codertw.com/%E7%A8%8B%E5%BC%8F%E8%AA%9E%E8%A8%80/671116/
 
 float rand (vec2 co) {

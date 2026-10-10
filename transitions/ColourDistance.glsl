@@ -1,5 +1,7 @@
 // License: MIT
 // Author: P-Seebauer
+// Description: Pixels switch to the incoming image in order of how close their colors are
+// Tags: blend, color
 // ported by gre from https://gist.github.com/P-Seebauer/2a5fa2f77c883dd661f9
 
 uniform float power; // = 5.0

@@ -1,9 +1,10 @@
 // Author: Handk
 // License: MIT
+// Description: Zooms into the outgoing image, then the incoming one wipes in from left to right
+// Tags: zoom, wipe, horizontal
 
+// @param Part of the first half spent zooming (capped at 0.5)
 uniform float zoom_quickness; // = 0.8
-float nQuick = clamp(zoom_quickness,0.0,0.5);
-
 vec2 zoom(vec2 uv, float amount) {
   if(amount<0.5)
   return 0.5 + ((uv - 0.5) * (1.0-amount));
@@ -13,6 +14,7 @@ vec2 zoom(vec2 uv, float amount) {
 }
 
 vec4 transition (vec2 uv) {
+  float nQuick = clamp(zoom_quickness,0.0,0.5);
   if(progress<0.5){
     vec4 c= mix(
       getFromColor(zoom(uv, smoothstep(0.0, nQuick, progress))),

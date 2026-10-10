@@ -13,6 +13,8 @@ transitions/MyTransition.glsl    <-- correct
 transitions/MyTransition.glsl/MyTransition.glsl   <-- WRONG (GitHub web UI sometimes creates this)
 ```
 
+Use UTF-8 and LF (Unix) line endings; CI checks both with `node scripts/lint-transitions.js`.
+
 If you use the GitHub web UI to create a file, make sure you type the full path `transitions/MyTransition.glsl` in the filename field, not just `MyTransition.glsl` after navigating into the `transitions/` folder.
 
 ### File format
@@ -52,6 +54,27 @@ uniform float speed; // = 1.0
 uniform vec2 direction; // = vec2(1.0, 0.0)
 uniform bool invert; // = false
 ```
+
+### Description, tags and parameter hints (recommended)
+
+Help people find and use your transition by describing it:
+
+```glsl
+// Author: Your Name
+// License: MIT
+// Description: A ragged left-to-right wipe, as if the image was blown away by the wind
+// Tags: wipe, horizontal, noise
+
+// @range(0, 1) Width of the ragged edge
+uniform float size; // = 0.2
+// @param Wipe from right to left instead
+uniform bool reversed; // = false
+```
+
+- Put hints (`@range(min, max[, step])`, `@color`, `@param`) on the line **above** the uniform, never after the default value.
+- Tags are lowercase; use dashes for multiple words (`zoom-in`).
+
+See [Transition metadata](README.md#transition-metadata-optional) for the full syntax.
 
 ### Naming conventions
 

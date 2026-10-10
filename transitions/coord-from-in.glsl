@@ -1,5 +1,7 @@
 // Author: haiyoucuv
 // License: MIT
+// Description: A crossfade in which the colors of one image displace the other
+// Tags: displace, distort, blend
 
 vec4 transition (vec2 uv) {
 

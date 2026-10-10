@@ -72,6 +72,60 @@ uniform vec2 foo /*= vec2(42.0, 42.0)*/, bar /* = vec2(1.) */;
 uniform vec2 foo, bar; // = vec2(1.0, 2.0); // both at the same time ! (needs a ';' if you have this second //, like usual glsl code)
 ```
 
+### Transition metadata (optional)
+
+Transitions can describe themselves so that tools, editors and package integrations can list, search and expose them with a proper UI. All of it is optional and lives in comments, so the shader stays valid GLSL.
+
+Header lines, next to `Author` and `License`:
+
+```glsl
+// Author: Adrian Purser
+// License: MIT
+// Description: The outgoing image drops out of the frame with a few bounces, revealing the incoming one
+// Tags: bounce, slide, vertical, shadow
+```
+
+- `Description`: one line describing what the transition looks like.
+- `Tags`: comma-separated, lowercase words or dash-separated words (e.g. `wipe`, `zoom-in`).
+
+Parameter hints go on comment lines **directly above** the uniform they describe. Text after the hints is the parameter description; `@param` alone marks a description-only line:
+
+```glsl
+// @color Color of the shadow cast on the incoming image
+uniform vec4 shadow_colour; // = vec4(0.,0.,0.,.6)
+// @range(1, 10, 1) Number of bounces before settling
+uniform float bounces; // = 3.0
+// @param Wipe from right to left instead
+uniform bool reversed; // = false
+```
+
+| Hint | Applies to | Meaning |
+|---|---|---|
+| `@range(min, max)` / `@range(min, max, step)` | `float`, `int`, `vec*`, `ivec*` | Suggested bounds for a UI control (applies per component for vectors) |
+| `@color` | `vec3`, `vec4` | The value is an RGB / RGBA color |
+| `@param` | any | No hint, only a description |
+
+Hints are on their own line (not after the default value) so that existing parsers of the `// = value` syntax keep working.
+
+### Extra textures
+
+A transition may declare additional `uniform sampler2D` inputs (e.g. `luma`, `displacement`). They are listed in the `textures` field of `gl-transitions.json`; the implementer is responsible for providing them.
+
+### `gl-transitions.json` format
+
+The npm package exposes the collection as an array of objects:
+
+| Field | Description |
+|---|---|
+| `name` | File name without `.glsl`. Stable: never renamed once published |
+| `author`, `license` | From the header comments |
+| `glsl` | The transition source |
+| `paramsTypes`, `defaultParams` | Parameter types and default values (legacy, kept for compatibility) |
+| `params` | Per parameter: `type`, `default`, and when annotated `min`, `max`, `step`, `color`, `description` |
+| `description`, `tags` | From the header comments (`tags` is always an array) |
+| `textures` | Extra `sampler2D` inputs beyond `from` and `to` |
+| `createdAt`, `updatedAt` | From git history |
+
 
 # `gl-transitions` collection policy
 

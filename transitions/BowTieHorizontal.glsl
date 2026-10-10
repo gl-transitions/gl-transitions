@@ -1,5 +1,7 @@
 // Author: huynx
 // License: MIT
+// Description: Two triangles grow from the left and right edges into a bow tie that reveals the incoming image
+// Tags: wipe, shape, horizontal
 
 const vec2 bottom_left = vec2(0.0, 1.0);
 const vec2 bottom_right = vec2(1.0, 1.0);

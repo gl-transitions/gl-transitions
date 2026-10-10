@@ -1,5 +1,8 @@
 // Author: Brandon Anzaldi
 // License: MIT
+// Description: Cuts to full-screen TV static, then to the incoming image
+// Tags: static, noise, retro
+// @param Part of the transition, at each end, that shows the images instead of static
 uniform float offset; // = 0.05
 
 // Pseudo-random noise function

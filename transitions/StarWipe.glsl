@@ -1,11 +1,16 @@
 // Author: Ben Lucas
 // License: MIT
+// Description: A growing star reveals the incoming image
+// Tags: wipe, shape, star
 #define PI 3.141592653589793
 #define STAR_ANGLE 1.2566370614359172
 
+// @param Thickness of the star's border
 uniform float border_thickness;// = 0.01
 uniform float star_rotation;// = 0.75
+// @color Color of the star's border
 uniform vec4 border_color; // = vec4(1.0)
+// @param Center of the star
 uniform vec2 star_center;// = vec2(0.5)
 
 vec2 rotate(vec2 v, float theta) {

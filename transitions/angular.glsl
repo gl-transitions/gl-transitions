@@ -1,8 +1,11 @@
 // Author: Fernando Kuteken
 // License: MIT
+// Description: A wipe that sweeps around the center from a starting angle
+// Tags: wipe, radial, clock
 
 #define PI 3.141592653589
 
+// @range(0, 360) Angle where the wipe starts, in degrees
 uniform float startingAngle; // = 90
 
 vec4 transition (vec2 uv) {

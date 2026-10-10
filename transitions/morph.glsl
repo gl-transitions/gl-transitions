@@ -1,5 +1,8 @@
 // Author: paniq
 // License: MIT
+// Description: A crossfade in which each image is displaced by the other's colors, like a morph
+// Tags: morph, distort, blend
+// @param Strength of the displacement
 uniform float strength; // = 0.1
 
 vec4 transition(vec2 p) {

@@ -1,8 +1,13 @@
 // Author: Adrian Purser
 // License: MIT
+// Description: The outgoing image drops out of the frame with a few bounces, revealing the incoming one
+// Tags: bounce, slide, vertical, shadow
 
+// @color Color of the shadow cast on the incoming image
 uniform vec4 shadow_colour; // = vec4(0.,0.,0.,.6)
+// @range(0.01, 0.5) Height of the shadow, relative to the image height
 uniform float shadow_height; // = 0.075
+// @range(1, 10, 1) Number of bounces before settling
 uniform float bounces; // = 3.0
 
 const float PI = 3.14159265358;

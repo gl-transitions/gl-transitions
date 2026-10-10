@@ -1,6 +1,10 @@
 // Author: gre
 // License: MIT
+// Description: A soft-edged circle opens from the center to reveal the incoming image
+// Tags: circle, iris, wipe
+// @param Softness of the circle's edge
 uniform float smoothness; // = 0.3
+// @param Open the circle; false closes it instead
 uniform bool opening; // = true
 
 const vec2 center = vec2(0.5, 0.5);

@@ -1,5 +1,7 @@
 // Author: Sergey Kosarevsky
 // License: MIT
+// Description: Both images break into large blocks that blend, then sharpen into the incoming image
+// Tags: pixelate, mosaic, blend
 // Ported from https://gist.github.com/corporateshark/21d2fdd24c706952dc8c
 
 uniform float pixelSize; // = 50.0

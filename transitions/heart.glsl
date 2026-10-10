@@ -1,5 +1,7 @@
 // Author: gre
 // License: MIT
+// Description: A heart shape grows from the center to reveal the incoming image
+// Tags: shape, wipe, heart
 
 float inHeart (vec2 p, vec2 center, float size) {
   if (size==0.0) return 0.0;

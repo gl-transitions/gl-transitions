@@ -1,5 +1,7 @@
 // Author: mandubian
 // License: MIT
+// Description: Wavy, color-separated ripples scramble the outgoing image into the incoming one
+// Tags: wave, distort, chromatic
 uniform float amplitude; // = 1.0
 uniform float waves; // = 30.0
 uniform float colorSeparation; // = 0.3

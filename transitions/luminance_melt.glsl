@@ -1,5 +1,7 @@
 // Author: 0gust1
 // License: MIT
+// Description: The outgoing image melts away in noisy vertical streaks, depending on its brightness
+// Tags: melt, noise, luma
 //My own first transition — based on crosshatch code (from pthrasher), using  simplex noise formula (copied and pasted)
 //-> cooler with high contrasted images (isolated dark subject on light background f.e.)
 //TODO : try to rebase it on DoomTransition (from zeh)?
@@ -10,10 +12,13 @@
 
 
 //direction of movement :  0 : up, 1, down
+// @param Direction of the melt (false: up, true: down)
 uniform bool direction; // = 1 
 //luminance threshold
+// @range(0, 1) Luminance threshold
 uniform float l_threshold; // = 0.8 
 //does the movement takes effect above or below luminance threshold ?
+// @param Melt the parts above the threshold instead of below
 uniform bool above; // = false 
 
 
@@ -102,9 +107,8 @@ float luminance(vec4 color){
   return color.r*0.299+color.g*0.587+color.b*0.114;
 }
 
-vec2 center = vec2(1.0, direction);
-
 vec4 transition(vec2 uv) {
+  vec2 center = vec2(1.0, direction);
   vec2 p = uv.xy / vec2(1.0).xy;
   if (progress == 0.0) {
     return getFromColor(p);

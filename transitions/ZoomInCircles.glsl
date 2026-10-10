@@ -1,14 +1,15 @@
 // License: MIT
 // Author: dycm8009
+// Description: Concentric rings of the outgoing image zoom at different speeds before revealing the incoming one
+// Tags: zoom, circle
 // ported by gre from https://gist.github.com/dycm8009/948e99b1800e81ad909a
 
 vec2 zoom(vec2 uv, float amount) {
   return 0.5 + ((uv - 0.5) * amount);	
 }
 
-vec2 ratio2 = vec2(1.0, 1.0 / ratio);
-
 vec4 transition(vec2 uv) {
+  vec2 ratio2 = vec2(1.0, 1.0 / ratio);
   // TODO: some timing are hardcoded but should be one or many parameters
   // TODO: should also be able to configure how much circles
   // TODO: if() branching should be avoided when possible, prefer use of step() & other functions

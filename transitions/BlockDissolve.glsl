@@ -1,5 +1,7 @@
 // Author: nwoeanhinnogaehr
 // License: MIT
+// Description: The incoming image appears in small random blocks
+// Tags: dissolve, blocks, noise
 // Ported from https://gist.github.com/nwoeanhinnogaehr/b93818de23d4511fde10
 
 uniform float blocksize; // = 0.02

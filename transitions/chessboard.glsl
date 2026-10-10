@@ -1,6 +1,9 @@
 // Author: lql
 // License: MIT
+// Description: A chessboard pattern of squares reveals the incoming image
+// Tags: grid, squares, pattern
 
+// @param Number of squares per row
 uniform float grid_num; // = 10.0
 
 vec4 transition(vec2 uv) {

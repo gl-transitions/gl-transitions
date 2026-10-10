@@ -1,5 +1,7 @@
 // Author: nwoeanhinnogaehr
 // License: MIT
+// Description: A crossfade through the HSV color space that cycles through hues
+// Tags: fade, color, hue
 // Ported from https://gist.github.com/nwoeanhinnogaehr/b185145363d65751009b
 
 // HSV functions from http://lolengine.net/blog/2013/07/27/rgb-to-hsv-in-glsl

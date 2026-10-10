@@ -10,12 +10,15 @@
 // 5. No unused uniform parameters
 // 6. Has required metadata (Author, License)
 // 7. Contains a transition(vec2) function
+// 8. Description, Tags and parameter annotations are well formed
 //
 // Exit code 0 = pass, 1 = errors found
 // Outputs JSON to stdout: { name, valid, errors[], warnings[] }
 
 const fs = require("fs");
 const path = require("path");
+const { parseMeta } = require("../lib/transition-meta");
+const { checkEncoding } = require("../lib/file-checks");
 
 const args = process.argv.slice(2);
 let transitionPath = null;
@@ -44,6 +47,9 @@ if (!/\/\/\s*[Aa]uthor\s*:/.test(glsl)) {
 }
 if (!/\/\/\s*[Ll]icense\s*:/.test(glsl)) {
   errors.push("Missing '// License:' comment");
+}
+for (const e of checkEncoding(fs.readFileSync(transitionPath))) {
+  errors.push(e.charAt(0).toUpperCase() + e.slice(1));
 }
 if (!/vec4\s+transition\s*\(\s*vec2/.test(glsl)) {
   errors.push("Missing 'vec4 transition(vec2 uv)' function");
@@ -105,6 +111,17 @@ while ((m = defaultRegex.exec(glsl)) !== null) {
   if (type === "sampler2D") continue;
   uniformTypes[uname] = type;
   if (val) uniformDefaults[uname] = parseGLSLValue(type, val);
+}
+
+// Catalog metadata: Description, Tags and parameter annotations
+const meta = parseMeta(glsl, uniformTypes, uniformDefaults);
+errors.push(...meta.errors);
+warnings.push(...meta.warnings);
+if (!meta.description) {
+  warnings.push("Missing '// Description:' comment (one line describing the effect)");
+}
+if (meta.tags.length === 0) {
+  warnings.push("Missing '// Tags:' comment (e.g. '// Tags: wipe, directional')");
 }
 
 // If static checks already found critical errors, skip GL validation

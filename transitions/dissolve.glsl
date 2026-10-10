@@ -1,12 +1,12 @@
 // Author: hjm1fb
 // License: MIT
-
-#ifdef GL_ES
-precision mediump float;
-#endif
+// Description: The incoming image spreads over the outgoing one with a hot, glowing edge
+// Tags: dissolve, burn, glow
 
 uniform float uLineWidth; // = 0.1
+// @color Color of the spreading edge
 uniform vec3 uSpreadClr; // = vec3(1.0, 0.0, 0.0)
+// @color Color of the hottest part of the edge
 uniform vec3 uHotClr; // = vec3(0.9, 0.9, 0.2)
 uniform float uPow; // = 5.0
 uniform float uIntensity; // = 1.0

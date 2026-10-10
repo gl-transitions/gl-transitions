@@ -1,7 +1,10 @@
 // Author: lql
 // License: MIT
+// Description: The outgoing image shrinks into a box, toward the center or a corner, revealing the incoming one
+// Tags: box, zoom, shape
 uniform int rectIn; // =1
 // center:0, left_top:1, left_bottom:2, right_top:3, right_bottom:4
+// @range(0, 4, 1) Where the box goes: 0 center, 1 left top, 2 left bottom, 3 right top, 4 right bottom
 uniform int location; // =0
 
 vec4 transition(vec2 uv) {

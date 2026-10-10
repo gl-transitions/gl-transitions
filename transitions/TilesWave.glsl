@@ -1,7 +1,10 @@
 // Author: numb3r23
 // License: MIT
+// Description: The incoming image is revealed tile by tile in a diagonal wave
+// Tags: tiles, wave, wipe
 // Ported from https://gist.github.com/numb3r23/169781bb76f310e2bfde
 
+// @param Number of tiles (columns, rows)
 uniform ivec2 tileCount; // = ivec2(8, 8)
 uniform bool flipX; // = true
 uniform bool flipY; // = false

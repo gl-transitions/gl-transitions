@@ -1,5 +1,8 @@
 // Author: gre
 // License: MIT
+// Description: A crossfade through a blur
+// Tags: blur, blend
+// @param Amount of blur
 uniform float intensity; // = 0.1
 const int passes = 6;
 

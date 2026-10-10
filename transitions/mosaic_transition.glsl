@@ -1,6 +1,9 @@
 // Author: YueDev
 // License: MIT
+// Description: Both images break into mosaic blocks that blend, then sharpen into the incoming image
+// Tags: mosaic, pixelate, blend
 
+// @param Number of mosaic blocks
 uniform float mosaicNum;// = 10.0
 
 vec2 getMosaicUV(vec2 uv) {

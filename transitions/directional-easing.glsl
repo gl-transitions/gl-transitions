@@ -1,6 +1,9 @@
 // Author: Max Plotnikov
 // License: MIT
+// Description: Like Directional, with an eased movement
+// Tags: slide, push, directional
 
+// @param Direction of the movement
 uniform vec2 direction; // = vec2(0.0, 1.0)
 
 vec4 transition (vec2 uv) {

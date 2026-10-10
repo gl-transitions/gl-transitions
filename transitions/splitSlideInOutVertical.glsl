@@ -1,6 +1,9 @@
 // Author: OllyOllyOlly
 // License: MIT
+// Description: The halves of both images slide vertically in opposite directions, out and in at once
+// Tags: slide, split, vertical
 
+// @param Swap the directions of the halves
 uniform bool reverse; // = false
 
 const vec2 boundMin = vec2(0.0, 0.0);

@@ -1,0 +1,2 @@
+# Transitions are linted for LF line endings (scripts/lint-transitions.js)
+*.glsl text eol=lf

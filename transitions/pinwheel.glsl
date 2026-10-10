@@ -1,6 +1,9 @@
 // Author: Mr Speaker
 // License: MIT
+// Description: A spinning pinwheel reveals the incoming image
+// Tags: pinwheel, radial, rotate
 
+// @param Rotation speed
 uniform float speed; // = 2.0
 
 vec4 transition(vec2 uv) {

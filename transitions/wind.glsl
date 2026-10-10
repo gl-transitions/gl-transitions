@@ -1,8 +1,11 @@
 // Author: gre
 // License: MIT
+// Description: A ragged left-to-right wipe, as if the image was blown away by the wind
+// Tags: wipe, horizontal, noise
 
-// Custom parameters
+// @range(0, 1) Width of the ragged edge
 uniform float size; // = 0.2
+// @param Wipe from right to left instead
 uniform bool reversed; // = false
 
 float rand (vec2 co) {

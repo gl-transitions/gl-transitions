@@ -1,7 +1,10 @@
 // Author: KMojek
 // License: MIT
+// Description: A bow-tie wipe with an adjustable shape that can run in reverse
+// Tags: wipe, shape
 
 uniform float adjust; // = 0.5
+// @param Run the wipe in reverse
 uniform bool reverse; // = false
 
 float check(vec2 p1, vec2 p2, vec2 p3)

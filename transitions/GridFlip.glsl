@@ -1,10 +1,14 @@
 // License: MIT
 // Author: TimDonselaar
+// Description: The image splits into a grid of tiles that flip one by one to the incoming image
+// Tags: grid, tiles, flip
 // ported by gre from https://gist.github.com/TimDonselaar/9bcd1c4b5934ba60087bdb55c2ea92e5
 
+// @param Number of tiles (columns, rows)
 uniform ivec2 size; // = ivec2(4)
 uniform float pause; // = 0.1
 uniform float dividerWidth; // = 0.05
+// @color Color behind the tiles
 uniform vec4 bgcolor; // = vec4(0.0, 0.0, 0.0, 1.0)
 uniform float randomness; // = 0.1
  

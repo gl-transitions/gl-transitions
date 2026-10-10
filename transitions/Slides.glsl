@@ -1,10 +1,13 @@
 // Author: Mark Craig
 // mrmcsoftware on github and youtube ( http://www.youtube.com/MrMcSoftware )
 // License: MIT
+// Description: The outgoing image slides out, or the incoming one slides in, toward an edge, a corner or the center
+// Tags: slide, directional
 
 // Slides Transition by Mark Craig (Copyright © 2022)
 
 uniform int type; // = 0
+// @param Slide the incoming image in instead of the outgoing one out
 uniform bool In; // = false
 // type: slide to/from which edge, which corner, or center
 // In: if true slide new image in, otherwise slide old image out

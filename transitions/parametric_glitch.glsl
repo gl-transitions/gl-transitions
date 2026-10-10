@@ -1,9 +1,13 @@
 // Author: Yoni Maltsman @friendlyspinach
 // License: MIT
+// Description: A crossfade with glitchy horizontal bands and color shifts
+// Tags: glitch, blend
 
 
 
+// @param Horizontal amplitude of the glitch
 uniform float ampx; // =1.0
+// @param Vertical amplitude of the glitch
 uniform float ampy; //=1.0
 
 vec4 transition (vec2 uv) {

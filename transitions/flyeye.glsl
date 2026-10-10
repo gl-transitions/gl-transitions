@@ -1,5 +1,7 @@
 // Author: gre
 // License: MIT
+// Description: The image breaks into a fly's-eye grid of lenses with color separation
+// Tags: lens, distort, chromatic
 uniform float size; // = 0.04
 uniform float zoom; // = 50.0
 uniform float colorSeparation; // = 0.3

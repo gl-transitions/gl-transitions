@@ -1,6 +1,9 @@
 // Author: Gaëtan Renaudeau
 // License: MIT
+// Description: The incoming image pushes the outgoing one out in a given direction
+// Tags: slide, push, directional
 
+// @param Direction of the movement
 uniform vec2 direction; // = vec2(0.0, 1.0)
 
 vec4 transition (vec2 uv) {

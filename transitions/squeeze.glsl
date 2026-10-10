@@ -1,6 +1,9 @@
 // Author: gre
 // License: MIT
+// Description: The outgoing image is squeezed into a line with color separation, revealing the incoming one
+// Tags: squeeze, chromatic, vertical
  
+// @param Amount of color separation
 uniform float colorSeparation; // = 0.04
  
 vec4 transition (vec2 uv) {

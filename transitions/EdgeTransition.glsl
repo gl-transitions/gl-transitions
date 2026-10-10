@@ -1,5 +1,7 @@
 // Author: Woohyun Kim
 // License: MIT
+// Description: Both images fade through black with their edges glowing
+// Tags: edges, fade
 
 uniform float edge_thickness; // = 0.001
 uniform float edge_brightness; // = 8.0
