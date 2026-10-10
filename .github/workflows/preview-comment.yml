@@ -25,14 +25,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # fetch-depth: 0 so origin/preview-assets resolves; else the publish step wipes it.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           fetch-depth: 0
 
       - name: Download previews artifact
         id: download
         continue-on-error: true
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: transition-previews
           path: previews
@@ -76,6 +76,16 @@ jobs:
           for gif in previews/*.gif; do
             # Untrusted artifact: don't dereference symlinks.
             [ -f "$gif" ] && [ ! -L "$gif" ] || continue
+            # Only publish real GIFs of a sane size: the branch is served from raw.githubusercontent.com.
+            magic=$(head -c 6 -- "$gif")
+            if [ "$magic" != "GIF89a" ] && [ "$magic" != "GIF87a" ]; then
+              echo "::warning::Skipping $(basename -- "$gif"): not a GIF"
+              continue
+            fi
+            if [ "$(stat -c %s -- "$gif")" -gt 20000000 ]; then
+              echo "::warning::Skipping $(basename -- "$gif"): larger than 20 MB"
+              continue
+            fi
             dest="${PREFIX}-$(basename -- "$gif")"
             cp -- "$gif" "$dest"
             git add -- "$dest"
@@ -90,7 +100,7 @@ jobs:
 
       - name: Post preview comment with inline GIFs
         if: steps.meta.outputs.pr != ''
-        uses: actions/github-script@v7
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
         env:
           PR_NUMBER: ${{ steps.meta.outputs.pr }}
           PREFIX: run-${{ github.event.workflow_run.id }}
@@ -105,22 +115,23 @@ jobs:
               return;
             }
             const pr = Number(prRaw);
-            // pr.txt is written before untrusted PR code runs, so a fork PR could forge it.
-            // For pull_request runs, bind the comment to the PR that actually produced this
-            // run; workflow_dispatch is maintainer-chosen, so skip it.
+            // pr.txt comes from the untrusted run, so a fork PR could forge it: only comment
+            // on the PR that actually produced this run. Preview only runs on pull_request.
             const wr = context.payload.workflow_run;
-            if (wr.event === 'pull_request') {
-              const { data: prData } = await github.rest.pulls.get({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr,
-              });
-              // head_sha may be the PR head or the merge commit checked out for the run.
-              const allowed = [prData.head.sha, prData.merge_commit_sha].filter(Boolean);
-              if (!allowed.includes(wr.head_sha)) {
-                core.setFailed(`PR #${pr} (head ${prData.head.sha}) does not match the Preview run head (${wr.head_sha}); refusing to comment.`);
-                return;
-              }
+            if (wr.event !== 'pull_request') {
+              core.setFailed(`Unexpected Preview run event '${wr.event}'; refusing to comment.`);
+              return;
+            }
+            const { data: prData } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr,
+            });
+            // head_sha may be the PR head or the merge commit checked out for the run.
+            const allowed = [prData.head.sha, prData.merge_commit_sha].filter(Boolean);
+            if (!allowed.includes(wr.head_sha)) {
+              core.setFailed(`PR #${pr} (head ${prData.head.sha}) does not match the Preview run head (${wr.head_sha}); refusing to comment.`);
+              return;
             }
             const prefix = process.env.PREFIX;
             const dir = process.env.GIF_DIR;
@@ -156,11 +167,21 @@ jobs:
 
               let validation = null;
               try {
-                validation = JSON.parse(fs.readFileSync(validationPath, 'utf8'));
+                // Untrusted artifact: cap the size before parsing.
+                if (fs.statSync(validationPath).size <= 100000) {
+                  validation = JSON.parse(fs.readFileSync(validationPath, 'utf8'));
+                }
               } catch {}
 
-              // Publish skips symlinked GIFs, so only link a regular file.
-              const hasGif = isRegular(`${name}.gif`);
+              // Publish skips symlinked, non-GIF and oversized files: only link what was published.
+              const isPublishable = (f) => {
+                if (!isRegular(f)) return false;
+                const file = path.join(dir, f);
+                if (fs.statSync(file).size > 20000000) return false;
+                const magic = fs.readFileSync(file).subarray(0, 6).toString('latin1');
+                return magic === 'GIF89a' || magic === 'GIF87a';
+              };
+              const hasGif = isPublishable(`${name}.gif`);
               const icon = validation?.valid === true ? '✅' : validation?.valid === false ? '❌' : '⚠️';
               body += `### ${icon} ${code(name)}\n\n`;
 
