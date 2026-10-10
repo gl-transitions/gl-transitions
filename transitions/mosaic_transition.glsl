@@ -1,7 +1,7 @@
 // Author: YueDev
 // License: MIT
-// Description: Both images break into mosaic blocks that zoom and blend into the incoming image
-// Tags: mosaic, pixelate, zoom
+// Description: Both images break into mosaic blocks that blend, then sharpen into the incoming image
+// Tags: mosaic, pixelate, blend
 
 // @param Number of mosaic blocks
 uniform float mosaicNum;// = 10.0

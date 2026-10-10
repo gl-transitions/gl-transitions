@@ -1,6 +1,6 @@
 // Author: lizhongjian
 // License: MIT
-// Description: Both images slide sideways while crossfading
+// Description: The outgoing image slides to the right, uncovering a crossfade to the incoming one
 // Tags: slide, horizontal, blend
 
 vec4 transition (vec2 uv) {

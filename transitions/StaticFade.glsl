@@ -1,6 +1,6 @@
 // Author: Ben Lucas
 // License: MIT
-// Description: A crossfade through TV static
+// Description: Cuts to the incoming image halfway, hidden behind a burst of TV static
 // Tags: static, noise, retro
 
 uniform float n_noise_pixels ; // = 200.0

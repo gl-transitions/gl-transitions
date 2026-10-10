@@ -2,7 +2,7 @@
 // mrmcsoftware on github and youtube ( http://www.youtube.com/MrMcSoftware )
 // License: MIT
 // Description: The outgoing image slides out, or the incoming one slides in, toward an edge, a corner or the center
-// Tags: slide
+// Tags: slide, directional
 
 // Slides Transition by Mark Craig (Copyright © 2022)
 

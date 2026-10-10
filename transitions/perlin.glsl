@@ -3,7 +3,7 @@
 // Description: The incoming image appears through blobs of Perlin noise
 // Tags: noise, dissolve
 
-// @param Size of the noise
+// @param Scale of the noise; higher values make smaller blobs
 uniform float scale; // = 4.0
 // @param Softness of the blob edges
 uniform float smoothness; // = 0.01

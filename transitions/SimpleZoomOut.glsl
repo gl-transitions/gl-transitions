@@ -4,7 +4,7 @@
 // Tags: zoom, fade
 
 
-// @range(0.2, 1) How quickly the zoom happens
+// @range(0.2, 1) Part of the transition spent zooming
 uniform float zoom_quickness; // = 0.8
 // @param Fade instead of cutting to the incoming image
 uniform bool fade; // = true

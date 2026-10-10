@@ -1,7 +1,7 @@
 // Author: JustKirillS
 // License: MIT
-// Description: The image splits into a grid of tiles that switch to the incoming image one by one
-// Tags: grid, tiles
+// Description: The image splits into a grid of tiles that flip one by one to the incoming image
+// Tags: grid, tiles, flip
 // Ported from https://gist.github.com/JustKirillS/714f095318834f4d2375de872c53af1e
 
 uniform ivec2 size; // = ivec2(4, 4)

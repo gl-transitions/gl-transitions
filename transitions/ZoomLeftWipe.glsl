@@ -3,7 +3,7 @@
 // Description: Zooms into the outgoing image, then the incoming one wipes in from right to left
 // Tags: zoom, wipe, horizontal
 
-// @param How quickly the zoom happens
+// @param Part of the first half spent zooming (capped at 0.5)
 uniform float zoom_quickness; // = 0.8
 vec2 zoom(vec2 uv, float amount) {
   if(amount<0.5)
