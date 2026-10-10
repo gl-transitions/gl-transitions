@@ -13,7 +13,7 @@ transitions/MyTransition.glsl    <-- correct
 transitions/MyTransition.glsl/MyTransition.glsl   <-- WRONG (GitHub web UI sometimes creates this)
 ```
 
-Use UTF-8 and LF (Unix) line endings; CI checks both with `node scripts/lint-transitions.js`.
+Use UTF-8 and LF (Unix) line endings; CI checks both with `npm run lint`.
 
 If you use the GitHub web UI to create a file, make sure you type the full path `transitions/MyTransition.glsl` in the filename field, not just `MyTransition.glsl` after navigating into the `transitions/` folder.
 
@@ -96,3 +96,15 @@ If you're modifying an existing transition, please explain the motivation in you
 ## Spec reference
 
 See the [GL Transition Specification v1](README.md#gl-transition-specification-v1) in the README for full technical details.
+
+## Development
+
+The repository tooling lives in `scripts/` (see [scripts/README.md](scripts/README.md)). It uses Node 22 (`.nvmrc`), ES modules (`.mjs`) and a single `package.json` at the root:
+
+```sh
+npm ci
+npm test
+npm run lint
+npm run format
+npm run validate -- -t transitions/MyTransition.glsl
+```

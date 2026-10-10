@@ -1,16 +1,16 @@
-cd $(dirname $0)/..
+cd $(dirname $0)/../..
 set -e
 
 remoteVersion=`npm show gl-transitions version`
 
 rm -rf release/
-cp -R scripts/release-skeleton release
+cp -R scripts/npm-package/skeleton release
 cd release
 npm version $remoteVersion --no-git-tag-version
 npm version minor --no-git-tag-version
 cd -
 
-node scripts/gl-transition-transform.js -d transitions -o release/gl-transitions.json
+node scripts/catalog/build-catalog.mjs -d transitions -o release/gl-transitions.json
 cd release
 echo "window.GLTransitions=" | cat - gl-transitions.json > gl-transitions.js
 echo "module.exports=" | cat - gl-transitions.json > index.js
@@ -18,5 +18,5 @@ mkdir transitions && cp ../transitions/*.glsl transitions/.
 cp ../LICENSE .
 cd -
 
-# SkSL (Skia) versions of the transitions that compile; see tools/README.md
-node tools/build-sksl.js --out release/sksl
+# SkSL (Skia) versions of the transitions that compile; see scripts/README.md
+node scripts/targets/build-sksl.mjs --out release/sksl

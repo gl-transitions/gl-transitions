@@ -6,24 +6,15 @@ on:
     paths:
       - 'transitions/*.glsl'
 
-  workflow_dispatch:
-    inputs:
-      transition:
-        description: 'Transition name (optional — auto-detects from PR if omitted)'
-        required: false
-        type: string
-      pr_number:
-        description: 'PR number to preview and comment on'
-        required: true
-        type: string
-
 concurrency:
-  group: preview-${{ github.event.pull_request.number || inputs.pr_number || github.run_id }}
+  group: preview-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 # SECURITY: executes untrusted PR code (renders the contributed shader), so it runs
-# read-only with no secrets. Publishing GIFs and commenting happens in the trusted
-# preview-comment.yml (workflow_run), which never executes PR code.
+# read-only with no secrets, and only on pull_request (never in the default branch
+# context, so no cache poisoning). Publishing GIFs and commenting happens in the
+# trusted preview-comment.yml (workflow_run), which never executes PR code.
+# To preview an older PR that never ran this workflow, close and reopen it.
 permissions:
   contents: read
   pull-requests: read
@@ -31,77 +22,40 @@ permissions:
 jobs:
   preview:
     runs-on: ubuntu-latest
-    env:
-      TRANSITION_NAME: ${{ inputs.transition }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Fetch master for diff
-        if: github.event_name == 'pull_request'
         run: git fetch origin master
 
-      - name: Checkout PR branch for workflow_dispatch
-        if: github.event_name == 'workflow_dispatch' && inputs.pr_number != ''
-        env:
-          PR_NUMBER: ${{ inputs.pr_number }}
-        run: |
-          git fetch origin "pull/${PR_NUMBER}/head" --depth=1
-          git checkout FETCH_HEAD -- transitions/
-
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: 20
+          node-version-file: .nvmrc
 
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb mesa-utils libgl1-mesa-dri libglapi-mesa libosmesa6 ffmpeg
 
-      - name: Install preview dependencies
-        run: cd scripts/preview && npm install
+      - name: Install dependencies
+        run: npm ci --omit=dev
 
       - name: Detect transitions
         id: detect
         env:
-          PR_NUMBER: ${{ inputs.pr_number }}
-          GH_TOKEN: ${{ github.token }}
+          PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ -n "$TRANSITION_NAME" ]; then
-              # Single transition specified
-              if [ ! -f "transitions/${TRANSITION_NAME}.glsl" ]; then
-                echo "::error::transitions/${TRANSITION_NAME}.glsl not found"
-                exit 1
-              fi
-              echo "files=transitions/${TRANSITION_NAME}.glsl" >> $GITHUB_OUTPUT
-            else
-              # Auto-detect from PR diff — normalize nested dirs (transitions/X.glsl/X.glsl -> transitions/X.glsl)
-              FILES=$(gh pr diff "$PR_NUMBER" --repo "${{ github.repository }}" --name-only \
-                | grep '^transitions/.*\.glsl$\|^transitions/.*\.glsl/' \
-                | sed 's|transitions/\(.*\.glsl\)/.*|transitions/\1|' \
-                | sort -u | head -20 || true)
-              FILES=$(echo "$FILES" | tr '\n' ' ')
-              if [ -z "$FILES" ]; then
-                echo "::warning::No .glsl files found in PR #${PR_NUMBER}"
-                echo "files=" >> $GITHUB_OUTPUT
-              else
-                echo "Detected files: $FILES"
-                echo "files=$FILES" >> $GITHUB_OUTPUT
-              fi
-            fi
-            echo "pr=$PR_NUMBER" >> $GITHUB_OUTPUT
+          FILES=$(git diff --name-only origin/master...HEAD -- 'transitions/*.glsl' | tr '\n' ' ')
+          if [ -z "$FILES" ]; then
+            echo "No .glsl files changed"
+            echo "files=" >> $GITHUB_OUTPUT
           else
-            FILES=$(git diff --name-only origin/master...HEAD -- 'transitions/*.glsl' | tr '\n' ' ')
-            if [ -z "$FILES" ]; then
-              echo "No .glsl files changed"
-              echo "files=" >> $GITHUB_OUTPUT
-            else
-              echo "files=$FILES" >> $GITHUB_OUTPUT
-            fi
-            echo "pr=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+            echo "files=$FILES" >> $GITHUB_OUTPUT
           fi
+          echo "pr=$PULL_REQUEST_NUMBER" >> $GITHUB_OUTPUT
 
       - name: Validate and render previews
         if: steps.detect.outputs.files != ''
@@ -116,12 +70,12 @@ jobs:
             for file in $FILES; do
               name=$(basename "$file" .glsl)
               echo "=== Validating $name ==="
-              node scripts/preview/validate-transition.js \
+              node scripts/checks/validate-transition.mjs \
                 --transition "$file" > "/tmp/previews/${name}.validation.json" 2>/dev/null || true
               cat "/tmp/previews/${name}.validation.json"
               echo ""
               echo "=== Rendering $name ==="
-              node scripts/preview/render-transition.js \
+              node scripts/rendering/render-preview.mjs \
                 --transition "$file" \
                 --output "/tmp/previews/${name}.gif" 2>&1 || echo "Failed: $name"
             done
@@ -129,7 +83,7 @@ jobs:
 
       - name: Upload previews as artifact
         if: steps.detect.outputs.files != ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: transition-previews
           path: |

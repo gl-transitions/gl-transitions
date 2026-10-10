@@ -1,5 +1,5 @@
 // Parses the optional metadata annotations of a gl-transition source.
-// Shared by gl-transition-transform.js (build) and validate-transition.js (PR checks).
+// Shared by the build (build-catalog.mjs) and validate-transition.mjs (PR checks).
 //
 // Header lines (next to `// Author:` and `// License:`):
 //   // Description: The outgoing image falls and bounces on the floor
@@ -120,7 +120,10 @@ function parseParamAnnotations(glsl) {
     if (/^\s*\/\//.test(line)) return; // plain comments may sit between hints and the uniform
     const uniform = line.replace(/\/\*.*?\*\//g, "").match(/^\s*uniform\s+\w+\s+([\w\s,]+);/);
     if (uniform) {
-      for (const name of uniform[1].split(",").map((s) => s.trim()).filter(Boolean)) {
+      for (const name of uniform[1]
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)) {
         hints[name] = { ...pending.hint };
       }
     } else {
@@ -178,7 +181,11 @@ function parseTextures(glsl) {
   const re = /uniform\s+sampler2D\s+([\w\s,]+?)\s*;/g;
   let m;
   while ((m = re.exec(glsl)) !== null) {
-    for (const name of m[1].split(",").map((s) => s.trim()).filter(Boolean)) textures.push(name);
+    for (const name of m[1]
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean))
+      textures.push(name);
   }
   return textures;
 }
@@ -197,4 +204,4 @@ function parseMeta(glsl, paramsTypes, defaultParams) {
   };
 }
 
-module.exports = { parseHeader, parseParamAnnotations, buildParams, parseTextures, parseMeta };
+export { parseHeader, parseParamAnnotations, buildParams, parseTextures, parseMeta };

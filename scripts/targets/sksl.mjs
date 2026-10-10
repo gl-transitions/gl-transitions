@@ -10,7 +10,7 @@
 // image must be drawn at the output size. Like the GLSL spec, transitions see
 // straight (unpremultiplied) colors; the output is premultiplied as Skia expects.
 
-const { preprocess } = require("./preprocess");
+import { preprocess } from "./glsl-preprocess.mjs";
 
 function header(t) {
   const lines = [
@@ -50,11 +50,16 @@ function toSkSL(transition) {
   // Extra textures: `uniform sampler2D x;` -> child shader + helper; texture2D(x, uv) -> helper call.
   const helpers = [];
   for (const name of transition.textures) {
-    helpers.push(`vec4 _texture_${name}(vec2 uv) { return vec4(unpremul(${name}.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }`);
+    helpers.push(
+      `vec4 _texture_${name}(vec2 uv) { return vec4(unpremul(${name}.eval(vec2(uv.x, 1.0 - uv.y) * _resolution))); }`,
+    );
     body = body.replace(new RegExp(`\\btexture2D\\s*\\(\\s*${name}\\s*,`, "g"), `_texture_${name}(`);
   }
   body = body.replace(/uniform\s+sampler2D\s+([\w\s,]+);/g, (_, names) =>
-    names.split(",").map((n) => `uniform shader ${n.trim()};`).join("\n")
+    names
+      .split(",")
+      .map((n) => `uniform shader ${n.trim()};`)
+      .join("\n"),
   );
   if (/\btexture2D\s*\(/.test(body)) {
     throw new Error("texture2D() is only supported on declared extra textures");
@@ -80,4 +85,4 @@ function toSkSL(transition) {
   return source;
 }
 
-module.exports = { toSkSL };
+export { toSkSL };

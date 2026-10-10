@@ -1,8 +1,8 @@
-// Run with: node --test 'tools/test/*.test.js'
-const { test } = require("node:test");
-const assert = require("node:assert/strict");
-const { preprocess } = require("../lib/preprocess");
-const { toSkSL } = require("../lib/sksl");
+// Run with: npm test
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { preprocess } from "./glsl-preprocess.mjs";
+import { toSkSL } from "./sksl.mjs";
 
 test("preprocess: object-like, function-like and nested macros", () => {
   const out = preprocess(
@@ -12,9 +12,12 @@ test("preprocess: object-like, function-like and nested macros", () => {
       "#define TWO_PI (2.0*PI)",
       "float a = SQ(PI) + TWO_PI + SQ(f(1.0, 2.0));",
       "float PIE = obj.PI;",
-    ].join("\n")
+    ].join("\n"),
   );
-  assert.match(out, /float a = \(\(3\.14\)\*\(3\.14\)\) \+ \(2\.0\*3\.14\) \+ \(\(f\(1\.0, 2\.0\)\)\*\(f\(1\.0, 2\.0\)\)\);/);
+  assert.match(
+    out,
+    /float a = \(\(3\.14\)\*\(3\.14\)\) \+ \(2\.0\*3\.14\) \+ \(\(f\(1\.0, 2\.0\)\)\*\(f\(1\.0, 2\.0\)\)\);/,
+  );
   assert.match(out, /float PIE = obj\.PI;/);
 });
 
@@ -36,7 +39,10 @@ test("preprocess: rejects unsupported directives", () => {
 const base = { name: "t", author: "a", license: "MIT", paramsTypes: {}, defaultParams: {}, textures: [] };
 
 test("sksl: wraps transition with children, uniforms and main", () => {
-  const src = toSkSL({ ...base, glsl: "vec4 transition(vec2 uv) { return mix(getFromColor(uv), getToColor(uv), progress); }" });
+  const src = toSkSL({
+    ...base,
+    glsl: "vec4 transition(vec2 uv) { return mix(getFromColor(uv), getToColor(uv), progress); }",
+  });
   assert.match(src, /uniform shader _from;/);
   assert.match(src, /uniform float2 _resolution;/);
   assert.match(src, /half4 main\(float2 _coord\)/);
