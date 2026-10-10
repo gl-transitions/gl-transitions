@@ -107,41 +107,13 @@ jobs:
                 for (const f of head.failed) out.push(`- \`${f.name}\`: ${f.error.split("\n")[0]}`);
               }
             }
-            const sksl = read("/tmp/sksl/report.json");
-            if (sksl) {
-              const order = ["match", "noise-only", "close", "differs", "no-reference", "compile-error", "unsupported"];
-              out.push("", "## SkSL", "", "| Status | Count |", "|---|---|");
-              for (const s of order) if (sksl.counts[s]) out.push(`| ${s} | ${sksl.counts[s]} |`);
-              const notes = sksl.transitions.filter((t) => t.status !== "match");
-              if (notes.length) {
-                out.push("", "<details><summary>Transitions that do not match</summary>", "", "| Transition | Status | Differing pixels | Notes |", "|---|---|---|---|");
-                for (const t of notes) {
-                  const pct = t.differingPixels !== undefined ? `${(t.differingPixels * 100).toFixed(1)}%` : "";
-                  const note = [t.hashNoise ? "hash noise" : "", (t.error || "").split("\n")[0].replace(/\|/g, "\\|")].filter(Boolean).join("; ");
-                  out.push(`| \`${t.name}\` | ${t.status} | ${pct} | ${note} |`);
-                }
-                out.push("", "</details>");
-              }
-            }
-            const glsl3 = read("/tmp/glsl3/report.json");
-            if (glsl3) {
-              out.push("", "## GLSL ES 3.00", "", `${glsl3.counts.compiled || 0} of ${glsl3.total} compile with glslang.`);
-              for (const t of glsl3.transitions.filter((t) => t.status !== "compiled")) {
-                out.push(`- \`${t.name}\` (${t.status}): ${(t.error || "").split("\n")[0]}`);
-              }
-            }
-            const gpu = read("/tmp/wgsl-msl/report.json");
-            if (gpu) {
-              for (const [title, r] of [["WGSL", gpu.wgsl], ["MSL", gpu.msl]]) {
-                out.push("", `## ${title}`, "", Object.entries(r.counts).map(([k, v]) => `${v} ${k}`).join(", ") + ` (of ${r.total})`);
-                for (const t of r.transitions.filter((t) => !["match", "compiled", "translated"].includes(t.status))) {
-                  const pct = t.differingPixels !== undefined ? ` ${(t.differingPixels * 100).toFixed(1)}% of pixels differ` : "";
-                  out.push(`- \`${t.name}\` (${t.status}${t.hashNoise ? ", hash noise" : ""})${pct}${t.error ? ": " + t.error.split("\n")[0] : ""}`);
-                }
-              }
-            }
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
           '
+          reports=$(ls /tmp/sksl/report.json /tmp/glsl3/report.json /tmp/wgsl-msl/report.json 2>/dev/null || true)
+          if [ -n "$reports" ]; then
+            node scripts/targets/build-compatibility.mjs --summary /tmp/compatibility.md $reports
+            cat /tmp/compatibility.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload renders
         if: always()
