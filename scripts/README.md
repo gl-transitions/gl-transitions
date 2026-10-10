@@ -15,6 +15,7 @@ npm run build      # the npm package, in release/
 | `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults) and `validate-transition.mjs` (spec checks shown in PR previews) |
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
 | `targets/` | Conversion to other shader languages, checked against the reference renders (SkSL today) |
+| `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
 | `npm-package/` | `build.sh` and the `skeleton/` of the published package |
 
 The reference renders are the ground truth for every other target: each target renders the same procedural images at the same progress values and is compared pixel by pixel. CI (**Reference renders** workflow) also renders the base branch and the PR to report transitions whose output changed.
@@ -61,3 +62,15 @@ Transitions see straight (unpremultiplied) colors, as in the GLSL spec; the outp
 | `no-reference` | The GLSL reference render is missing or has another size, so nothing was compared |
 | `compile-error` | Skia rejected the generated shader |
 | `unsupported` | The converter can't handle the source |
+
+## Agent documents
+
+`agents/build-agent-docs.mjs` runs at the end of `npm run build` and adds to the package:
+
+| File | Content |
+|---|---|
+| `llms.txt` | [llms.txt](https://llmstxt.org/) index: summary, the GLSL contract, docs links and one line per transition |
+| `llms-full.txt` | Every transition with its description, tags, typed parameters (defaults, ranges), author, license and GLSL / SkSL / preview links |
+| `skills/gl-transitions/` | The Agent Skill from [`skills/gl-transitions/`](../skills/gl-transitions/SKILL.md), plus the generated `references/catalog.md` (tag index, one line per transition) |
+
+Links point to the exact package version on jsDelivr. The skill's integration guides (`references/*.md`) are written by hand; `agents/agent-docs.test.mjs` checks the `bakeParams` snippet against every transition.
