@@ -6,6 +6,6 @@
 
 vec4 transition(vec2 uv) {
   // Only sample the visible side: the other one divides by zero at progress 0 and 1.
-  if (uv.x > progress) return getFromColor((uv - vec2(progress, 0.0)) / vec2(1.0 - progress, 1.0));
+  if (progress == 0.0 || uv.x > progress) return getFromColor((uv - vec2(progress, 0.0)) / vec2(1.0 - progress, 1.0));
   return getToColor(uv / vec2(progress, 1.0));
 }
