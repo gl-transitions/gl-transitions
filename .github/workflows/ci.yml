@@ -63,7 +63,7 @@ jobs:
           fi
           # Only what ends up in the npm package (not tests, dev tooling or devDependencies).
           CHANGED=$(git diff --name-only "$LAST_TAG" -- \
-            transitions/ scripts/npm-package/ scripts/catalog/ scripts/targets/ ':!*.test.mjs')
+            transitions/ skills/ scripts/npm-package/ scripts/catalog/ scripts/targets/ scripts/agents/ ':!*.test.mjs')
           if [ -n "$CHANGED" ]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "Changed files affecting package:"
