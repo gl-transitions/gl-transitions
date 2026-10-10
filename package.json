@@ -17,6 +17,7 @@
     "build:sksl": "node scripts/targets/build-sksl.mjs",
     "build:agent-docs": "node scripts/agents/build-agent-docs.mjs --out release",
     "build:glsl3": "node scripts/targets/build-glsl3.mjs",
+    "build:wgsl-msl": "node scripts/targets/build-wgsl-msl.mjs",
     "format": "prettier --write \"scripts/**/*.mjs\"",
     "format:check": "prettier --check \"scripts/**/*.mjs\""
   },
@@ -25,7 +26,8 @@
     "pngjs": "^7.0.0"
   },
   "optionalDependencies": {
-    "gl": "^8.0.0"
+    "gl": "^8.0.0",
+    "webgpu": "0.6.2"
   },
   "devDependencies": {
     "prettier": "^3.9.10"
