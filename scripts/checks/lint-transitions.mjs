@@ -5,12 +5,15 @@
 // - every entry is a regular `.glsl` file directly in transitions/ (the GitHub
 //   web UI sometimes creates `Foo.glsl/Foo.glsl` or drops the extension)
 // - UTF-8 without BOM, LF line endings (see encoding.mjs)
+// - the header and parameters parse without errors, as the build requires
+//   (annotations, typed defaults such as `true`/`false` for bool, author; see catalog/parse-transition.mjs)
 // Hidden files (.DS_Store, …) are ignored, like the rest of the tooling does.
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkEncoding } from "./encoding.mjs";
+import { parseTransition } from "../catalog/parse-transition.mjs";
 
 // Returns { count, errors } for the transitions in `dir`.
 function lintTransitions(dir) {
@@ -31,7 +34,9 @@ function lintTransitions(dir) {
       errors.push(`${rel}: must have the .glsl extension`);
       continue;
     }
-    for (const e of checkEncoding(fs.readFileSync(path.join(dir, entry.name)))) errors.push(`${rel}: ${e}`);
+    const buffer = fs.readFileSync(path.join(dir, entry.name));
+    for (const e of checkEncoding(buffer)) errors.push(`${rel}: ${e}`);
+    for (const e of parseTransition(buffer.toString("utf8"), entry.name).errors) errors.push(`${rel}: ${e}`);
   }
   return { count: entries.length, errors };
 }

@@ -86,7 +86,7 @@ const transitions = files.map((file) => {
 });
 
 if (errorCount > 0) {
-  process.stderr.write(`${errorCount} annotation error(s), aborting\n`);
+  process.stderr.write(`${errorCount} error(s), aborting\n`);
   process.exit(1);
 }
 

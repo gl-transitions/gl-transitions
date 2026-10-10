@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseHeader, parseParamAnnotations, parseTextures, parseMeta } from "./transition-meta.mjs";
-import { parseTransition } from "./parse-transition.mjs";
+import { checkDefault, parseTransition } from "./parse-transition.mjs";
 
 test("header: description and tags", () => {
   const h = parseHeader(
@@ -138,4 +138,23 @@ test("parseTransition: every uniform declaration form of the spec, with hints", 
   assert.deepEqual(transition.params.c, { type: "vec3", default: [0.9, 0.4, 0.2], color: true });
   assert.deepEqual(transition.params.e, { type: "vec2", default: [2, 2], min: 0, max: 2, description: "Both of them" });
   assert.deepEqual(transition.textures, ["luma"]);
+});
+
+test("checkDefault: values the catalog can read for each type", () => {
+  for (const [type, value] of [
+    ["bool", "true"],
+    ["int", "-3"],
+    ["float", "1"],
+    ["float", ".5e-2"],
+    ["vec2", "vec2(0.5)"],
+    ["vec3", "vec3(1.0, 0., -2)"],
+    ["ivec2", "ivec2(4, 4)"],
+  ])
+    assert.equal(checkDefault(type, value), null, `${type} ${value}`);
+  assert.match(checkDefault("bool", "1"), /true or false/);
+  assert.match(checkDefault("int", "1.5"), /integer/);
+  assert.match(checkDefault("float", "one"), /number/);
+  assert.match(checkDefault("vec3", "vec3(1.0, 2.0)"), /1 or 3 numbers/);
+  assert.match(checkDefault("vec2", "vec3(1.0)"), /vec2/);
+  assert.match(checkDefault("ivec2", "ivec2(1.5)"), /integers/);
 });

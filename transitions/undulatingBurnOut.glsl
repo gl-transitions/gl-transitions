@@ -40,7 +40,9 @@ float getWave(vec2 p){
   float offset = mix(40.0, 30.0, smoothstep(0.0, 1.0, x));
   float ease_degs = quadraticInOut(sin(degs));
   float deg_wave_pos = (ease_degs * magnitude) * sin(x * offset);
-  return x + deg_wave_pos;
+  // The soft edge reaches `smoothness` beyond the radius: start the radius at -smoothness
+  // so nothing of the incoming image shows at progress 0 (unchanged from progress 0.1 on).
+  return x - smoothness * (1.0 - smoothstep(0.0, 0.1, x)) + deg_wave_pos;
 }
 
 vec4 transition(vec2 p) {

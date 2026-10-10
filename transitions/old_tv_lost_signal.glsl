@@ -1,4 +1,4 @@
-// Author: mernking gitlab: Godswork
+// Author: mernking (gitlab.com/Godswork)
 // License: MIT
 // Description: A crossfade with drifting tracking lines and tearing, like a TV losing its signal
 // Tags: retro, glitch, scanlines

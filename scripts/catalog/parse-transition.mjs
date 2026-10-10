@@ -24,6 +24,32 @@ function parseGLSLValue(type, valueStr) {
   return valueStr;
 }
 
+const NUMBER = String.raw`[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`;
+const INTEGER = String.raw`[+-]?\d+`;
+const DEFAULT_PATTERNS = {
+  bool: /^(?:true|false)$/,
+  int: new RegExp(`^${INTEGER}$`),
+  float: new RegExp(`^${NUMBER}$`),
+};
+
+// Returns why a default value written in the source can't be read as `type`, or null.
+// parseGLSLValue is lenient (a bool `= 1` silently reads as false), so the build rejects these.
+function checkDefault(type, valueStr) {
+  valueStr = valueStr.trim();
+  const vecMatch = type.match(/^(i)?vec(\d)$/);
+  if (vecMatch) {
+    const component = vecMatch[1] ? INTEGER : NUMBER;
+    const m = valueStr.match(new RegExp(`^${type}\\s*\\(([^)]*)\\)$`));
+    const values = m ? m[1].split(",").map((v) => v.trim()) : [];
+    const arityOk = values.length === 1 || values.length === Number(vecMatch[2]);
+    if (m && arityOk && values.every((v) => new RegExp(`^${component}$`).test(v))) return null;
+    return `expected ${type}(…) with 1 or ${vecMatch[2]} ${vecMatch[1] ? "integers" : "numbers"}`;
+  }
+  const pattern = DEFAULT_PATTERNS[type];
+  if (!pattern || pattern.test(valueStr)) return null;
+  return type === "bool" ? "expected true or false" : `expected a${type === "int" ? "n integer" : " number"}`;
+}
+
 const UNIFORM_STATEMENT = /uniform\s+(bool|int|float|vec[234]|ivec[234]|mat[234]|sampler2D)\s+([^;\n]+);([^\n]*)/g;
 
 // Splits the names part of a uniform statement ("a /* = 1.0 */, b") into
@@ -48,6 +74,9 @@ function parseTransition(glsl, filename) {
 
   const authorMatch = glsl.match(/\/\/\s*[Aa]uthor\s*:\s*(.+)/);
   const author = authorMatch ? authorMatch[1].trim() : "unknown";
+  const errors = [];
+  // A colon reads as another "key: value" header line to tools that parse these comments.
+  if (author.includes(":")) errors.push(`Author '${author}' must not contain ':' (e.g. 'name (gitlab.com/handle)')`);
 
   const licenseMatch = glsl.match(/\/\/\s*[Ll]icense\s*:\s*(.+)/);
   const license = licenseMatch ? licenseMatch[1].trim() : "MIT";
@@ -68,6 +97,8 @@ function parseTransition(glsl, filename) {
     for (const { name, blockDefault } of splitDeclarators(declarators)) {
       const defaultValue = blockDefault ?? (lineDefault && lineDefault[1]);
       if (!defaultValue) continue;
+      const invalid = checkDefault(type, defaultValue);
+      if (invalid) errors.push(`default of '${name}' (${defaultValue.trim()}) is not a valid ${type}: ${invalid}`);
       paramsTypes[name] = type;
       defaultParams[name] = parseGLSLValue(type, defaultValue);
     }
@@ -88,9 +119,9 @@ function parseTransition(glsl, filename) {
       params: meta.params,
       textures: meta.textures,
     },
-    errors: meta.errors,
+    errors: [...errors, ...meta.errors],
     warnings: meta.warnings,
   };
 }
 
-export { parseGLSLValue, parseTransition, parseUniformNames };
+export { checkDefault, parseGLSLValue, parseTransition, parseUniformNames };

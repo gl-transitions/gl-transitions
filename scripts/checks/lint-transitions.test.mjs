@@ -34,3 +34,15 @@ test("lintTransitions: layout errors; hidden files are ignored", () => {
   assert.ok(errors.some((e) => /Nested\.glsl: must be a file directly in transitions\//.test(e)));
   fs.rmSync(dir, { recursive: true });
 });
+
+test("lintTransitions: parse errors (bool default, author with a colon)", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lint-"));
+  fs.writeFileSync(path.join(dir, "Good.glsl"), "uniform bool flip; // = true\n" + ok);
+  fs.writeFileSync(path.join(dir, "IntBool.glsl"), "uniform bool flip; // = 1\n" + ok);
+  fs.writeFileSync(path.join(dir, "Colon.glsl"), ok.replace("Author: a", "Author: a gitlab: b"));
+  const { errors } = lintTransitions(dir);
+  assert.equal(errors.length, 2);
+  assert.ok(errors.some((e) => /IntBool\.glsl: default of 'flip' \(1\) is not a valid bool/.test(e)));
+  assert.ok(errors.some((e) => /Colon\.glsl: Author 'a gitlab: b' must not contain ':'/.test(e)));
+  fs.rmSync(dir, { recursive: true });
+});
