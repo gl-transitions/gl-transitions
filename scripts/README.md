@@ -14,7 +14,7 @@ npm run build      # the npm package, in release/
 | `catalog/` | Parses each `.glsl` (uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
 | `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults) and `validate-transition.mjs` (spec checks shown in PR previews) |
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
-| `targets/` | Conversion to other shader languages, checked against the reference renders (SkSL today) |
+| `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
 | `npm-package/` | `build.sh` and the `skeleton/` of the published package |
 
@@ -23,6 +23,7 @@ The reference renders are the ground truth for every other target: each target r
 ```sh
 npm run render:references -- --out /tmp/refs
 npm run build:sksl -- --out /tmp/sksl --refs /tmp/refs --renders /tmp/sksl-renders --report /tmp/sksl.json
+npm run build:glsl3 -- --out /tmp/glsl3 --report /tmp/glsl3.json
 ```
 
 ## SkSL
@@ -74,3 +75,11 @@ Transitions see straight (unpremultiplied) colors, as in the GLSL spec; the outp
 | `skills/gl-transitions/` | The Agent Skill from [`skills/gl-transitions/`](../skills/gl-transitions/SKILL.md), plus the generated `references/catalog.md` (tag index, one line per transition) |
 
 Links point to the exact package version on jsDelivr. The skill's integration guides (`references/*.md`) are written by hand; `agents/agent-docs.test.mjs` checks the `bakeParams` snippet against every transition.
+
+## GLSL ES 3.00
+
+`targets/build-glsl3.mjs` converts each transition to GLSL ES 3.00 (WebGL 2, OpenGL ES 3) and compiles it with [glslang](https://github.com/KhronosGroup/glslang), the Khronos reference compiler, inside the wrapper documented in the package README. glslang is a pinned prebuilt release, downloaded and checked against its SHA-256 on first use (`targets/toolchain.mjs`); set `GLSLANG_VALIDATOR` to use your own binary on other platforms.
+
+The output keeps the spec v1 shape: the parameter uniforms (with their `// = default` comments) and `vec4 transition(vec2 uv)`, so hosts reuse their GLSL wrapper with `#version 300 es`. The only rewrite is `texture2D()` → `texture()`. Anything else GLSL ES 3.00 rejects (non-constant global initializers, keywords used as names…) is reported as `compile-error` and left out of the package.
+
+It is not rendered, because headless GL is WebGL 1 only.
