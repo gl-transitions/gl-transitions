@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { checkEncoding } from "./encoding.mjs";
 import { lintTransitions } from "./lint-transitions.mjs";
+import { findConflictMarkers } from "./lint-conflict-markers.mjs";
 
 const ok = "// Author: a\n// License: MIT\nvec4 transition(vec2 uv) { return getToColor(uv); }\n";
 
@@ -45,4 +46,13 @@ test("lintTransitions: parse errors (bool default, author with a colon)", () => 
   assert.ok(errors.some((e) => /IntBool\.glsl: default of 'flip' \(1\) is not a valid bool/.test(e)));
   assert.ok(errors.some((e) => /Colon\.glsl: Author 'a gitlab: b' must not contain ':'/.test(e)));
   fs.rmSync(dir, { recursive: true });
+});
+
+test("findConflictMarkers: flags git markers, not a Markdown ======= underline", () => {
+  const conflict = "a\n<<<<<<< HEAD\nb\n=======\nc\n>>>>>>> a14bbe7 (Some commit)\n";
+  assert.deepEqual(findConflictMarkers(conflict), [
+    "line 2: merge conflict marker `<<<<<<<`",
+    "line 6: merge conflict marker `>>>>>>>`",
+  ]);
+  assert.deepEqual(findConflictMarkers("Title\n=======\n\n<<<<<<<< eight\n// >>>>>>> quoted\n"), []);
 });

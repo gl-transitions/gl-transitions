@@ -8,7 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "lint": "node scripts/checks/lint-transitions.mjs",
+    "lint": "node scripts/checks/lint-transitions.mjs && node scripts/checks/lint-conflict-markers.mjs",
     "test": "node --test",
     "validate": "node scripts/checks/validate-transition.mjs",
     "build": "./scripts/npm-package/build.sh",

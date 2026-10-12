@@ -5,14 +5,14 @@ Everything that builds, checks and renders the collection. All scripts are ES mo
 ```sh
 npm ci             # gl (headless WebGL, for rendering) is optional: it builds on Node 22 (.nvmrc)
 npm test           # unit tests (scripts/**/*.test.mjs)
-npm run lint       # layout, encoding and parsing of transitions/
+npm run lint       # layout, encoding and parsing of transitions/, no merge conflict markers
 npm run build      # the npm package, in release/
 ```
 
 | Folder | What it does |
 |---|---|
 | `catalog/` | Parses each `.glsl` (uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
-| `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults) and `validate-transition.mjs` (spec checks shown in PR previews) |
+| `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults), `lint-conflict-markers.mjs` (no `<<<<<<<`/`>>>>>>>` left in tracked files) and `validate-transition.mjs` (spec checks shown in PR previews) |
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
 | `targets/` | Conversion to other shader languages, checked against the reference renders (SkSL today) |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
