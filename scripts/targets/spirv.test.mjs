@@ -82,3 +82,10 @@ test("spirv: bindMetalResources assigns buffer, sampler and texture indices", ()
   assert.match(out, /luma \[\[texture\(2\)\]\]/);
   assert.match(out, /uniforms \[\[buffer\(0\)\]\]/);
 });
+
+test("spirv: bindMetalResources throws on a resource it doesn't know", () => {
+  assert.throws(
+    () => bindMetalResources(", metal::texture2d<float> from_ [[user(fake0)]]", { textures: [] }),
+    /no binding for the resource 'from_'/,
+  );
+});

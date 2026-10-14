@@ -127,7 +127,9 @@ function bindMetalResources(msl, layout) {
   return msl.replace(/(\s(\w+)) \[\[user\(fake\d+\)\]\]/g, (match, decl, name) => {
     if (name === "_sampler") return `${decl} [[sampler(0)]]`;
     if (textures.includes(name)) return `${decl} [[texture(${textures.indexOf(name)})]]`;
-    return `${decl} [[buffer(0)]]`; // the uniform block, the only other resource
+    if (name === "uniforms") return `${decl} [[buffer(0)]]`;
+    // A name naga changed would otherwise get a wrong binding, unnoticed where MSL isn't compiled.
+    throw new Error(`MSL: no binding for the resource '${name}'`);
   });
 }
 

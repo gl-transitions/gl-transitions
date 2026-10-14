@@ -72,7 +72,7 @@ function header(t, language) {
   ].join("\n");
 }
 
-// Translates one transition. Returns { wgsl, msl, layout } or { status, error }.
+// Translates one transition. Returns { wgsl, msl, mslError, layout } or { status, error }.
 function translate(transition) {
   let converted;
   try {
@@ -93,11 +93,13 @@ function translate(transition) {
   fs.writeFileSync(`${base}.wgsl`, tidyWGSL);
   const tidy = tidyWGSL === rawWGSL || !run(tools.naga, [`${base}.wgsl`]);
   const rawMSL = fs.readFileSync(`${base}.raw.metal`, "utf8");
-  return {
-    wgsl: tidy ? tidyWGSL : rawWGSL,
-    msl: bindMetalResources(tidy ? tidyNames(rawMSL) : rawMSL, converted.layout),
-    layout: converted.layout,
-  };
+  let msl, mslError;
+  try {
+    msl = bindMetalResources(tidy ? tidyNames(rawMSL) : rawMSL, converted.layout);
+  } catch (e) {
+    mslError = e.message;
+  }
+  return { wgsl: tidy ? tidyWGSL : rawWGSL, msl, mslError, layout: converted.layout };
 }
 
 // Compiles MSL with Apple's Metal compiler. Returns the errors, or "" on success.
@@ -209,6 +211,9 @@ async function createRenderer() {
     }
 
     const strip = Buffer.alloc(WIDTH * PROGRESS.length * HEIGHT * 4);
+    // Errors at draw time (e.g. a uniform buffer smaller than the shader's struct) reject the
+    // command buffer and leave the readback cleared: report them instead of comparing that.
+    device.pushErrorScope("validation");
     for (const [f, progress] of PROGRESS.entries()) {
       device.queue.writeBuffer(uniforms, 0, uniformData(transition, layout, progress));
       const encoder = device.createCommandEncoder();
@@ -231,7 +236,9 @@ async function createRenderer() {
       }
       readback.unmap();
     }
+    const drawError = await device.popErrorScope();
     uniforms.destroy();
+    if (drawError) throw new Error(drawError.message.trim());
     return strip;
   }
   return { gpu, render, destroy: () => device.destroy() };
@@ -245,7 +252,15 @@ const files = fs
   .filter((f) => f.endsWith(".glsl") && fs.statSync(path.join(dir, f)).isFile())
   .sort();
 for (const d of [opt.wgsl, opt.msl, opt.renders]) if (d) fs.mkdirSync(d, { recursive: true });
-const renderer = opt.refs || opt.renders ? await createRenderer() : null;
+// Rendering is informational: without a WebGPU device, the WGSL is only compiled.
+let renderer = null;
+if (opt.refs || opt.renders) {
+  try {
+    renderer = await createRenderer();
+  } catch (e) {
+    console.warn(`Not rendering WGSL: ${e.message}`);
+  }
+}
 
 const wgslResults = [];
 const mslResults = [];
@@ -287,9 +302,13 @@ for (const file of files) {
     fs.writeFileSync(path.join(opt.wgsl, `${transition.name}.wgsl`), header(transition, "WGSL") + out.wgsl);
   }
 
-  const mslError = metal ? compileMSL(transition.name, out.msl) : "";
+  let mslError = out.mslError;
+  if (!mslError && metal) {
+    const error = compileMSL(transition.name, out.msl);
+    if (error) mslError = `metal: ${error}`;
+  }
   if (mslError) {
-    Object.assign(mslResult, { status: "compile-error", error: `metal: ${mslError}` });
+    Object.assign(mslResult, { status: "compile-error", error: mslError });
   } else {
     mslResult.status = metal ? "compiled" : "translated";
     fs.writeFileSync(path.join(opt.msl, `${transition.name}.metal`), header(transition, "MSL") + out.msl);
