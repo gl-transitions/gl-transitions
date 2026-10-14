@@ -82,12 +82,13 @@ function checkRender(strip, { name, hashNoise, refsDir, rendersDir }) {
   }
   if (!refsDir) return {};
   const ref = path.join(refsDir, `${name}.png`);
-  if (!fs.existsSync(ref)) return { status: "no-reference", error: `missing ${ref}` };
+  // Errors name the file only: they end up in the published compatibility.json.
+  if (!fs.existsSync(ref)) return { status: "no-reference", error: `no reference render ${name}.png` };
   const reference = PNG.sync.read(fs.readFileSync(ref));
   if (reference.width !== WIDTH * PROGRESS.length || reference.height !== HEIGHT) {
     return {
       status: "no-reference",
-      error: `${ref} is ${reference.width}x${reference.height}, expected ${WIDTH * PROGRESS.length}x${HEIGHT}`,
+      error: `${name}.png is ${reference.width}x${reference.height}, expected ${WIDTH * PROGRESS.length}x${HEIGHT}`,
     };
   }
   const { status, worst } = compare(strip, reference.data);
