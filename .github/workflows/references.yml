@@ -3,7 +3,9 @@ name: Reference renders
 # Renders every transition on the base branch and on the PR with the same
 # software GL (Mesa llvmpipe) and reports transitions whose output changed.
 # Then converts every transition to SkSL, renders it with Skia (CanvasKit) and
-# reports how it compares with the GLSL render.
+# reports how it compares with the GLSL render, compiles the GLSL ES 3.00
+# versions with glslang, and translates them through SPIR-V to WGSL (rendered
+# with Dawn on Mesa lavapipe and compared too) and MSL.
 # Also validates every transition against the spec (validate-transition.mjs).
 # The comparisons are informational: fails only when a GLSL transition does not
 # render or breaks the spec.
@@ -42,10 +44,17 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 mesa-vulkan-drivers
 
       - name: Install dependencies
         run: npm ci --omit=dev
+
+      # glslang (checksummed download) and naga (cargo build, ~1 min) for the shader targets.
+      - name: Cache shader toolchain
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: node_modules/.cache/gl-transitions-toolchain
+          key: shader-toolchain-${{ runner.os }}-${{ hashFiles('scripts/targets/toolchain.mjs') }}
 
       - name: Check out base transitions
         env:
@@ -74,6 +83,14 @@ jobs:
             done
             exit $failed
           '
+      # Informational like the SkSL comparison: runs even when the spec validation fails.
+      - name: Build GLSL ES 3.00
+        if: always()
+        continue-on-error: true
+        run: node scripts/targets/build-glsl3.mjs --out /tmp/glsl3/shaders --report /tmp/glsl3/report.json
+
+      - name: Build WGSL and MSL, compare WGSL
+        run: node scripts/targets/build-wgsl-msl.mjs --wgsl /tmp/wgsl-msl/wgsl --msl /tmp/wgsl-msl/msl --layouts /tmp/wgsl-msl/layouts.json --refs /tmp/refs/head --renders /tmp/wgsl-msl/renders --report /tmp/wgsl-msl/report.json
 
       - name: Summary
         if: always()
@@ -93,24 +110,13 @@ jobs:
                 for (const f of head.failed) out.push(`- \`${f.name}\`: ${f.error.split("\n")[0]}`);
               }
             }
-            const sksl = read("/tmp/sksl/report.json");
-            if (sksl) {
-              const order = ["match", "noise-only", "close", "differs", "no-reference", "compile-error", "unsupported"];
-              out.push("", "## SkSL", "", "| Status | Count |", "|---|---|");
-              for (const s of order) if (sksl.counts[s]) out.push(`| ${s} | ${sksl.counts[s]} |`);
-              const notes = sksl.transitions.filter((t) => t.status !== "match");
-              if (notes.length) {
-                out.push("", "<details><summary>Transitions that do not match</summary>", "", "| Transition | Status | Differing pixels | Notes |", "|---|---|---|---|");
-                for (const t of notes) {
-                  const pct = t.differingPixels !== undefined ? `${(t.differingPixels * 100).toFixed(1)}%` : "";
-                  const note = [t.hashNoise ? "hash noise" : "", (t.error || "").split("\n")[0].replace(/\|/g, "\\|")].filter(Boolean).join("; ");
-                  out.push(`| \`${t.name}\` | ${t.status} | ${pct} | ${note} |`);
-                }
-                out.push("", "</details>");
-              }
-            }
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
           '
+          reports=$(ls /tmp/sksl/report.json /tmp/glsl3/report.json /tmp/wgsl-msl/report.json 2>/dev/null || true)
+          if [ -n "$reports" ]; then
+            node scripts/targets/build-compatibility.mjs --summary /tmp/compatibility.md $reports
+            cat /tmp/compatibility.md >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Upload renders
         if: always()
@@ -120,6 +126,8 @@ jobs:
           path: |
             /tmp/refs/
             /tmp/sksl/
+            /tmp/glsl3/
+            /tmp/wgsl-msl/
           if-no-files-found: warn
 
       - name: Fail on render errors
