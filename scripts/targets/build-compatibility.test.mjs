@@ -45,3 +45,25 @@ test("compatibility: merges target reports, including the combined WGSL/MSL repo
   assert.match(md, /`noise` \| differs \(40\.0%, hash noise\)/);
   fs.rmSync(dir, { recursive: true });
 });
+
+test("compatibility: lists close renders, escapes compiler messages, a missing reference still counts as rendered", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "compat-"));
+  const report = path.join(dir, "wgsl.json");
+  fs.writeFileSync(
+    report,
+    JSON.stringify({
+      target: "wgsl",
+      transitions: [
+        { name: "near", status: "close", differingPixels: 0.04 },
+        { name: "new", status: "no-reference", error: "missing new.png" },
+        { name: "bad", status: "compile-error", error: "expected <ident>, found `|`" },
+      ],
+    }),
+  );
+  const out = path.join(dir, "compatibility.json");
+  const md = execFileSync("node", [script, "--out", out, report], { encoding: "utf8" });
+  assert.equal(JSON.parse(fs.readFileSync(out, "utf8")).targets.wgsl.rendered, true);
+  assert.match(md, /`near` \| close \(4\.0%\)/);
+  assert.match(md, /expected &lt;ident&gt;, found \\`\\\|\\`/);
+  fs.rmSync(dir, { recursive: true });
+});

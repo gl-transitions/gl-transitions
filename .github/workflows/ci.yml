@@ -70,7 +70,8 @@ jobs:
           fi
           # Only what ends up in the npm package (not tests, dev tooling or devDependencies).
           CHANGED=$(git diff --name-only "$LAST_TAG" -- \
-            transitions/ skills/ scripts/npm-package/ scripts/catalog/ scripts/targets/ scripts/agents/ ':!*.test.mjs')
+            transitions/ skills/ scripts/npm-package/ scripts/catalog/ scripts/targets/ scripts/agents/ \
+            scripts/rendering/ package.json ':!*.test.mjs')
           if [ -n "$CHANGED" ]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "Changed files affecting package:"
@@ -104,17 +105,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 mesa-vulkan-drivers
 
-      # Optional gl (headless WebGL) and webgpu (Dawn) render the compatibility checks.
+      # Optional gl (headless WebGL) and webgpu (Dawn) render the compatibility checks: they are
+      # the only packages with install scripts, so no other package's script runs here.
       - name: Install dependencies
-        run: npm ci --omit=dev
+        run: |
+          npm ci --omit=dev --ignore-scripts
+          npm rebuild gl webgpu
 
+      # Informational: without references, compatibility.json says the targets were only compiled.
       - name: Render references
+        continue-on-error: true
         run: xvfb-run -s "-ac -screen 0 1280x1024x24" node scripts/rendering/render-references.mjs --out /tmp/refs
 
       - name: Build
-        run: npm run build
-        env:
-          REFERENCE_RENDERS: /tmp/refs
+        run: |
+          if [ -d /tmp/refs ]; then export REFERENCE_RENDERS=/tmp/refs; fi
+          npm run build
 
       - name: Upload package
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

@@ -15,8 +15,6 @@ const TARGETS = {
   wgsl: { language: "WGSL", path: "wgsl/{name}.wgsl" },
   msl: { language: "Metal Shading Language", path: "msl/{name}.metal" },
 };
-// Statuses for which the file is shipped and expected to work.
-const OK = ["match", "noise-only", "close", "compiled", "translated"];
 const STATUS_ORDER = [
   "match",
   "noise-only",
@@ -50,7 +48,8 @@ const targets = {};
 const transitions = {};
 for (const report of reports) {
   if (!TARGETS[report.target]) throw new Error(`unknown target '${report.target}'`);
-  const rendered = report.transitions.some((t) => t.differingPixels !== undefined);
+  // no-reference: compared, but the reference render was missing or the wrong size.
+  const rendered = report.transitions.some((t) => t.differingPixels !== undefined || t.status === "no-reference");
   targets[report.target] = { ...TARGETS[report.target], rendered };
   for (const { name, status, error, differingPixels, hashNoise } of report.transitions) {
     const entry = { status };
@@ -70,6 +69,15 @@ if (opt.out) fs.writeFileSync(opt.out, JSON.stringify(matrix, null, 2) + "\n");
 
 // --- Markdown summary ---
 
+// Compiler messages go in a table inside <details>: keep `|`, backticks and tags literal.
+function escapeCell(text) {
+  return text
+    .replace(/[\\|`]/g, "\\$&")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 const names = Object.keys(targets);
 const lines = ["## Compatibility", "", `| Status | ${names.map((t) => targets[t].language).join(" | ")} |`];
 lines.push(`|---|${names.map(() => "---:").join("|")}|`);
@@ -77,18 +85,20 @@ for (const status of STATUS_ORDER) {
   const counts = names.map((t) => Object.values(sorted).filter((e) => e[t]?.status === status).length);
   if (counts.some(Boolean)) lines.push(`| ${status} | ${counts.map((c) => c || "").join(" | ")} |`);
 }
-const flagged = Object.entries(sorted).filter(([, e]) => names.some((t) => e[t] && !OK.includes(e[t].status)));
+// Listed: every target that doesn't work, and the renders that only come close (close, noise-only).
+const EXACT = ["match", "compiled", "translated"];
+const flagged = Object.entries(sorted).filter(([, e]) => names.some((t) => e[t] && !EXACT.includes(e[t].status)));
 if (flagged.length) {
-  lines.push("", "<details><summary>Transitions with a target that does not work</summary>", "");
+  lines.push("", "<details><summary>Transitions with a target that does not match exactly</summary>", "");
   lines.push(`| Transition | ${names.join(" | ")} |`, `|---|${names.map(() => "---").join("|")}|`);
   for (const [name, e] of flagged) {
     const cell = (t) => {
       if (!e[t]) return "";
       const { status, differingPixels, hashNoise, error } = e[t];
       const notes = [
-        differingPixels !== undefined && !OK.includes(status) ? `${(differingPixels * 100).toFixed(1)}%` : "",
-        hashNoise && !OK.includes(status) ? "hash noise" : "",
-        error ? error.slice(0, 120).replace(/[\\|]/g, "\\$&") : "",
+        differingPixels !== undefined && !EXACT.includes(status) ? `${(differingPixels * 100).toFixed(1)}%` : "",
+        hashNoise && !EXACT.includes(status) ? "hash noise" : "",
+        error ? escapeCell(error.slice(0, 120)) : "",
       ].filter(Boolean);
       return notes.length ? `${status} (${notes.join(", ")})` : status;
     };
