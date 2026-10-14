@@ -1,7 +1,9 @@
 // Run with: npm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { toGLSL3 } from "./glsl3.mjs";
+import fs from "node:fs";
+import path from "node:path";
+import { toGLSL3, GLSL3_WRAPPER } from "./glsl3.mjs";
 
 const base = { name: "t", author: "a", license: "MIT", paramsTypes: {}, defaultParams: {}, textures: [] };
 
@@ -26,4 +28,10 @@ test("glsl3: identifiers containing texture2D are left alone", () => {
 
 test("glsl3: rejects a #version directive", () => {
   assert.throws(() => toGLSL3({ ...base, glsl: "#version 100\nvec4 transition(vec2 uv) { return vec4(0.0); }" }));
+});
+
+test("glsl3: the package README shows the wrapper the build compiles with", () => {
+  const readme = fs.readFileSync(path.join(import.meta.dirname, "..", "npm-package", "skeleton", "README.md"), "utf8");
+  const shown = GLSL3_WRAPPER.before + "// ... contents of glsl3/<name>.glsl ..." + GLSL3_WRAPPER.after;
+  assert.ok(readme.includes("```glsl\n" + shown + "```"), "update the GLSL ES 3.00 contract in the package README");
 });

@@ -34,7 +34,10 @@ if (!opt.out) {
 const glslang = await glslangValidator();
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "glsl3-"));
 
-// Returns glslang's error messages, or "" when the shader compiles.
+// glslang numbers lines from the start of the wrapped file: the wrapper, then toGLSL3's header line.
+const LINE_OFFSET = GLSL3_WRAPPER.before.split("\n").length;
+
+// Returns glslang's error messages, with lines numbered as in transitions/<name>.glsl, or "" when the shader compiles.
 function validate(name, source) {
   const file = path.join(tmp, `${name}.frag`);
   fs.writeFileSync(file, GLSL3_WRAPPER.before + source + GLSL3_WRAPPER.after);
@@ -45,7 +48,7 @@ function validate(name, source) {
     (stdout + stderr)
       .split("\n")
       .filter((l) => /ERROR|error/.test(l) && !/compilation errors/.test(l))
-      .map((l) => l.replace(`${file}:`, "").trim())
+      .map((l) => l.replace(/^ERROR: 0:(\d+):/, (_, n) => `ERROR: line ${n - LINE_OFFSET}:`).trim())
       .join("\n") || `glslang exited with ${status}`
   );
 }

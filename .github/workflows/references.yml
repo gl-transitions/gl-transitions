@@ -75,7 +75,10 @@ jobs:
             done
             exit $failed
           '
+      # Informational like the SkSL comparison: runs even when the spec validation fails.
       - name: Build GLSL ES 3.00
+        if: always()
+        continue-on-error: true
         run: node scripts/targets/build-glsl3.mjs --out /tmp/glsl3/shaders --report /tmp/glsl3/report.json
 
       - name: Summary
