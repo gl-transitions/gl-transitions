@@ -3,7 +3,7 @@
 // when GLSL reference renders are given, renders it the same way and compares.
 //
 // Usage:
-//   npm run build:sksl -- --out <dir> [--refs <glsl renders dir>] [--renders <dir>] [--report <file.json>]
+//   pnpm run build:sksl --out <dir> [--refs <glsl renders dir>] [--renders <dir>] [--report <file.json>]
 //
 //   --out      writes <name>.sksl for every transition that compiles, and index.js mapping
 //              each name to its source (for bundlers that can't import .sksl files)
@@ -28,7 +28,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i].startsWith("--")) opt[args[i].slice(2)] = path.resolve(args[++i]);
 }
 if (!opt.out) {
-  console.error("Usage: npm run build:sksl -- --out <dir> [--refs <dir>] [--renders <dir>] [--report <file>]");
+  console.error("Usage: pnpm run build:sksl --out <dir> [--refs <dir>] [--renders <dir>] [--report <file>]");
   process.exit(1);
 }
 

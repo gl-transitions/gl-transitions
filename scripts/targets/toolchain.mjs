@@ -1,5 +1,5 @@
 // Pinned native shader tools used by the targets, installed on first use into
-// node_modules/.cache/gl-transitions-toolchain (so `npm ci` starts clean).
+// node_modules/.cache/gl-transitions-toolchain (deleting node_modules starts clean).
 //
 //   glslang  Khronos reference compiler: validates GLSL ES 3.00 and compiles Vulkan GLSL
 //            to SPIR-V. Prebuilt release archive, checked against the SHA-256 below

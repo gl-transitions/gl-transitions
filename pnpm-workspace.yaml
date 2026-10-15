@@ -1,0 +1,31 @@
+packages:
+  - packages/*
+  - examples/*
+
+# Install scripts run only for these: gl (headless WebGL) and webgpu (Dawn) render the
+# reference and compatibility checks; React Native Skia copies its native binaries for the example.
+allowBuilds:
+  gl: true
+  webgpu: true
+  "@shopify/react-native-skia": true
+
+# The example links the gl-transitions package built here, which ships an Agent Skill:
+# not to install in this repository.
+permissions:
+  gl-transitions:
+    skills: false
+
+overrides:
+  tar: ^7.5.21
+  node-gyp: ^11
+  # The package's tests only use React Native Skia's headless build: its prebuilt native
+  # binaries (~750 MB) are replaced by an empty package. The example keeps them.
+  "@shopify/react-native-skia@2.14.0>react-native-skia-android": link:packages/react-native-skia/test/native-binaries-stub
+  "@shopify/react-native-skia@2.14.0>react-native-skia-apple-ios": link:packages/react-native-skia/test/native-binaries-stub
+  "@shopify/react-native-skia@2.14.0>react-native-skia-apple-macos": link:packages/react-native-skia/test/native-binaries-stub
+  "@shopify/react-native-skia@2.14.0>react-native-skia-apple-tvos": link:packages/react-native-skia/test/native-binaries-stub
+
+# The example gets a copy of the package (injected) whose peers (React, React Native Skia,
+# Reanimated) resolve to its own versions, refreshed after each build of the package.
+syncInjectedDepsAfterScripts:
+  - build

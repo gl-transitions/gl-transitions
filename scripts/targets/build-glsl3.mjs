@@ -3,7 +3,7 @@
 // Khronos reference compiler, inside the reference wrapper (GLSL3_WRAPPER).
 //
 // Usage:
-//   npm run build:glsl3 -- --out <dir> [--report <file.json>]
+//   pnpm run build:glsl3 --out <dir> [--report <file.json>]
 //
 //   --out      writes <name>.glsl for every transition that compiles
 //   --report   writes the per-transition status as JSON (also printed as a summary)
@@ -27,7 +27,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i].startsWith("--")) opt[args[i].slice(2)] = path.resolve(args[++i]);
 }
 if (!opt.out) {
-  console.error("Usage: npm run build:glsl3 -- --out <dir> [--report <file>]");
+  console.error("Usage: pnpm run build:glsl3 --out <dir> [--report <file>]");
   process.exit(1);
 }
 

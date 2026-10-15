@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Checks the layout and encoding of the transitions/ folder.
-// Usage: npm run lint  (or: node scripts/checks/lint-transitions.mjs [transitions-dir])
+// Usage: pnpm run lint  (or: node scripts/checks/lint-transitions.mjs [transitions-dir])
 //
 // - every entry is a regular `.glsl` file directly in transitions/ (the GitHub
 //   web UI sometimes creates `Foo.glsl/Foo.glsl` or drops the extension)

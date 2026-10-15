@@ -19,7 +19,7 @@ cp ../LICENSE .
 cd -
 
 # Shader targets; see scripts/README.md. Set REFERENCE_RENDERS to a folder of GLSL reference
-# renders (npm run render:references) to compare the SkSL and WGSL renders with them.
+# renders (pnpm run render:references) to compare the SkSL and WGSL renders with them.
 reports="$(mktemp -d)"
 # The optional --refs argument, kept as one word even if the path has spaces.
 set --

@@ -4,8 +4,8 @@
 // Other shader targets (SkSL, WGSL, …) are compared against these images.
 //
 // Usage:
-//   npm run render:references -- --out <dir> [--transitions <dir>] [file.glsl ...]
-//   npm run render:references -- --check --out <dir> [--strict]   # compare with images in <dir>
+//   pnpm run render:references --out <dir> [--transitions <dir>] [file.glsl ...]
+//   pnpm run render:references --check --out <dir> [--strict]   # compare with images in <dir>
 //
 // Without file arguments, renders every transition of --transitions (default: transitions/).
 // Input images are generated procedurally so the output only depends on the GL
@@ -42,7 +42,7 @@ for (let i = 0; i < args.length; i++) {
 }
 if (!outDir) {
   console.error(
-    "Usage: npm run render:references -- --out <dir> [--check [--strict]] [--transitions <dir>] [file.glsl ...]",
+    "Usage: pnpm run render:references --out <dir> [--check [--strict]] [--transitions <dir>] [file.glsl ...]",
   );
   process.exit(1);
 }

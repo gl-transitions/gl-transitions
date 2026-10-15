@@ -1,4 +1,4 @@
-// Run with: npm test
+// Run with: pnpm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { preprocess } from "./glsl-preprocess.mjs";

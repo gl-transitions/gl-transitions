@@ -13,7 +13,7 @@ transitions/MyTransition.glsl    <-- correct
 transitions/MyTransition.glsl/MyTransition.glsl   <-- WRONG (GitHub web UI sometimes creates this)
 ```
 
-Use UTF-8 and LF (Unix) line endings; CI checks both with `npm run lint`.
+Use UTF-8 and LF (Unix) line endings; CI checks both with `pnpm run lint`.
 
 If you use the GitHub web UI to create a file, make sure you type the full path `transitions/MyTransition.glsl` in the filename field, not just `MyTransition.glsl` after navigating into the `transitions/` folder.
 
@@ -55,7 +55,7 @@ uniform vec2 direction; // = vec2(1.0, 0.0)
 uniform bool invert; // = false
 ```
 
-Defaults must match the type: `true` or `false` for `bool` (not `1`), integers for `int`, `vec2(…)` with 1 or 2 values for `vec2`. `npm run lint` checks this.
+Defaults must match the type: `true` or `false` for `bool` (not `1`), integers for `int`, `vec2(…)` with 1 or 2 values for `vec2`. `pnpm run lint` checks this.
 
 ### Description, tags and parameter hints (recommended)
 
@@ -101,12 +101,12 @@ See the [GL Transition Specification v1](README.md#gl-transition-specification-v
 
 ## Development
 
-The repository tooling lives in `scripts/` (see [scripts/README.md](scripts/README.md)). It uses Node 22 (`.nvmrc`), ES modules (`.mjs`) and a single `package.json` at the root:
+The repository tooling lives in `scripts/` (see [scripts/README.md](scripts/README.md)). It uses Node 22 (`.nvmrc`), ES modules (`.mjs`) and a [pnpm](https://pnpm.io) workspace (`pnpm-workspace.yaml`: the root, `packages/*` and `examples/*`):
 
 ```sh
-npm ci
-npm test
-npm run lint
-npm run format
-npm run validate -- -t transitions/MyTransition.glsl
+pnpm install --filter '!gl-transitions-react-native-skia-example'   # without the Expo example (its native binaries are ~750 MB)
+pnpm test
+pnpm run lint
+pnpm run format
+pnpm run validate -t transitions/MyTransition.glsl
 ```
