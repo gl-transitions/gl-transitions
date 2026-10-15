@@ -23,7 +23,8 @@
     "build:compatibility": "node scripts/targets/build-compatibility.mjs",
     "format": "prettier --write \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\"",
     "format:check": "prettier --check \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\"",
-    "changeset": "changeset"
+    "changeset": "changeset",
+    "changeset:version": "changeset version && pnpm install --lockfile-only"
   },
   "dependencies": {
     "canvaskit-wasm": "0.42.0",
