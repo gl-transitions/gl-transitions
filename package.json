@@ -7,9 +7,13 @@
   "engines": {
     "node": ">=22"
   },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "lint": "node scripts/checks/lint-transitions.mjs",
-    "test": "node --test",
+    "pretest": "npm run build --workspaces --if-present",
+    "test": "node --test \"**/*.test.mjs\"",
     "validate": "node scripts/checks/validate-transition.mjs",
     "build": "./scripts/npm-package/build.sh",
     "render:references": "node scripts/rendering/render-references.mjs",
@@ -19,8 +23,8 @@
     "build:glsl3": "node scripts/targets/build-glsl3.mjs",
     "build:wgsl-msl": "node scripts/targets/build-wgsl-msl.mjs",
     "build:compatibility": "node scripts/targets/build-compatibility.mjs",
-    "format": "prettier --write \"scripts/**/*.mjs\"",
-    "format:check": "prettier --check \"scripts/**/*.mjs\""
+    "format": "prettier --write \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\"",
+    "format:check": "prettier --check \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\""
   },
   "dependencies": {
     "canvaskit-wasm": "0.42.0",
@@ -35,6 +39,10 @@
   },
   "overrides": {
     "tar": "^7.5.21",
-    "node-gyp": "^11"
+    "node-gyp": "^11",
+    "react-native-skia-android": "file:../../../packages/react-native-skia/test/native-binaries-stub",
+    "react-native-skia-apple-ios": "file:../../../packages/react-native-skia/test/native-binaries-stub",
+    "react-native-skia-apple-macos": "file:../../../packages/react-native-skia/test/native-binaries-stub",
+    "react-native-skia-apple-tvos": "file:../../../packages/react-native-skia/test/native-binaries-stub"
   }
 }

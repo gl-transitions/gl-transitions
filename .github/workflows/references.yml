@@ -6,15 +6,18 @@ name: Reference renders
 # reports how it compares with the GLSL render, compiles the GLSL ES 3.00
 # versions with glslang, and translates them through SPIR-V to WGSL (rendered
 # with Dawn on Mesa lavapipe and compared too) and MSL.
-# Also validates every transition against the spec (validate-transition.mjs).
+# Also validates every transition against the spec (validate-transition.mjs),
+# and renders every transition through the React Native Skia package.
 # The comparisons are informational: fails only when a GLSL transition does not
-# render or breaks the spec.
+# render or breaks the spec, or when the React Native Skia package renders a
+# transition differently than its GLSL reference (beyond hash noise).
 
 on:
   pull_request:
     paths:
       - 'transitions/**'
       - 'scripts/**'
+      - 'packages/**'
       - 'package.json'
       - 'package-lock.json'
       - '.nvmrc'
@@ -47,7 +50,7 @@ jobs:
           sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 mesa-vulkan-drivers
 
       - name: Install dependencies
-        run: npm ci --omit=dev
+        run: npm ci
 
       # glslang (checksummed download) and naga (cargo build, ~1 min) for the shader targets.
       - name: Cache shader toolchain
@@ -91,6 +94,11 @@ jobs:
 
       - name: Build WGSL and MSL, compare WGSL
         run: node scripts/targets/build-wgsl-msl.mjs --wgsl /tmp/wgsl-msl/wgsl --msl /tmp/wgsl-msl/msl --layouts /tmp/wgsl-msl/layouts.json --refs /tmp/refs/head --renders /tmp/wgsl-msl/renders --report /tmp/wgsl-msl/report.json
+
+      - name: Compare React Native Skia renders
+        run: |
+          npm run build -w @gl-transitions/react-native-skia
+          GL_TRANSITIONS_REFS=/tmp/refs/head node --test "packages/react-native-skia/test/*.test.mjs"
 
       - name: Summary
         if: always()

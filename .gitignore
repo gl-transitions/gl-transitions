@@ -8,3 +8,5 @@ yarn-debug.log*
 yarn-error.log*
 
 release/
+packages/*/dist/
+packages/*/src/*.generated.ts

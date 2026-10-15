@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "gl-transitions",
+    "slug": "gl-transitions-react-native-skia-example",
+    "scheme": "gltransitions",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "android": {
+      "package": "com.gltransitions.example"
+    },
+    "ios": {
+      "bundleIdentifier": "com.gltransitions.example"
+    }
+  }
+}
