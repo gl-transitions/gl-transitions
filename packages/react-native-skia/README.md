@@ -86,10 +86,10 @@ function Wipe({ from, to, progress, width, height }) {
 In the [gl-transitions repository](https://github.com/gl-transitions/gl-transitions), from the root:
 
 ```sh
-npm install
-npm test        # builds this package, then renders every transition with React Native Skia's headless (CanvasKit) build
+pnpm install --filter '!gl-transitions-react-native-skia-example'   # the example installs the real native binaries
+pnpm test       # builds this package, then renders every transition with React Native Skia's headless (CanvasKit) build
 ```
 
 The Reference renders workflow also compares every transition rendered through this package with its GLSL reference.
 
-The repository replaces React Native Skia's prebuilt native binaries (about 750 MB) with an empty package, see `overrides` in its root `package.json`: tests only use the headless build.
+For this package's tests, the repository replaces React Native Skia's prebuilt native binaries (about 750 MB) with an empty package, see `overrides` in its `pnpm-workspace.yaml`: they only use the headless build. The example (`examples/react-native-skia`) installs the real ones.

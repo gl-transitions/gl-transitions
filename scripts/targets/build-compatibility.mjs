@@ -3,7 +3,7 @@
 // the compatibility matrix shipped in the npm package, and a Markdown summary for CI.
 //
 // Usage:
-//   npm run build:compatibility -- [--out <compatibility.json>] [--summary <file.md>] <report.json> ...
+//   pnpm run build:compatibility [--out <compatibility.json>] [--summary <file.md>] <report.json> ...
 
 import fs from "node:fs";
 
@@ -35,7 +35,7 @@ for (let i = 0; i < args.length; i++) {
   else reportFiles.push(args[i]);
 }
 if (!reportFiles.length) {
-  console.error("Usage: npm run build:compatibility -- [--out <file>] [--summary <file.md>] <report.json> ...");
+  console.error("Usage: pnpm run build:compatibility [--out <file>] [--summary <file.md>] <report.json> ...");
   process.exit(1);
 }
 

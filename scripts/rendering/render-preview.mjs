@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Renders a gl-transition to a GIF preview.
-// Usage: npm run render:preview -- --transition path/to/fade.glsl --output preview.gif
+// Usage: pnpm run render:preview --transition path/to/fade.glsl --output preview.gif
 //
 // Requires: gl npm package, ffmpeg system binary
 
@@ -26,7 +26,7 @@ for (let i = 0; i < args.length; i++) {
 }
 
 if (!transitionPath) {
-  console.error("Usage: npm run render:preview -- --transition <file.glsl> [--output <out.gif>]");
+  console.error("Usage: pnpm run render:preview --transition <file.glsl> [--output <out.gif>]");
   process.exit(1);
 }
 

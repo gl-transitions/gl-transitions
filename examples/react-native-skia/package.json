@@ -8,11 +8,11 @@
     "ios": "expo run:ios"
   },
   "dependencies": {
-    "@gl-transitions/react-native-skia": "file:../../packages/react-native-skia",
+    "@gl-transitions/react-native-skia": "workspace:*",
     "@shopify/react-native-skia": "2.6.2",
     "expo": "~57.0.28",
     "expo-status-bar": "~57.0.1",
-    "gl-transitions": "file:../../release",
+    "gl-transitions": "workspace:*",
     "react": "19.2.3",
     "react-native": "0.86.3",
     "react-native-reanimated": "4.5.1",
@@ -21,5 +21,10 @@
   "devDependencies": {
     "@types/react": "~19.2.2",
     "typescript": "~6.0.3"
+  },
+  "dependenciesMeta": {
+    "@gl-transitions/react-native-skia": {
+      "injected": true
+    }
   }
 }

@@ -21,12 +21,15 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        run: npm ci --omit=optional
+        # Without the Expo example, which only the React Native Skia e2e workflow builds.
+        run: pnpm install --frozen-lockfile --filter '!gl-transitions-react-native-skia-example' --no-optional
 
       # glslang (checksummed download) and naga (cargo build, ~1 min) for the shader targets.
       - name: Cache shader toolchain
@@ -36,65 +39,106 @@ jobs:
           key: shader-toolchain-${{ runner.os }}-${{ hashFiles('scripts/targets/toolchain.mjs') }}
 
       - name: Lint transitions
-        run: npm run lint
+        run: pnpm run lint
 
       - name: Check formatting
-        run: npm run format:check
+        run: pnpm run format:check
 
       - name: Test
-        run: npm test
+        run: pnpm test
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
-  check-publish:
+      # Transitions need none: their changesets are written when the Version Packages PR is prepared.
+      - name: Check changesets
+        if: github.event_name == 'pull_request' && github.head_ref != 'changeset-release/master'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/checks/check-changesets.mjs "$BASE_SHA"
+
+  # Releases with changesets (https://changesets.dev/guide/automating): with pending changesets,
+  # opens or updates the "Version Packages" pull request; once it is merged, packs and publishes
+  # the new versions.
+  release-mode:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     outputs:
-      should_publish: ${{ steps.check.outputs.should_publish }}
+      mode: ${{ steps.mode.outputs.mode }}
+      publish-plan-artifact-id: ${{ steps.mode.outputs.publish-plan-artifact-id }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Check if transitions or build changed
-        id: check
-        run: |
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -z "$LAST_TAG" ]; then
-            echo "No previous tag found — will publish"
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          # Only what ends up in the npm package (not tests, dev tooling or devDependencies).
-          CHANGED=$(git diff --name-only "$LAST_TAG" -- \
-            transitions/ skills/ scripts/npm-package/ scripts/catalog/ scripts/targets/ scripts/agents/ \
-            scripts/rendering/ package.json ':!*.test.mjs')
-          if [ -n "$CHANGED" ]; then
-            echo "should_publish=true" >> $GITHUB_OUTPUT
-            echo "Changed files affecting package:"
-            echo "$CHANGED"
-          else
-            echo "should_publish=false" >> $GITHUB_OUTPUT
-            echo "No changes to transitions or build scripts — skipping publish"
-          fi
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
-  # Builds the package without publish rights: building runs native tools (glslang, naga
-  # compiled by cargo, headless GL and Dawn to fill compatibility.json), so it stays out of
-  # the job that holds the npm OIDC token. No cache here, so nothing written by other runs
-  # ends up in the published package.
-  package:
-    needs: check-publish
-    if: needs.check-publish.outputs.should_publish == 'true'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter gl-transitions-repository --no-optional
+
+      # One for each transition added or changed since the last release (not committed).
+      - name: Write the changesets of the transitions
+        run: node scripts/npm-package/write-transition-changesets.mjs
+
+      - id: mode
+        uses: changesets/action/select-mode@66d7d1ddafddf1ef45f98ee51a7496f9cdadb2f4 # v2.1.2
+
+  version:
+    needs: release-mode
+    if: needs.release-mode.outputs.mode == 'version'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # build-catalog.mjs reads each transition's createdAt/updatedAt from git log.
           fetch-depth: 0
           persist-credentials: false
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter gl-transitions-repository --no-optional
+
+      # One for each transition added or changed since the last release (not committed).
+      - name: Write the changesets of the transitions
+        run: node scripts/npm-package/write-transition-changesets.mjs
+
+      - uses: changesets/action/version@66d7d1ddafddf1ef45f98ee51a7496f9cdadb2f4 # v2.1.2
+        with:
+          script: pnpm changeset version
+        env:
+          # For the changelog's links to pull requests and authors (@changesets/changelog-github).
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Builds and packs the new versions without publish rights: building runs native tools
+  # (glslang, naga compiled by cargo, headless GL and Dawn to fill compatibility.json), so it
+  # stays out of the job that holds the npm OIDC token. No cache here, so nothing written by
+  # other runs ends up in the published packages.
+  pack:
+    needs: release-mode
+    if: needs.release-mode.outputs.mode == 'publish'
+    runs-on: ubuntu-latest
+    outputs:
+      pack-dir-artifact-id: ${{ steps.pack.outputs.pack-dir-artifact-id }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -105,12 +149,10 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 mesa-vulkan-drivers
 
-      # Optional gl (headless WebGL) and webgpu (Dawn) render the compatibility checks: they are
-      # the only packages with install scripts, so no other package's script runs here.
+      # Only gl (headless WebGL), webgpu (Dawn) and React Native Skia run install scripts
+      # (allowBuilds in pnpm-workspace.yaml).
       - name: Install dependencies
-        run: |
-          npm ci --omit=dev --ignore-scripts
-          npm rebuild gl webgpu
+        run: pnpm install --frozen-lockfile --filter '!gl-transitions-react-native-skia-example'
 
       # Informational: without references, compatibility.json says the targets were only compiled.
       - name: Render references
@@ -120,17 +162,17 @@ jobs:
       - name: Build
         run: |
           if [ -d /tmp/refs ]; then export REFERENCE_RENDERS=/tmp/refs; fi
-          npm run build
+          pnpm -r run build
 
-      - name: Upload package
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      - id: pack
+        uses: changesets/action/pack@66d7d1ddafddf1ef45f98ee51a7496f9cdadb2f4 # v2.1.2
         with:
-          name: npm-package
-          path: release/
-          if-no-files-found: error
+          publish-plan-artifact-id: ${{ needs.release-mode.outputs.publish-plan-artifact-id }}
 
+  # Publishes the packed tarballs with npm trusted publishing (OIDC, no token; pnpm adds the
+  # provenance), then tags each release and creates its GitHub release.
   publish:
-    needs: package
+    needs: pack
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -141,33 +183,15 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
 
-      - name: Download package
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter gl-transitions-repository --no-optional
+
+      - uses: changesets/action/publish@66d7d1ddafddf1ef45f98ee51a7496f9cdadb2f4 # v2.1.2
         with:
-          name: npm-package
-          path: release
-
-      # npm trusted publishing (OIDC, no token) needs npm >= 11.5.1; Node 22 ships npm 10.
-      - name: Upgrade npm for trusted publishing
-        run: npm install --global --ignore-scripts npm@11
-
-      - name: Publish to npm
-        run: npm publish --provenance --access public
-        working-directory: release
-
-      - name: Tag and push
-        run: |
-          VERSION=$(node -p "require('./release/package.json').version")
-          git fetch --tags origin
-          if git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null; then
-            echo "Tag v${VERSION} already exists; skipping."
-          else
-            git tag "v${VERSION}"
-            git push "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "v${VERSION}"
-          fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}

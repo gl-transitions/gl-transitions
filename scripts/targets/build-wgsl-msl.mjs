@@ -6,7 +6,7 @@
 // MSL is compiled with Apple's Metal compiler when it is available (macOS).
 //
 // Usage:
-//   npm run build:wgsl-msl -- --wgsl <dir> --msl <dir> [--layouts <file.json>]
+//   pnpm run build:wgsl-msl --wgsl <dir> --msl <dir> [--layouts <file.json>]
 //                             [--refs <glsl renders dir>] [--renders <dir>] [--report <file.json>]
 //
 //   --wgsl, --msl  write <name>.wgsl / <name>.metal for every transition that translates
@@ -37,7 +37,7 @@ for (let i = 0; i < args.length; i++) {
 }
 if (!opt.wgsl || !opt.msl) {
   console.error(
-    "Usage: npm run build:wgsl-msl -- --wgsl <dir> --msl <dir> [--layouts <file>] [--refs <dir>] [--renders <dir>] [--report <file>]",
+    "Usage: pnpm run build:wgsl-msl --wgsl <dir> --msl <dir> [--layouts <file>] [--refs <dir>] [--renders <dir>] [--report <file>]",
   );
   process.exit(1);
 }
@@ -116,7 +116,7 @@ async function createRenderer() {
   try {
     webgpu = await import("webgpu");
   } catch {
-    throw new Error("--refs and --renders need the optional `webgpu` package (npm install)");
+    throw new Error("--refs and --renders need the optional `webgpu` package (pnpm install)");
   }
   Object.assign(globalThis, webgpu.globals);
   // Dawn crashes if the GPU object is garbage collected while the device lives: keep it referenced.

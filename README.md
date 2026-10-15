@@ -5,7 +5,7 @@
 
 ---
 
-Each commit that gets to [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions)'s master automatically generates a new npm minor release.
+New transitions merged into [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions)'s master are published in the next npm minor release, listed in the [changelog](packages/gl-transitions/CHANGELOG.md).
 
 [![CI](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml/badge.svg)](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml) [![npm version](https://badge.fury.io/js/gl-transitions.svg)](https://badge.fury.io/js/gl-transitions)
 

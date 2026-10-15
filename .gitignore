@@ -7,6 +7,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-release/
 packages/*/dist/
+# The former build output (now packages/gl-transitions/dist)
+release/
 packages/*/src/*.generated.ts

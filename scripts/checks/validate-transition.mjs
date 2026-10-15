@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Validates a gl-transition shader against the spec.
-// Usage: npm run validate -- --transition path/to/fade.glsl
+// Usage: pnpm run validate --transition path/to/fade.glsl
 //
 // Checks:
 // 1. Shader compiles
@@ -26,7 +26,7 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === "--transition" || args[i] === "-t") transitionPath = args[++i];
 }
 if (!transitionPath) {
-  console.error("Usage: npm run validate -- --transition <file.glsl>");
+  console.error("Usage: pnpm run validate --transition <file.glsl>");
   process.exit(1);
 }
 

@@ -1,29 +1,29 @@
 # Repository scripts
 
-Everything that builds, checks and renders the collection. All scripts are ES modules (`.mjs`) with one set of dependencies in the root `package.json`:
+Everything that builds, checks and renders the collection. All scripts are ES modules (`.mjs`) with their dependencies in the root `package.json`:
 
 ```sh
-npm ci             # gl (headless WebGL, for rendering) is optional: it builds on Node 22 (.nvmrc)
-npm test           # unit tests (scripts/**/*.test.mjs)
-npm run lint       # layout, encoding and parsing of transitions/
-npm run build      # the npm package, in release/ (the first run downloads glslang and builds naga: needs Rust)
+pnpm install --filter '!gl-transitions-react-native-skia-example'   # all but the Expo example; gl (headless WebGL, for rendering) is optional
+pnpm test            # unit tests (**/*.test.mjs)
+pnpm run lint        # layout, encoding and parsing of transitions/
+pnpm run build       # the gl-transitions package, in packages/gl-transitions/dist/ (the first run downloads glslang and builds naga: needs Rust)
 ```
 
 | Folder | What it does |
 |---|---|
 | `catalog/` | Parses each `.glsl` (uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
-| `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults) and `validate-transition.mjs` (spec checks shown in PR previews) |
+| `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults), `validate-transition.mjs` (spec checks shown in PR previews) and `check-changesets.mjs` (a pull request that changes a published package adds a changeset) |
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
 | `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
-| `npm-package/` | `build.sh` and the `skeleton/` of the published package |
+| `npm-package/` | `build.sh`, which builds `packages/gl-transitions` (its manifest, README and types) into its `dist/`, and `write-transition-changesets.mjs`, which writes a changeset for each transition added or changed since the last release |
 
 The reference renders are the ground truth for every other target: each target renders the same procedural images at the same progress values and is compared pixel by pixel. CI (**Reference renders** workflow) also renders the base branch and the PR to report transitions whose output changed.
 
 ```sh
-npm run render:references -- --out /tmp/refs
-npm run build:sksl -- --out /tmp/sksl --refs /tmp/refs --renders /tmp/sksl-renders --report /tmp/sksl.json
-npm run build:glsl3 -- --out /tmp/glsl3 --report /tmp/glsl3.json
+pnpm run render:references --out /tmp/refs
+pnpm run build:sksl --out /tmp/sksl --refs /tmp/refs --renders /tmp/sksl-renders --report /tmp/sksl.json
+pnpm run build:glsl3 --out /tmp/glsl3 --report /tmp/glsl3.json
 ```
 
 ## SkSL
@@ -66,7 +66,7 @@ Transitions see straight (unpremultiplied) colors, as in the GLSL spec; the outp
 
 ## Agent documents
 
-`agents/build-agent-docs.mjs` runs at the end of `npm run build` and adds to the package:
+`agents/build-agent-docs.mjs` runs at the end of `pnpm run build` and adds to the package:
 
 | File | Content |
 |---|---|
@@ -99,7 +99,7 @@ Textures are sampled at an explicit level 0: WGSL only allows implicit-derivativ
 naga has no prebuilt release, so `targets/toolchain.mjs` builds the pinned version with `cargo install --locked` on first use (about a minute); install [Rust](https://rustup.rs) or set `NAGA`. On Linux, Dawn needs a Vulkan driver (`mesa-vulkan-drivers` provides the lavapipe software renderer).
 
 ```sh
-npm run build:wgsl-msl -- --wgsl /tmp/wgsl --msl /tmp/msl --layouts /tmp/layouts.json --refs /tmp/refs --report /tmp/wgsl-msl.json
+pnpm run build:wgsl-msl --wgsl /tmp/wgsl --msl /tmp/msl --layouts /tmp/layouts.json --refs /tmp/refs --report /tmp/wgsl-msl.json
 ```
 
 ## Compatibility matrix
@@ -107,8 +107,8 @@ npm run build:wgsl-msl -- --wgsl /tmp/wgsl --msl /tmp/msl --layouts /tmp/layouts
 `targets/build-compatibility.mjs` merges the targets' `--report` files into `compatibility.json` (shipped in the package, documented in its README) and a Markdown table for the CI job summary. `npm-package/build.sh` runs every target with a report; with `REFERENCE_RENDERS=<dir>` it also renders SkSL and WGSL and compares them with the GLSL renders in `<dir>`, which is what the publishing workflow does.
 
 ```sh
-npm run build:compatibility -- --out /tmp/compatibility.json --summary /tmp/compatibility.md /tmp/sksl.json /tmp/glsl3.json /tmp/wgsl-msl.json
-REFERENCE_RENDERS=/tmp/refs npm run build
+pnpm run build:compatibility --out /tmp/compatibility.json --summary /tmp/compatibility.md /tmp/sksl.json /tmp/glsl3.json /tmp/wgsl-msl.json
+REFERENCE_RENDERS=/tmp/refs pnpm run build
 ```
 
 The **Reference renders** workflow shows the table on every PR that touches transitions or scripts.

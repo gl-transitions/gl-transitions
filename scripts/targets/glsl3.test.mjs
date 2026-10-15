@@ -1,4 +1,4 @@
-// Run with: npm test
+// Run with: pnpm test
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -31,7 +31,10 @@ test("glsl3: rejects a #version directive", () => {
 });
 
 test("glsl3: the package README shows the wrapper the build compiles with", () => {
-  const readme = fs.readFileSync(path.join(import.meta.dirname, "..", "npm-package", "skeleton", "README.md"), "utf8");
+  const readme = fs.readFileSync(
+    path.join(import.meta.dirname, "..", "..", "packages", "gl-transitions", "README.md"),
+    "utf8",
+  );
   const shown = GLSL3_WRAPPER.before + "// ... contents of glsl3/<name>.glsl ..." + GLSL3_WRAPPER.after;
   assert.ok(readme.includes("```glsl\n" + shown + "```"), "update the GLSL ES 3.00 contract in the package README");
 });

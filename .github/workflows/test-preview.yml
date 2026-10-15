@@ -6,7 +6,8 @@ on:
     paths:
       - 'scripts/**'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
       - '.nvmrc'
       - '.github/workflows/test-preview.yml'
   pull_request:
@@ -14,7 +15,8 @@ on:
     paths:
       - 'scripts/**'
       - 'package.json'
-      - 'package-lock.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
       - '.nvmrc'
       - '.github/workflows/test-preview.yml'
   workflow_dispatch:
@@ -30,6 +32,8 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
@@ -40,7 +44,7 @@ jobs:
           sudo apt-get install -y xvfb mesa-utils libgl1-mesa-dri libglapi-mesa libosmesa6 ffmpeg
 
       - name: Install dependencies
-        run: npm ci --omit=dev
+        run: pnpm install --frozen-lockfile --prod --filter gl-transitions-repository
 
       - name: Validate test transitions
         run: |
