@@ -9,15 +9,19 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.join(import.meta.dirname, "..", "..");
-// What else ends up in the gl-transitions package, besides packages/gl-transitions.
-const GL_TRANSITIONS_SOURCES = [
-  "skills/",
-  "scripts/npm-package/",
-  "scripts/catalog/",
-  "scripts/targets/",
-  "scripts/agents/",
-  "scripts/rendering/",
-];
+// What else ends up in each package, besides its folder in packages/.
+const SOURCES = {
+  "gl-transitions": [
+    "skills/",
+    "scripts/npm-package/",
+    "scripts/catalog/",
+    "scripts/targets/",
+    "scripts/agents/",
+    "scripts/rendering/",
+  ],
+  // Its generated types parse the transitions (scripts/generate-transition-types.mjs).
+  "@gl-transitions/react-native-skia": ["scripts/catalog/"],
+};
 
 // The packages a file belongs to: tests, CHANGELOG.md and transitions/ don't count.
 function packagesOf(file, packages) {
@@ -53,7 +57,7 @@ function workspacePackages(root) {
     .filter(({ pkg }) => !pkg.private)
     .map(({ d, pkg }) => ({
       name: pkg.name,
-      roots: [`packages/${d}/`, ...(pkg.name === "gl-transitions" ? GL_TRANSITIONS_SOURCES : [])],
+      roots: [`packages/${d}/`, ...(SOURCES[pkg.name] ?? [])],
     }));
 }
 

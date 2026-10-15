@@ -47,4 +47,6 @@ test("workspacePackages: the published packages of this repository", () => {
   const found = workspacePackages(path.join(import.meta.dirname, "..", ".."));
   const gl = found.find((p) => p.name === "gl-transitions");
   assert.ok(gl.roots.includes("packages/gl-transitions/") && gl.roots.includes("skills/"));
+  const rn = found.find((p) => p.name === "@gl-transitions/react-native-skia");
+  assert.deepEqual(rn.roots, ["packages/react-native-skia/", "scripts/catalog/"]);
 });

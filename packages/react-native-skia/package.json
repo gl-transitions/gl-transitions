@@ -1,7 +1,6 @@
 {
   "name": "@gl-transitions/react-native-skia",
   "version": "0.0.0",
-  "private": true,
   "description": "Use any of the gl-transitions in React Native Skia",
   "license": "MIT",
   "type": "module",
@@ -43,9 +42,6 @@
     "react-native-reanimated": ">=4.0.0"
   },
   "peerDependenciesMeta": {
-    "gl-transitions": {
-      "optional": true
-    },
     "react-native-reanimated": {
       "optional": true
     }
