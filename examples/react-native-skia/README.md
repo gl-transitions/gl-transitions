@@ -8,7 +8,7 @@ An Expo app using [`@gl-transitions/react-native-skia`](../../packages/react-nat
 ## Run it
 
 ```sh
-# From the repository root: build gl-transitions (release/) and the package (dist/)
+# From the repository root: build gl-transitions and the package (their dist/)
 pnpm install && pnpm run build && pnpm --filter @gl-transitions/react-native-skia run build
 
 cd examples/react-native-skia

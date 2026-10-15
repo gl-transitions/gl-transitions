@@ -73,7 +73,7 @@ jobs:
           fi
           # Only what ends up in the npm package (not tests, dev tooling or devDependencies).
           CHANGED=$(git diff --name-only "$LAST_TAG" -- \
-            transitions/ skills/ scripts/npm-package/ scripts/catalog/ scripts/targets/ scripts/agents/ \
+            transitions/ skills/ packages/gl-transitions/ scripts/npm-package/ scripts/catalog/ scripts/targets/ scripts/agents/ \
             scripts/rendering/ package.json pnpm-workspace.yaml ':!*.test.mjs')
           if [ -n "$CHANGED" ]; then
             echo "should_publish=true" >> $GITHUB_OUTPUT
@@ -129,7 +129,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: npm-package
-          path: release/
+          path: packages/gl-transitions/dist/
           if-no-files-found: error
 
   publish:
@@ -152,7 +152,7 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: npm-package
-          path: release
+          path: dist
 
       # npm trusted publishing (OIDC, no token) needs npm >= 11.5.1; Node 22 ships npm 10.
       - name: Upgrade npm for trusted publishing
@@ -160,11 +160,11 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --provenance --access public
-        working-directory: release
+        working-directory: dist
 
       - name: Tag and push
         run: |
-          VERSION=$(node -p "require('./release/package.json').version")
+          VERSION=$(node -p "require('./dist/package.json').version")
           git fetch --tags origin
           if git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null; then
             echo "Tag v${VERSION} already exists; skipping."

@@ -1,7 +1,7 @@
 {
   "name": "gl-transitions-repository",
   "private": true,
-  "description": "Development tooling of the gl-transitions repository. The published package is built from scripts/npm-package/skeleton.",
+  "description": "Development tooling of the gl-transitions repository. The published packages are in packages/.",
   "license": "MIT",
   "type": "module",
   "engines": {
@@ -10,14 +10,14 @@
   "packageManager": "pnpm@12.11.2",
   "scripts": {
     "lint": "node scripts/checks/lint-transitions.mjs",
-    "pretest": "pnpm -r --if-present build",
+    "pretest": "pnpm -r --filter '!gl-transitions' --if-present run build",
     "test": "node --test \"**/*.test.mjs\"",
     "validate": "node scripts/checks/validate-transition.mjs",
-    "build": "./scripts/npm-package/build.sh",
+    "build": "pnpm --filter gl-transitions run build",
     "render:references": "node scripts/rendering/render-references.mjs",
     "render:preview": "node scripts/rendering/render-preview.mjs",
     "build:sksl": "node scripts/targets/build-sksl.mjs",
-    "build:agent-docs": "node scripts/agents/build-agent-docs.mjs --out release",
+    "build:agent-docs": "node scripts/agents/build-agent-docs.mjs --out packages/gl-transitions/dist",
     "build:glsl3": "node scripts/targets/build-glsl3.mjs",
     "build:wgsl-msl": "node scripts/targets/build-wgsl-msl.mjs",
     "build:compatibility": "node scripts/targets/build-compatibility.mjs",

@@ -6,8 +6,9 @@ name: React Native Skia e2e
 
 on:
   pull_request:
-    # What the package, the example and the gl-transitions release they use are built from.
+    # What the package, the example and the gl-transitions package they use are built from.
     paths: &paths
+      - "packages/gl-transitions/**"
       - "packages/react-native-skia/**"
       - "examples/react-native-skia/**"
       - "transitions/**"
@@ -63,7 +64,7 @@ jobs:
           path: node_modules/.cache/gl-transitions-toolchain
           key: shader-toolchain-${{ runner.os }}-${{ hashFiles('scripts/targets/toolchain.mjs') }}
 
-      # The example uses the package and the gl-transitions release built from this commit.
+      # The example uses the package and gl-transitions (its dist/) built from this commit.
       - name: Build gl-transitions and the package
         working-directory: .
         run: |

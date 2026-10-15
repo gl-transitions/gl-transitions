@@ -6,7 +6,7 @@ Everything that builds, checks and renders the collection. All scripts are ES mo
 pnpm install --filter '!gl-transitions-react-native-skia-example'   # all but the Expo example; gl (headless WebGL, for rendering) is optional
 pnpm test            # unit tests (**/*.test.mjs)
 pnpm run lint        # layout, encoding and parsing of transitions/
-pnpm run build       # the npm package, in release/ (the first run downloads glslang and builds naga: needs Rust)
+pnpm run build       # the gl-transitions package, in packages/gl-transitions/dist/ (the first run downloads glslang and builds naga: needs Rust)
 ```
 
 | Folder | What it does |
@@ -16,7 +16,7 @@ pnpm run build       # the npm package, in release/ (the first run downloads gls
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
 | `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
-| `npm-package/` | `build.sh` and the `skeleton/` of the published package |
+| `npm-package/` | `build.sh`, which builds `packages/gl-transitions` (its manifest, README and types) into its `dist/` |
 
 The reference renders are the ground truth for every other target: each target renders the same procedural images at the same progress values and is compared pixel by pixel. CI (**Reference renders** workflow) also renders the base branch and the PR to report transitions whose output changed.
 

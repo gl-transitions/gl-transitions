@@ -2,7 +2,7 @@
 // Adds the agent-facing files to the built npm package (see agent-docs.mjs):
 //   <out>/llms.txt, <out>/llms-full.txt
 //   <out>/skills/gl-transitions/  (copied from skills/, plus the generated references/catalog.md)
-// Usage: node scripts/agents/build-agent-docs.mjs --out release
+// Usage: node scripts/agents/build-agent-docs.mjs --out packages/gl-transitions/dist
 // Expects <out>/gl-transitions.json and <out>/package.json (run after the catalog build).
 
 import fs from "node:fs";
@@ -10,7 +10,7 @@ import path from "node:path";
 import { renderLlmsTxt, renderLlmsFullTxt, renderCatalogReference } from "./agent-docs.mjs";
 
 const args = process.argv.slice(2);
-let out = "release";
+let out = "packages/gl-transitions/dist";
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--out") out = args[++i];
 }
