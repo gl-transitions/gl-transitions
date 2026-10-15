@@ -12,11 +12,11 @@ pnpm run build       # the gl-transitions package, in packages/gl-transitions/di
 | Folder | What it does |
 |---|---|
 | `catalog/` | Parses each `.glsl` (uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
-| `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults) and `validate-transition.mjs` (spec checks shown in PR previews) |
+| `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults), `validate-transition.mjs` (spec checks shown in PR previews) and `check-changesets.mjs` (a pull request that changes a published package adds a changeset) |
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
 | `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
-| `npm-package/` | `build.sh`, which builds `packages/gl-transitions` (its manifest, README and types) into its `dist/` |
+| `npm-package/` | `build.sh`, which builds `packages/gl-transitions` (its manifest, README and types) into its `dist/`, and `write-transition-changesets.mjs`, which writes a changeset for each transition added or changed since the last release |
 
 The reference renders are the ground truth for every other target: each target renders the same procedural images at the same progress values and is compared pixel by pixel. CI (**Reference renders** workflow) also renders the base branch and the PR to report transitions whose output changed.
 

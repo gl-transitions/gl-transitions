@@ -7,21 +7,16 @@ DIST=packages/gl-transitions/dist
 rm -rf $DIST
 mkdir -p $DIST/sksl
 cp packages/gl-transitions/README.md packages/gl-transitions/index.d.ts $DIST/
+if [ -f packages/gl-transitions/CHANGELOG.md ]; then cp packages/gl-transitions/CHANGELOG.md $DIST/; fi
 cp packages/gl-transitions/sksl/index.d.ts $DIST/sksl/
-# The published manifest: without the build script and the publish directory.
+# The published manifest, with the version changesets set: without the build script and the
+# publish directory.
 node -e '
   const pkg = require("./packages/gl-transitions/package.json");
   delete pkg.scripts;
   delete pkg.publishConfig;
   require("fs").writeFileSync(process.argv[1], JSON.stringify(pkg, null, 2) + "\n");
 ' $DIST/package.json
-# Each publish is the next minor version of the published one.
-remoteVersion=`npm show gl-transitions version`
-cd $DIST
-npm version $remoteVersion --no-git-tag-version --allow-same-version > /dev/null
-npm version minor --no-git-tag-version
-cd -
-
 node scripts/catalog/build-catalog.mjs -d transitions -o $DIST/gl-transitions.json
 cd $DIST
 echo "window.GLTransitions=" | cat - gl-transitions.json > gl-transitions.js

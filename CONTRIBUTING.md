@@ -110,3 +110,11 @@ pnpm run lint
 pnpm run format
 pnpm run validate -t transitions/MyTransition.glsl
 ```
+
+## Releases
+
+Releases are prepared with [changesets](https://github.com/changesets/changesets) (see [.changeset/README.md](.changeset/README.md)):
+
+- A pull request that adds or changes transitions needs nothing more: each one is listed in the changelog of the next release.
+- A pull request that changes a published package otherwise (its code, the build scripts, the Agent Skill) adds a changeset with `pnpm changeset`. CI checks it.
+- On master, the "Version Packages" pull request collects the pending changes. Merging it publishes the new versions to npm.

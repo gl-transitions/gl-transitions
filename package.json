@@ -22,7 +22,8 @@
     "build:wgsl-msl": "node scripts/targets/build-wgsl-msl.mjs",
     "build:compatibility": "node scripts/targets/build-compatibility.mjs",
     "format": "prettier --write \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\"",
-    "format:check": "prettier --check \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\""
+    "format:check": "prettier --check \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\"",
+    "changeset": "changeset"
   },
   "dependencies": {
     "canvaskit-wasm": "0.42.0",
@@ -33,6 +34,8 @@
     "webgpu": "0.6.2"
   },
   "devDependencies": {
+    "@changesets/changelog-github": "^1.0.1",
+    "@changesets/cli": "^3.0.3",
     "prettier": "^3.9.10"
   }
 }
