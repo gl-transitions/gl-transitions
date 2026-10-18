@@ -1,0 +1,96 @@
+name: fframes example
+
+# Builds examples/fframes (the gl-transitions crate in fframes, from crates.io) and renders every
+# transition with fframes' Skia renderer on the CPU, compared with the GLSL reference renders
+# (examples/fframes/scripts/check.mjs). Fails when a transition differs beyond hash noise;
+# transitions fframes can't set up yet (ivec parameters) are only reported.
+
+on:
+  pull_request:
+    paths:
+      - "transitions/**"
+      - "scripts/**"
+      - "crates/**"
+      - "examples/fframes/**"
+      - "packages/gl-transitions/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".nvmrc"
+      - ".github/workflows/fframes-example.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fframes-example-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Headless GL for the reference renders; fontconfig and freetype for Skia.
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6 libfontconfig1-dev libfreetype-dev
+
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      # With gl (headless WebGL) for the reference renders.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter gl-transitions-repository --filter gl-transitions
+
+      - name: Cache shader toolchain
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules/.cache/gl-transitions-toolchain
+          key: shader-toolchain-${{ runner.os }}-${{ hashFiles('scripts/targets/toolchain.mjs') }}
+
+      # fframes, Skia and FFmpeg take a while to build: saved per run, restored from the latest.
+      - name: Cache cargo
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            examples/fframes/target
+          key: fframes-example-${{ runner.os }}-${{ hashFiles('examples/fframes/Cargo.lock') }}-${{ github.run_id }}
+          restore-keys: |
+            fframes-example-${{ runner.os }}-${{ hashFiles('examples/fframes/Cargo.lock') }}-
+            fframes-example-${{ runner.os }}-
+
+      - name: Build the npm package and the crate's sources
+        run: |
+          pnpm run build
+          pnpm run build:crate
+
+      - name: Render references
+        run: xvfb-run -s "-ac -screen 0 1280x1024x24" node scripts/rendering/render-references.mjs --out /tmp/refs > /dev/null
+
+      - name: Check
+        run: node examples/fframes/scripts/check.mjs /tmp/refs --renders /tmp/fframes/renders --report /tmp/fframes/report.json
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f /tmp/fframes/report.json ]; then
+            node -e 'const r = require("/tmp/fframes/report.json"); console.log(`**fframes:** ${Object.entries(r.counts).map(([k, v]) => `${v} ${k}`).join(", ")} (of ${r.total})`)' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: fframes-renders
+          path: /tmp/fframes/
+          if-no-files-found: warn

@@ -14,3 +14,5 @@ packages/*/src/*.generated.ts
 # The Rust crate: its generated/ folder is written by scripts/rust-crate/build-crate.mjs.
 crates/*/generated/
 crates/*/target/
+examples/fframes/target/
+examples/fframes/out/

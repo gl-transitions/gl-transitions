@@ -44,7 +44,7 @@ paint.set_shader(effect.make_shader(data, &children, None));
 canvas.draw_rect(Rect::from_wh(width, height), &paint);
 ```
 
-Hosts that set uniforms by name (fframes, OpenGL) iterate over `params.iter()`; `Value::as_shader_value` turns `bool` values into the `int` the SkSL, WGSL and Metal shaders declare.
+[`examples/fframes`](https://github.com/gl-transitions/gl-transitions/tree/master/examples/fframes) draws transitions in an [fframes](https://github.com/dmtrKovalenko/fframes) video this way. Hosts that set uniforms by name (fframes, OpenGL) iterate over `params.iter()`; `Value::as_shader_value` turns `bool` values into the `int` the SkSL, WGSL and Metal shaders declare.
 
 ## Versions
 
