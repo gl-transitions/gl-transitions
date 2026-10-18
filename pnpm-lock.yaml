@@ -198,6 +198,12 @@ importers:
         specifier: 0.6.2
         version: 0.6.2(supports-color@8.1.1)
 
+  crates/gl-transitions:
+    dependencies:
+      gl-transitions:
+        specifier: workspace:*
+        version: link:../../packages/gl-transitions/dist
+
   examples/react-native-skia:
     dependencies:
       '@gl-transitions/react-native-skia':

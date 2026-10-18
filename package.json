@@ -25,7 +25,7 @@
     "format": "prettier --write \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx},scripts/**/*.mjs}\"",
     "format:check": "prettier --check \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx},scripts/**/*.mjs}\"",
     "changeset": "changeset",
-    "changeset:version": "changeset version && pnpm install --lockfile-only"
+    "changeset:version": "changeset version && node scripts/rust-crate/sync-version.mjs && pnpm install --lockfile-only"
   },
   "dependencies": {
     "canvaskit-wasm": "0.42.0",

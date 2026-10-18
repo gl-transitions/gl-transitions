@@ -12,7 +12,7 @@ keywords = ["transitions", "shader", "sksl", "wgsl", "video"]
 categories = ["graphics", "multimedia::video", "rendering"]
 # generated/ is not committed (scripts/rust-crate/build-crate.mjs writes it from the npm
 # package build): listing it here makes `cargo package` ship it although git ignores it.
-include = ["src/**/*.rs", "generated/**/*", "build.rs", "Cargo.toml", "README.md", "LICENSE"]
+include = ["src/**/*.rs", "generated/**/*", "build.rs", "Cargo.toml", "README.md", "CHANGELOG.md", "LICENSE"]
 
 [features]
 default = ["sksl", "wgsl", "glsl3", "msl"]

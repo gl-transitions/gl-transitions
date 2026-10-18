@@ -49,4 +49,20 @@ test("workspacePackages: the published packages of this repository", () => {
   assert.ok(gl.roots.includes("packages/gl-transitions/") && gl.roots.includes("skills/"));
   const rn = found.find((p) => p.name === "@gl-transitions/react-native-skia");
   assert.deepEqual(rn.roots, ["packages/react-native-skia/", "scripts/catalog/"]);
+  const crate = found.find((p) => p.name === "gl-transitions-crate");
+  assert.deepEqual(crate.roots, ["crates/gl-transitions/", "scripts/rust-crate/"]);
+  assert.ok(!found.some((p) => p.name === "gl-transitions-repository" || p.name.endsWith("-example")));
+});
+
+test("missingChangesets: the crate's sources and build scripts need a changeset, its tests don't", () => {
+  const crate = { name: "gl-transitions-crate", roots: ["crates/gl-transitions/", "scripts/rust-crate/"] };
+  const all = [...packages, crate];
+  for (const file of ["crates/gl-transitions/src/lib.rs", "scripts/rust-crate/crate-catalog.mjs"]) {
+    assert.deepEqual(missingChangesets({ changed: [file], changesets: [], packages: all }), ["gl-transitions-crate"]);
+  }
+  const covered = [changeset('"gl-transitions-crate": patch')];
+  const lib = ["crates/gl-transitions/src/lib.rs"];
+  assert.deepEqual(missingChangesets({ changed: lib, changesets: covered, packages: all }), []);
+  const tests = ["crates/gl-transitions/tests/sksl.rs", "scripts/rust-crate/crate-catalog.test.mjs"];
+  assert.deepEqual(missingChangesets({ changed: tests, changesets: [], packages: all }), []);
 });

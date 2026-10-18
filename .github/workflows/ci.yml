@@ -186,3 +186,126 @@ jobs:
       - uses: changesets/action/publish@ae32849d5ba541f9ae29e40e22a623bc13562f51 # v2.1.2
         with:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
+
+  # The Rust crate, after npm, when its version is not on crates.io yet. Not only in publish mode:
+  # a crate that failed to publish is retried on the next push to master.
+  pack-crate:
+    needs: [release-mode, pack, publish]
+    if: ${{ !cancelled() && needs.release-mode.result == 'success' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          cache: false
+          install_args: node
+
+      - name: Is the crate's version on crates.io?
+        id: version
+        run: |
+          version=$(node scripts/rust-crate/sync-version.mjs --check)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          status=$(curl -sS -o /dev/null -w '%{http_code}' \
+            -A 'gl-transitions-release (https://github.com/gl-transitions/gl-transitions)' \
+            "https://crates.io/api/v1/crates/gl-transitions/$version")
+          case "$status" in
+            200) echo "gl-transitions $version is on crates.io"; echo "publish=false" >> "$GITHUB_OUTPUT" ;;
+            404) echo "gl-transitions $version is to publish"; echo "publish=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::crates.io answered $status"; exit 1 ;;
+          esac
+
+      - name: Install Rust
+        if: steps.version.outputs.publish == 'true'
+        run: mise install --locked rust
+
+      # From the published npm package (the sources of CATALOG_VERSION); npm may take a moment
+      # to serve a version just published.
+      - name: Build the crate's sources from the npm package
+        if: steps.version.outputs.publish == 'true'
+        run: |
+          npm_version=$(node -p 'require("./packages/gl-transitions/package.json").version')
+          mkdir -p "$RUNNER_TEMP/npm"
+          for attempt in 1 2 3 4 5 6; do
+            if npm pack "gl-transitions@$npm_version" --pack-destination "$RUNNER_TEMP/npm"; then break; fi
+            if [ "$attempt" = 6 ]; then exit 1; fi
+            sleep 20
+          done
+          tar -xzf "$RUNNER_TEMP/npm/gl-transitions-$npm_version.tgz" -C "$RUNNER_TEMP/npm"
+          node scripts/rust-crate/build-crate.mjs --package "$RUNNER_TEMP/npm/package"
+
+      - name: Package
+        if: steps.version.outputs.publish == 'true'
+        working-directory: crates/gl-transitions
+        run: |
+          cargo package --locked --allow-dirty --list > "$RUNNER_TEMP/files.txt"
+          grep -qx 'generated/catalog.rs' "$RUNNER_TEMP/files.txt"
+          grep -q '^generated/sksl/' "$RUNNER_TEMP/files.txt"
+          cargo package --locked --allow-dirty
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.version.outputs.publish == 'true'
+        with:
+          name: gl-transitions-crate
+          path: |
+            crates/gl-transitions
+            !crates/gl-transitions/target
+            !crates/gl-transitions/node_modules
+          if-no-files-found: error
+          retention-days: 30
+
+  # crates.io trusted publishing (OIDC). --no-verify: pack-crate compiled it, nothing runs here.
+  publish-crate:
+    needs: pack-crate
+    if: ${{ !cancelled() && needs.pack-crate.result == 'success' && needs.pack-crate.outputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      VERSION: ${{ needs.pack-crate.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          cache: false
+          install_args: rust
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: gl-transitions-crate
+          path: ${{ runner.temp }}/gl-transitions-crate
+
+      # On a re-run.
+      - name: Is the crate's version on crates.io?
+        id: check
+        run: |
+          status=$(curl -sS -o /dev/null -w '%{http_code}' \
+            -A 'gl-transitions-release (https://github.com/gl-transitions/gl-transitions)' \
+            "https://crates.io/api/v1/crates/gl-transitions/$VERSION")
+          case "$status" in
+            200) echo "gl-transitions $VERSION is already on crates.io"; echo "publish=false" >> "$GITHUB_OUTPUT" ;;
+            404) echo "publish=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::crates.io answered $status"; exit 1 ;;
+          esac
+
+      - id: auth
+        if: steps.check.outputs.publish == 'true'
+        uses: rust-lang/crates-io-auth-action@c6f97d42243bad5fab37ca0427f495c86d5b1a18 # v1.0.5
+
+      - name: Publish
+        if: steps.check.outputs.publish == 'true'
+        working-directory: ${{ runner.temp }}/gl-transitions-crate
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+        run: |
+          grep -q "^version = \"$VERSION\"" Cargo.toml
+          cargo publish --locked --no-verify --allow-dirty

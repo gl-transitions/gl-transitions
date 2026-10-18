@@ -129,4 +129,10 @@ Releases are prepared with [changesets](https://github.com/changesets/changesets
 
 - A pull request that adds or changes transitions needs nothing more: each one is listed in the changelog of the next release.
 - A pull request that changes a published package otherwise (its code, the build scripts, the Agent Skill) adds a changeset with `pnpm changeset`. CI checks it.
-- On master, the "Version Packages" pull request collects the pending changes. Merging it publishes the new versions to npm.
+- On master, the "Version Packages" pull request collects the pending changes. Merging it publishes the new versions to npm, then the Rust crate to crates.io.
+
+The Rust crate ([crates/gl-transitions](crates/gl-transitions)) is versioned by changesets too, as the private package `gl-transitions-crate` (its `package.json` only carries the version):
+
+- Each release of the `gl-transitions` npm package bumps the crate's patch version, so that `^0.x` users get the new transitions. A change to the crate's API (`crates/gl-transitions/src`, `scripts/rust-crate/`) adds a changeset for `gl-transitions-crate`, a minor one when it breaks something while the crate is in 0.x.
+- `pnpm run changeset:version` copies its version into `Cargo.toml` and the `Cargo.lock` files (`scripts/rust-crate/sync-version.mjs`); a test checks that they agree.
+- Once the npm packages are published, CI builds the crate's sources from the published `gl-transitions` package, packages the crate and publishes it with crates.io trusted publishing (no token). The release is tagged `gl-transitions-crate@<version>`, with its GitHub release. A version that is already on crates.io is skipped, and one that failed to publish is retried on the next push to master.
