@@ -1,0 +1,52 @@
+{
+  "name": "@gl-transitions/remotion",
+  "version": "0.0.0",
+  "description": "Use any of the gl-transitions as a Remotion presentation",
+  "license": "MIT",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gl-transitions/gl-transitions.git",
+    "directory": "packages/remotion"
+  },
+  "homepage": "https://gl-transitions.com",
+  "keywords": [
+    "remotion",
+    "video",
+    "transitions",
+    "webgl",
+    "shader",
+    "glsl"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "node ../../scripts/catalog/generate-transition-types.mjs src/transition-types.generated.ts && tsc",
+    "typecheck": "node ../../scripts/catalog/generate-transition-types.mjs src/transition-types.generated.ts && tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@remotion/transitions": ">=4.0.500",
+    "gl-transitions": "^1.76.1",
+    "remotion": ">=4.0.500"
+  },
+  "devDependencies": {
+    "@remotion/transitions": "4.0.536",
+    "@types/react": "^19.2.0",
+    "gl-transitions": "workspace:*",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.536",
+    "typescript": "^6.0.3"
+  }
+}

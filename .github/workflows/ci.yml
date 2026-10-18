@@ -28,8 +28,8 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        # Without the Expo example, which only the React Native Skia e2e workflow builds.
-        run: pnpm install --frozen-lockfile --filter '!gl-transitions-react-native-skia-example' --no-optional
+        # Without the examples: the e2e and Reference renders workflows build them.
+        run: pnpm install --frozen-lockfile --filter '!gl-transitions-react-native-skia-example' --filter '!gl-transitions-remotion-example' --no-optional
 
       # glslang (checksummed download) and naga (cargo build, ~1 min) for the shader targets.
       - name: Cache shader toolchain
@@ -153,7 +153,7 @@ jobs:
       # Only gl (headless WebGL), webgpu (Dawn) and React Native Skia run install scripts
       # (allowBuilds in pnpm-workspace.yaml).
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile --filter '!gl-transitions-react-native-skia-example'
+        run: pnpm install --frozen-lockfile --filter '!gl-transitions-react-native-skia-example' --filter '!gl-transitions-remotion-example'
 
       # Informational: without references, compatibility.json says the targets were only compiled.
       - name: Render references

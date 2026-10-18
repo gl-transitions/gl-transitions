@@ -21,8 +21,8 @@
     "build:glsl3": "node scripts/targets/build-glsl3.mjs",
     "build:wgsl-msl": "node scripts/targets/build-wgsl-msl.mjs",
     "build:compatibility": "node scripts/targets/build-compatibility.mjs",
-    "format": "prettier --write \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\"",
-    "format:check": "prettier --check \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx}}\"",
+    "format": "prettier --write \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx},scripts/**/*.mjs}\"",
+    "format:check": "prettier --check \"scripts/**/*.mjs\" \"packages/*/{src,test,scripts}/**/*.{ts,tsx,mjs}\" \"examples/*/{*.{ts,tsx,js},src/**/*.{ts,tsx},scripts/**/*.mjs}\"",
     "changeset": "changeset",
     "changeset:version": "changeset version && pnpm install --lockfile-only"
   },

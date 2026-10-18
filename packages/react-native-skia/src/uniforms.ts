@@ -1,16 +1,7 @@
 import type { Transition as CatalogTransition } from "gl-transitions";
-import type { TransitionParamsByName } from "./transition-types.generated.ts";
+import type { ParamInput, TransitionName, TransitionParams } from "./transition-types.generated.ts";
 
-/** Name of a transition known when this package was built. Newer ones from gl-transitions work too. */
-export type TransitionName = keyof TransitionParamsByName;
-
-/** A parameter value: `number` for float and int, `boolean` for bool, an array for vectors. */
-export type ParamInput = number | boolean | readonly number[];
-
-/** Parameters of a transition, all optional: the ones left out keep their default value. */
-export type TransitionParams<N extends string> = N extends TransitionName
-  ? Partial<TransitionParamsByName[N]>
-  : { [name: string]: ParamInput };
+export type { ParamInput, TransitionName, TransitionParams };
 
 /** Uniform values as React Native Skia's `<Shader uniforms>` takes them. */
 export type TransitionUniforms = { [name: string]: number | readonly number[] };
