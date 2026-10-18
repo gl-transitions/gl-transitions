@@ -3,10 +3,11 @@
 Everything that builds, checks and renders the collection. All scripts are ES modules (`.mjs`) with their dependencies in the root `package.json`:
 
 ```sh
+mise install         # Node, pnpm and Rust (mise.toml; see CONTRIBUTING.md)
 pnpm install --filter '!gl-transitions-react-native-skia-example'   # all but the Expo example; gl (headless WebGL, for rendering) is optional
 pnpm test            # unit tests (**/*.test.mjs)
 pnpm run lint        # layout, encoding and parsing of transitions/
-pnpm run build       # the gl-transitions package, in packages/gl-transitions/dist/ (the first run downloads glslang and builds naga: needs Rust)
+pnpm run build       # the gl-transitions package, in packages/gl-transitions/dist/ (the first run downloads glslang and builds naga with the Rust of mise.toml)
 ```
 
 | Folder | What it does |
@@ -97,7 +98,7 @@ It is not rendered, because headless GL is WebGL 1 only. The WGSL target, built 
 
 Textures are sampled at an explicit level 0: WGSL only allows implicit-derivative sampling in uniform control flow, and many transitions sample inside branches.
 
-naga has no prebuilt release, so `targets/toolchain.mjs` builds the pinned version with `cargo install --locked` on first use (about a minute); install [Rust](https://rustup.rs) or set `NAGA`. On Linux, Dawn needs a Vulkan driver (`mesa-vulkan-drivers` provides the lavapipe software renderer).
+naga has no prebuilt release, so `targets/toolchain.mjs` builds the pinned version with `cargo install --locked` on first use (about a minute) with the Rust of `mise.toml` (`mise install`), or set `NAGA`. On Linux, Dawn needs a Vulkan driver (`mesa-vulkan-drivers` provides the lavapipe software renderer).
 
 ```sh
 pnpm run build:wgsl-msl --wgsl /tmp/wgsl --msl /tmp/msl --layouts /tmp/layouts.json --refs /tmp/refs --report /tmp/wgsl-msl.json

@@ -1,0 +1,6 @@
+# Update with `mise up --bump` (keep `packageManager` in package.json on the same pnpm).
+
+[tools]
+node = "22.23.3"
+pnpm = "12.11.2"
+rust = { version = "1.99.1", profile = "minimal", components = "rustfmt,clippy" }

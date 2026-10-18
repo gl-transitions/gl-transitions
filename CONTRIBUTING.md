@@ -101,15 +101,27 @@ See the [GL Transition Specification v1](README.md#gl-transition-specification-v
 
 ## Development
 
-The repository tooling lives in `scripts/` (see [scripts/README.md](scripts/README.md)). It uses Node 22 (`.nvmrc`), ES modules (`.mjs`) and a [pnpm](https://pnpm.io) workspace (`pnpm-workspace.yaml`: the root, `packages/*` and `examples/*`):
+The repository tooling lives in `scripts/` (see [scripts/README.md](scripts/README.md)). It uses ES modules (`.mjs`) and a [pnpm](https://pnpm.io) workspace (`pnpm-workspace.yaml`: the root, `packages/*` and `examples/*`).
+
+[mise](https://mise.jdx.dev) installs the toolchain, the same versions as CI: Node, pnpm and Rust (for the crate, the fframes example and naga, which the shader targets build once), pinned in `mise.toml` with their checksums in `mise.lock`. With mise [activated in your shell](https://mise.jdx.dev/getting-started.html), from the repository root:
 
 ```sh
+mise install                                                         # Node, pnpm, Rust (with rustfmt and clippy)
 pnpm install --filter '!gl-transitions-react-native-skia-example'   # without the Expo example (its native binaries are ~750 MB)
 pnpm test
 pnpm run lint
 pnpm run format
 pnpm run validate -t transitions/MyTransition.glsl
 ```
+
+mise installs Rust with rustup (toolchains in `~/.rustup`, reusing an existing rustup) and selects the pinned version with `RUSTUP_TOOLCHAIN`, so `cargo` uses it anywhere in the repository. The crate's sources are generated from the npm package build:
+
+```sh
+pnpm run build && pnpm run build:crate
+cd crates/gl-transitions && cargo test
+```
+
+Without mise, install the versions of `mise.toml` another way. glslang and naga, for the shader targets, are not in mise: `scripts/targets/toolchain.mjs` pins them and installs them on first use (see [scripts/README.md](scripts/README.md)).
 
 ## Releases
 
