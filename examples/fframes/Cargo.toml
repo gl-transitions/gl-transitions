@@ -1,0 +1,43 @@
+[package]
+name = "gl-transitions-fframes-example"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "gl-transitions between images in an fframes video, with the gl-transitions crate's SkSL"
+license = "MIT"
+
+[dependencies]
+gl-transitions = { path = "../../crates/gl-transitions", default-features = false, features = ["sksl"] }
+# fframes from crates.io, as `cargo fframes new` sets it up (exact version: fframes is in release candidates).
+fframes = { version = "=1.2.1-rc.45", features = ["compile-time-svgtree", "cli"] }
+image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
+
+# Shaders run on the Skia backend: Metal on macOS, Vulkan elsewhere, or `--renderer skia-cpu`.
+[target.'cfg(target_os = "macos")'.dependencies]
+fframes_skia_renderer = { version = "=1.2.1-rc.45", features = ["metal", "cli"] }
+
+[target.'cfg(not(target_os = "macos"))'.dependencies]
+fframes_skia_renderer = { version = "=1.2.1-rc.45", features = ["vulkan", "cli"] }
+
+[features]
+default = ["h264"]
+# H.264 encoding for `render` (the check only renders frames).
+h264 = ["fframes/h264", "fframes/libav-agree-gpl"]
+
+[[bin]]
+name = "gl-transitions-fframes-example"
+path = "src/main.rs"
+
+[[bin]]
+name = "check"
+path = "src/bin/check.rs"
+
+# Its own workspace (not part of the crate's), with dependencies optimized in dev builds as in
+# fframes' project template.
+[workspace]
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3

@@ -16,6 +16,7 @@ pnpm run build       # the gl-transitions package, in packages/gl-transitions/di
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
 | `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
+| `rust-crate/` | `build-crate.mjs`, which writes the sources of the [Rust crate](../crates/gl-transitions) from the built npm package (see below) |
 | `npm-package/` | `build.sh`, which builds `packages/gl-transitions` (its manifest, README and types) into its `dist/`, and `write-transition-changesets.mjs`, which writes a changeset for each transition added or changed since the last release |
 
 The reference renders are the ground truth for every other target: each target renders the same procedural images at the same progress values and is compared pixel by pixel. CI (**Reference renders** workflow) also renders the base branch and the PR to report transitions whose output changed.
@@ -112,3 +113,14 @@ REFERENCE_RENDERS=/tmp/refs pnpm run build
 ```
 
 The **Reference renders** workflow shows the table on every PR that touches transitions or scripts.
+
+## Rust crate
+
+[`crates/gl-transitions`](../crates/gl-transitions) embeds the npm package's catalog and shader sources. `rust-crate/build-crate.mjs` copies them into `crates/gl-transitions/generated/` with `catalog.rs`, one Rust `Transition` literal per transition (typed parameter defaults, the WGSL / Metal uniform layout, `include_str!` of each source), and `LICENSES.md`, the source of every transition that is not MIT licensed (its notice and conditions). The folder is not committed; `Cargo.toml` lists it in `include`, so `cargo package` ships it and the published crate needs nothing else (with `--allow-dirty`: cargo counts the git-ignored files it packages as uncommitted changes).
+
+```sh
+pnpm run build && pnpm run build:crate
+cd crates/gl-transitions && cargo test   # naga validates every WGSL shader, Skia compiles every SkSL one (CPU)
+```
+
+The **Rust crate** workflow runs these, Clippy and `cargo publish --dry-run`. The crate has its own 0.x version; `CATALOG_VERSION` is the npm version its transitions come from.

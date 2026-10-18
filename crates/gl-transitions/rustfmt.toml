@@ -1,0 +1,2 @@
+# The Rust defaults, also so that a rustfmt.toml in a parent folder does not apply.
+edition = "2021"
