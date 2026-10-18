@@ -1,0 +1,4 @@
+node_modules/
+# Written by scripts/write-images.mjs
+public/
+out/

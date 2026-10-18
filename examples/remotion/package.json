@@ -1,0 +1,28 @@
+{
+  "name": "gl-transitions-remotion-example",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare-images": "node scripts/write-images.mjs",
+    "studio": "node scripts/write-images.mjs && remotion studio src/index.ts",
+    "check": "node scripts/write-images.mjs && node scripts/check.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gl-transitions/remotion": "workspace:*",
+    "@remotion/bundler": "4.0.536",
+    "@remotion/cli": "4.0.536",
+    "@remotion/google-fonts": "4.0.536",
+    "@remotion/renderer": "4.0.536",
+    "@remotion/transitions": "4.0.536",
+    "gl-transitions": "workspace:*",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "pngjs": "^7.0.0",
+    "typescript": "~6.0.3"
+  }
+}

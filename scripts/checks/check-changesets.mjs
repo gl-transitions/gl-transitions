@@ -19,8 +19,9 @@ const SOURCES = {
     "scripts/agents/",
     "scripts/rendering/",
   ],
-  // Its generated types parse the transitions (scripts/generate-transition-types.mjs).
+  // Their generated types parse the transitions (scripts/catalog/generate-transition-types.mjs).
   "@gl-transitions/react-native-skia": ["scripts/catalog/"],
+  "@gl-transitions/remotion": ["scripts/catalog/"],
 };
 
 // The packages a file belongs to: tests, CHANGELOG.md and transitions/ don't count.

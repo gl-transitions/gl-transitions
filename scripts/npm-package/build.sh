@@ -25,6 +25,10 @@ mkdir transitions && cp ../../../transitions/*.glsl transitions/.
 cp ../../../LICENSE .
 cd -
 
+# CATALOG_ONLY=1: only the catalog (gl-transitions.json, index.js, transitions/), for what
+# needs the package but none of its shader targets (the Remotion example in CI).
+if [ -n "$CATALOG_ONLY" ]; then exit 0; fi
+
 # Shader targets; see scripts/README.md. Set REFERENCE_RENDERS to a folder of GLSL reference
 # renders (pnpm run render:references) to compare the SkSL and WGSL renders with them.
 reports="$(mktemp -d)"

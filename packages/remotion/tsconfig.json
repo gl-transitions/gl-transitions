@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["es2022", "dom"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "verbatimModuleSyntax": true,
+    "rewriteRelativeImportExtensions": true,
+    "declaration": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "types": [],
+    // The gl-transitions types of this repository, so the package builds before they are published.
+    "paths": {
+      "gl-transitions": ["../gl-transitions/index.d.ts"]
+    }
+  },
+  "include": ["src"]
+}

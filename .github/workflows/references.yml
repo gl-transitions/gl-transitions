@@ -7,9 +7,10 @@ name: Reference renders
 # versions with glslang, and translates them through SPIR-V to WGSL (rendered
 # with Dawn on Mesa lavapipe and compared too) and MSL.
 # Also validates every transition against the spec (validate-transition.mjs),
-# and renders every transition through the React Native Skia package.
+# and renders every transition through the React Native Skia package and with
+# Remotion (@gl-transitions/remotion).
 # The comparisons are informational: fails only when a GLSL transition does not
-# render or breaks the spec, or when the React Native Skia package renders a
+# render or breaks the spec, or when the React Native Skia or Remotion package renders a
 # transition differently than its GLSL reference (beyond hash noise).
 
 on:
@@ -18,6 +19,7 @@ on:
       - 'transitions/**'
       - 'scripts/**'
       - 'packages/**'
+      - 'examples/remotion/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'pnpm-workspace.yaml'
@@ -103,6 +105,16 @@ jobs:
           pnpm --filter @gl-transitions/react-native-skia run build
           GL_TRANSITIONS_REFS=/tmp/refs/head node --test "packages/react-native-skia/test/*.test.mjs"
 
+      # The example renders every transition with Remotion's renderer (its own Chrome, WebGL on
+      # SwiftShader) and compares it with the reference: fails like the step above.
+      - name: Compare Remotion renders
+        if: ${{ !cancelled() }}
+        run: |
+          CATALOG_ONLY=1 pnpm run build
+          pnpm --filter @gl-transitions/remotion run build
+          pnpm --filter gl-transitions-remotion-example run typecheck
+          pnpm --filter gl-transitions-remotion-example run check /tmp/refs/head --renders /tmp/remotion/renders --report /tmp/remotion/report.json
+
       - name: Summary
         if: always()
         run: |
@@ -123,6 +135,9 @@ jobs:
             }
             fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, out.join("\n") + "\n");
           '
+          if [ -f /tmp/remotion/report.json ]; then
+            node -e 'const r = require("/tmp/remotion/report.json"); console.log(`\n**Remotion:** ${Object.entries(r.counts).map(([k, v]) => `${v} ${k}`).join(", ")} (of ${r.total})\n`)' >> "$GITHUB_STEP_SUMMARY"
+          fi
           reports=$(ls /tmp/sksl/report.json /tmp/glsl3/report.json /tmp/wgsl-msl/report.json 2>/dev/null || true)
           if [ -n "$reports" ]; then
             node scripts/targets/build-compatibility.mjs --summary /tmp/compatibility.md $reports
@@ -138,6 +153,7 @@ jobs:
             /tmp/refs/
             /tmp/sksl/
             /tmp/glsl3/
+            /tmp/remotion/
             /tmp/wgsl-msl/
           if-no-files-found: warn
 

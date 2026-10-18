@@ -32,8 +32,8 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "node scripts/generate-transition-types.mjs && tsc",
-    "typecheck": "node scripts/generate-transition-types.mjs && tsc --noEmit"
+    "build": "node ../../scripts/catalog/generate-transition-types.mjs src/transition-types.generated.ts && tsc",
+    "typecheck": "node ../../scripts/catalog/generate-transition-types.mjs src/transition-types.generated.ts && tsc --noEmit"
   },
   "peerDependencies": {
     "@shopify/react-native-skia": ">=2.0.0",

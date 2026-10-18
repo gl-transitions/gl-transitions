@@ -8,6 +8,8 @@ allowBuilds:
   gl: true
   webgpu: true
   "@shopify/react-native-skia": true
+  # Its install script only checks the binary, which comes from its platform package.
+  esbuild: false
 
 # The example links the gl-transitions package built here, which ships an Agent Skill:
 # not to install in this repository.
