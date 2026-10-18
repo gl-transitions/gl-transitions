@@ -51,6 +51,6 @@
     "@types/react": "^19.2.0",
     "gl-transitions": "workspace:*",
     "react": "^19.2.0",
-    "typescript": "^6.0.3"
+    "typescript": "^7.0.2"
   }
 }
