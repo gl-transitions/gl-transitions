@@ -48,9 +48,9 @@
   },
   "devDependencies": {
     "@shopify/react-native-skia": "2.14.0",
-    "@types/react": "^19.2.0",
+    "@types/react": "^19.3.0",
     "gl-transitions": "workspace:*",
-    "react": "^19.2.0",
-    "typescript": "^6.0.3"
+    "react": "^19.3.1",
+    "typescript": "^7.0.2"
   }
 }

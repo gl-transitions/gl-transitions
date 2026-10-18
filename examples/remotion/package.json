@@ -16,13 +16,13 @@
     "@remotion/renderer": "4.0.536",
     "@remotion/transitions": "4.0.536",
     "gl-transitions": "workspace:*",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "remotion": "4.0.536"
   },
   "devDependencies": {
-    "@types/react": "~19.2.2",
+    "@types/react": "~19.3.0",
     "pngjs": "^7.0.0",
-    "typescript": "~6.0.3"
+    "typescript": "~7.0.2"
   }
 }
