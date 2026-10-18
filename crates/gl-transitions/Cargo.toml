@@ -1,0 +1,32 @@
+[package]
+name = "gl-transitions"
+version = "0.1.0"
+edition = "2021"
+description = "The gl-transitions collection (GLSL transitions between two images) as SkSL, WGSL, GLSL ES 3.00 and Metal sources, with typed parameters and uniform layouts"
+license = "MIT AND BSD-2-Clause AND BSD-3-Clause"
+repository = "https://github.com/gl-transitions/gl-transitions"
+homepage = "https://gl-transitions.com"
+documentation = "https://docs.rs/gl-transitions"
+readme = "README.md"
+keywords = ["transitions", "shader", "sksl", "wgsl", "video"]
+categories = ["graphics", "multimedia::video", "rendering"]
+# generated/ is not committed (scripts/rust-crate/build-crate.mjs writes it from the npm
+# package build): listing it here makes `cargo package` ship it although git ignores it.
+include = ["src/**/*.rs", "generated/**/*", "build.rs", "Cargo.toml", "README.md", "LICENSE"]
+
+[features]
+default = ["sksl", "wgsl", "glsl3", "msl"]
+# Each target's sources are only compiled in when its feature is on; the original GLSL always is.
+sksl = []
+wgsl = []
+glsl3 = []
+msl = []
+
+[dev-dependencies]
+# Same version as the naga-cli that translates the shaders (scripts/targets/toolchain.mjs).
+naga = { version = "30.0.1", features = ["wgsl-in"] }
+# Downloads prebuilt Skia binaries: compiles every SkSL source and renders on the CPU.
+skia-safe = "0.153.3"
+
+[package.metadata.docs.rs]
+all-features = true
