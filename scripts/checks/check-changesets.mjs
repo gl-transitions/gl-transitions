@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Checks that a pull request adds a changeset for each published package it changes (see
+// Checks that a pull request adds a changeset for each released package it changes (see
 // .changeset/README.md). Transitions need none: their changesets are written at release time.
 // Usage: node scripts/checks/check-changesets.mjs <base ref>
 
@@ -9,7 +9,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.join(import.meta.dirname, "..", "..");
-// What else ends up in each package, besides its folder in packages/.
+// What else ends up in each package, besides its folder in packages/ (or crates/).
 const SOURCES = {
   "gl-transitions": [
     "skills/",
@@ -22,11 +22,15 @@ const SOURCES = {
   // Their generated types parse the transitions (scripts/catalog/generate-transition-types.mjs).
   "@gl-transitions/react-native-skia": ["scripts/catalog/"],
   "@gl-transitions/remotion": ["scripts/catalog/"],
+  // The Rust crate (a private package, published to crates.io by ci.yml).
+  "gl-transitions-crate": ["scripts/rust-crate/"],
 };
+// The folders of the released packages.
+const PACKAGE_DIRS = ["packages", "crates"];
 
 // The packages a file belongs to: tests, CHANGELOG.md and transitions/ don't count.
 function packagesOf(file, packages) {
-  if (/\.test\.mjs$|\/test\/|(^|\/)CHANGELOG\.md$/.test(file)) return [];
+  if (/\.test\.mjs$|\/tests?\/|(^|\/)CHANGELOG\.md$/.test(file)) return [];
   return packages.filter(({ roots }) => roots.some((root) => file.startsWith(root))).map(({ name }) => name);
 }
 
@@ -47,19 +51,23 @@ function missingChangesets({ changed, changesets, packages }) {
   return [...touched].filter((name) => !covered.has(name)).sort();
 }
 
-// The published (not private) packages of the workspace, with the folders they are built from.
+// The released packages of the workspace, with the folders they are built from: the published
+// ones, and the private ones that changesets versions because they have a version (the crate).
 function workspacePackages(root) {
-  const dir = path.join(root, "packages");
-  return fs
-    .readdirSync(dir)
-    .map((d) => ({ d, manifest: path.join(dir, d, "package.json") }))
-    .filter(({ manifest }) => fs.existsSync(manifest))
-    .map(({ d, manifest }) => ({ d, pkg: JSON.parse(fs.readFileSync(manifest, "utf8")) }))
-    .filter(({ pkg }) => !pkg.private)
-    .map(({ d, pkg }) => ({
-      name: pkg.name,
-      roots: [`packages/${d}/`, ...(SOURCES[pkg.name] ?? [])],
-    }));
+  return PACKAGE_DIRS.flatMap((parent) => {
+    const dir = path.join(root, parent);
+    if (!fs.existsSync(dir)) return [];
+    return fs
+      .readdirSync(dir)
+      .map((d) => ({ d, manifest: path.join(dir, d, "package.json") }))
+      .filter(({ manifest }) => fs.existsSync(manifest))
+      .map(({ d, manifest }) => ({ d, pkg: JSON.parse(fs.readFileSync(manifest, "utf8")) }))
+      .filter(({ pkg }) => !pkg.private || pkg.version)
+      .map(({ d, pkg }) => ({
+        name: pkg.name,
+        roots: [`${parent}/${d}/`, ...(SOURCES[pkg.name] ?? [])],
+      }));
+  });
 }
 
 const isMain = process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url));

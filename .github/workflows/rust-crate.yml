@@ -2,7 +2,7 @@ name: Rust crate
 
 # Builds the gl-transitions crate (crates/gl-transitions) from the npm package build, tests it
 # (naga validates every WGSL shader, Skia compiles every SkSL one on the CPU) and checks that it
-# packages. Publishing to crates.io is not wired yet.
+# packages. ci.yml publishes it.
 
 on:
   push:

@@ -17,7 +17,7 @@ pnpm run build       # the gl-transitions package, in packages/gl-transitions/di
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
 | `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
-| `rust-crate/` | `build-crate.mjs`, which writes the sources of the [Rust crate](../crates/gl-transitions) from the built npm package (see below) |
+| `rust-crate/` | `build-crate.mjs`, which writes the sources of the [Rust crate](../crates/gl-transitions) from the built npm package (see below), and `sync-version.mjs`, which copies the crate's version from changesets into `Cargo.toml` |
 | `npm-package/` | `build.sh`, which builds `packages/gl-transitions` (its manifest, README and types) into its `dist/`, and `write-transition-changesets.mjs`, which writes a changeset for each transition added or changed since the last release |
 
 The reference renders are the ground truth for every other target: each target renders the same procedural images at the same progress values and is compared pixel by pixel. CI (**Reference renders** workflow) also renders the base branch and the PR to report transitions whose output changed.
@@ -124,4 +124,4 @@ pnpm run build && pnpm run build:crate
 cd crates/gl-transitions && cargo test   # naga validates every WGSL shader, Skia compiles every SkSL one (CPU)
 ```
 
-The **Rust crate** workflow runs these, Clippy and `cargo publish --dry-run`. The crate has its own 0.x version; `CATALOG_VERSION` is the npm version its transitions come from.
+The **Rust crate** workflow runs these, Clippy and `cargo publish --dry-run`. The crate has its own 0.x version; `CATALOG_VERSION` is the npm version its transitions come from. changesets versions it (`crates/gl-transitions/package.json`, a private package); `rust-crate/sync-version.mjs` copies the version into `Cargo.toml` and the `Cargo.lock` files, and the CI workflow publishes it to crates.io after npm (see CONTRIBUTING.md).

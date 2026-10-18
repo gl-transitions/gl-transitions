@@ -1,6 +1,8 @@
 packages:
   - packages/*
   - examples/*
+  # The Rust crate's package.json only carries its version for changesets (see crates/gl-transitions/package.json).
+  - crates/*
 
 # Install scripts run only for these: gl (headless WebGL) and webgpu (Dawn) render the
 # reference and compatibility checks; React Native Skia copies its native binaries for the example.

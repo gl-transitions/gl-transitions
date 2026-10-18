@@ -48,6 +48,6 @@ canvas.draw_rect(Rect::from_wh(width, height), &paint);
 
 ## Versions
 
-The crate follows its own semver (0.x while the API settles); `gl_transitions::CATALOG_VERSION` says which npm release the transitions come from.
+The crate follows its own semver (0.x while the API settles); `gl_transitions::CATALOG_VERSION` says which npm release the transitions come from. Each release of the npm package publishes a patch release of the crate with its transitions, so `gl-transitions = "0.1"` keeps getting new ones; the changes are in [CHANGELOG.md](https://github.com/gl-transitions/gl-transitions/blob/master/crates/gl-transitions/CHANGELOG.md).
 
 This crate is built in the [gl-transitions repository](https://github.com/gl-transitions/gl-transitions/tree/master/crates/gl-transitions). Each transition keeps the license of its source (`license()`): MIT for nearly all of them, BSD for a few, whose notices and conditions are in `generated/LICENSES.md` of the crate. A transition a target's compiler rejected has no source for that target (`None`).
