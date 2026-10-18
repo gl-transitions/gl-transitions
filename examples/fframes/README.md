@@ -9,7 +9,8 @@ Transitions of the [`gl-transitions` crate](../../crates/gl-transitions) in [ffr
 ## Run it
 
 ```sh
-# From the repository root: the npm package build, then the crate's sources
+# From the repository root: the toolchain (mise.toml), the npm package build, then the crate's sources
+mise install
 pnpm install && pnpm run build && pnpm run build:crate
 
 cd examples/fframes
@@ -20,7 +21,7 @@ cargo run --release -- strip -n 12 -o out/strip.png # contact sheet; see --help 
 node scripts/check.mjs /tmp/refs --renders /tmp/fframes-renders
 ```
 
-On macOS with an older Rust and a recent Xcode, linking may fail on `___isPlatformVersionAtLeast` (fframes' prebuilt FFmpeg needs the clang runtime) or on proc macros stripped by Xcode's `strip`: `RUSTFLAGS="-C link-arg=$(xcrun clang --print-resource-dir)/lib/darwin/libclang_rt.osx.a" CARGO_PROFILE_RELEASE_STRIP=none` works around both.
+With the Rust of `mise.toml`, it builds as is on macOS. With an older Rust (1.89, for example) and a recent Xcode, linking may fail on `___isPlatformVersionAtLeast` (fframes' prebuilt FFmpeg needs the clang runtime) or on proc macros stripped by Xcode's `strip`: `RUSTFLAGS="-C link-arg=$(xcrun clang --print-resource-dir)/lib/darwin/libclang_rt.osx.a" CARGO_PROFILE_RELEASE_STRIP=none` works around both.
 
 ## What fframes can't do yet
 

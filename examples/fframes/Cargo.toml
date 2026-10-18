@@ -5,6 +5,7 @@ edition = "2024"
 publish = false
 description = "gl-transitions between images in an fframes video, with the gl-transitions crate's SkSL"
 license = "MIT"
+default-run = "gl-transitions-fframes-example"
 
 [dependencies]
 gl-transitions = { path = "../../crates/gl-transitions", default-features = false, features = ["sksl"] }
