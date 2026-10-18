@@ -129,7 +129,7 @@ Releases are prepared with [changesets](https://github.com/changesets/changesets
 
 - A pull request that adds or changes transitions needs nothing more: each one is listed in the changelog of the next release.
 - A pull request that changes a published package otherwise (its code, the build scripts, the Agent Skill) adds a changeset with `pnpm changeset`. CI checks it.
-- On master, the "Version Packages" pull request collects the pending changes. Merging it publishes the new versions to npm, then the Rust crate to crates.io.
+- On master, the "Version Packages" pull request collects the pending changes. Merging it publishes the new versions to npm, then the Rust crate to crates.io. Both publish jobs run in the `release` environment, restricted to master, and the npm and crates.io trusted publishers require it.
 
 The Rust crate ([crates/gl-transitions](crates/gl-transitions)) is versioned by changesets too, as the private package `gl-transitions-crate` (its `package.json` only carries the version):
 
