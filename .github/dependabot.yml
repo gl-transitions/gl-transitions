@@ -1,5 +1,5 @@
-# Weekly, grouped updates. Actions are pinned to commit SHAs; Dependabot keeps the
-# SHAs and their version comments up to date.
+# Weekly updates. Actions are pinned to commit SHAs; Dependabot keeps the SHAs and their
+# version comments up to date.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -10,10 +10,30 @@ updates:
       github-actions:
         patterns: ["*"]
 
+  # The pnpm workspace: the root, packages/* and examples/*.
   - package-ecosystem: npm
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # The Expo example (examples/react-native-skia) uses the versions its Expo SDK pins:
+      # they move together, with `npx expo install --fix` when changing SDK.
+      - dependency-name: "expo"
+      - dependency-name: "expo-*"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-reanimated"
+      - dependency-name: "react-native-worklets"
+      - dependency-name: "@shopify/react-native-skia"
+      # One React for the workspace (the one the Expo SDK pins), so that Remotion and the
+      # packages' tests resolve a single copy.
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "@types/react"
     groups:
+      # Remotion's packages share one version.
+      remotion:
+        patterns: ["remotion", "@remotion/*"]
+      # Minor and patch updates together; each major update in its own pull request.
       npm-dependencies:
         patterns: ["*"]
+        update-types: ["minor", "patch"]
