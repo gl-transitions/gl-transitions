@@ -167,6 +167,7 @@ jobs:
   publish:
     needs: pack
     runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: write
       id-token: write
@@ -264,6 +265,7 @@ jobs:
     needs: pack-crate
     if: ${{ !cancelled() && needs.pack-crate.result == 'success' && needs.pack-crate.outputs.publish == 'true' }}
     runs-on: ubuntu-latest
+    environment: release
     permissions:
       contents: read
       id-token: write
