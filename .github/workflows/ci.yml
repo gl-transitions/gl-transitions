@@ -28,8 +28,10 @@ jobs:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        # Without the examples: the e2e and Reference renders workflows build them.
-        run: pnpm install --frozen-lockfile --filter '!gl-transitions-react-native-skia-example' --filter '!gl-transitions-remotion-example' --no-optional
+        # Without the examples: the e2e and Reference renders workflows build them. With the
+        # optional dependencies: TypeScript 7's compiler is a native binary from an optional
+        # platform package (this also installs gl and webgpu, which this job does not use).
+        run: pnpm install --frozen-lockfile --filter '!gl-transitions-react-native-skia-example' --filter '!gl-transitions-remotion-example'
 
       # glslang (checksummed download) and naga (cargo build, ~1 min) for the shader targets.
       - name: Cache shader toolchain
