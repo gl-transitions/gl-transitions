@@ -21,3 +21,11 @@ swift/Sources/GLTransitions/Generated/
 swift/LICENSES.md
 swift/.build/
 swift/.swiftpm/
+
+# The Android library: its catalog and resources are written by scripts/android-library/build-android-library.mjs.
+android/gl-transitions/src/main/kotlin/com/gltransitions/generated/
+android/gl-transitions/src/main/resources/
+android/.gradle/
+android/build/
+android/gl-transitions/build/
+android/local.properties

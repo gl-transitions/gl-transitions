@@ -37,3 +37,13 @@ updates:
       npm-dependencies:
         patterns: ["*"]
         update-types: ["minor", "patch"]
+
+  # The Android library (android/): the Android Gradle plugin, the test libraries and the Gradle wrapper.
+  - package-ecosystem: gradle
+    directory: /android
+    schedule:
+      interval: weekly
+    groups:
+      gradle-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
