@@ -19,6 +19,7 @@
     "build:sksl": "node scripts/targets/build-sksl.mjs",
     "build:agent-docs": "node scripts/agents/build-agent-docs.mjs --out packages/gl-transitions/dist",
     "build:crate": "node scripts/rust-crate/build-crate.mjs",
+    "build:swift": "node scripts/swift-package/build-swift-package.mjs",
     "build:glsl3": "node scripts/targets/build-glsl3.mjs",
     "build:wgsl-msl": "node scripts/targets/build-wgsl-msl.mjs",
     "build:compatibility": "node scripts/targets/build-compatibility.mjs",

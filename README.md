@@ -1,6 +1,7 @@
 - Website: [gl-transitions.com](https://gl-transitions.com) *(alternative hosting: [gl-transitions.surge.sh](https://gl-transitions.surge.sh/))*
 - NPM package: [gl-transitions](https://www.npmjs.com/package/gl-transitions)
 - Rust crate: [gl-transitions](crates/gl-transitions) (SkSL, WGSL, Metal and GLSL sources with typed parameters, for skia-safe, wgpu, Bevy…; not on crates.io yet)
+- Swift package: [GLTransitions](swift) (Metal shaders, a Metal renderer and an AVFoundation compositor for transitions between video clips; iOS, macOS, tvOS, visionOS; not published yet)
 - Libraries for gl-transitions: [gl-transition-libs](https://github.com/gre/gl-transition-libs)
 - For coding agents: [llms.txt](https://cdn.jsdelivr.net/npm/gl-transitions@1/llms.txt) and an [Agent Skill](skills/gl-transitions/SKILL.md)
 
