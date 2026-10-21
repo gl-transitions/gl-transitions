@@ -1,30 +1,57 @@
-- Website: [gl-transitions.com](https://gl-transitions.com) *(alternative hosting: [gl-transitions.surge.sh](https://gl-transitions.surge.sh/))*
-- NPM package: [gl-transitions](https://www.npmjs.com/package/gl-transitions)
-- Rust crate: [gl-transitions](crates/gl-transitions) (SkSL, WGSL, Metal and GLSL sources with typed parameters, for skia-safe, wgpu, Bevy…; not on crates.io yet)
-- Swift package: [GLTransitions](swift) (Metal shaders, a Metal renderer and an AVFoundation compositor for transitions between video clips; iOS, macOS, tvOS, visionOS; installed from [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift)), with an [example app](examples/swiftui)
-- Android library: [gl-transitions](android) (AGSL shaders for RuntimeShader, Android 13+, with typed parameters; Kotlin and Java; on [Maven Central](https://central.sonatype.com/artifact/com.gl-transitions/gl-transitions)), with an [example app](examples/android)
-- Libraries for gl-transitions: [gl-transition-libs](https://github.com/gre/gl-transition-libs)
-- For coding agents: [llms.txt](https://cdn.jsdelivr.net/npm/gl-transitions@1/llms.txt) and an [Agent Skill](skills/gl-transitions/SKILL.md)
+# GL Transitions
 
----
+[![CI](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml/badge.svg)](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/gl-transitions)](https://www.npmjs.com/package/gl-transitions)
+[![crates.io](https://img.shields.io/crates/v/gl-transitions)](https://crates.io/crates/gl-transitions)
+[![Maven Central](https://img.shields.io/maven-central/v/com.gl-transitions/gl-transitions)](https://central.sonatype.com/artifact/com.gl-transitions/gl-transitions)
 
-New transitions merged into [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions)'s master are published in the next npm minor release, listed in the [changelog](packages/gl-transitions/CHANGELOG.md).
+<a href="https://gl-transitions.com/gallery"><img src=".github/readme/transitions.webp" width="800" alt="Twelve transitions playing between sample images: cube, doorway, crosswarp, ripple, Swirl, BookFlip, GlitchMemories, windowslice, InvertedPageCurl, pixelize, morph and wind"></a>
 
-[![CI](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml/badge.svg)](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml) [![npm version](https://badge.fury.io/js/gl-transitions.svg)](https://badge.fury.io/js/gl-transitions)
+An open collection of 100+ transitions between two images, written by the community as small GLSL functions that follow one [specification](#gl-transition-specification-v1). They are translated to SkSL, GLSL ES 3.00, WGSL, Metal and AGSL, for web pages, React Native and Android apps, iOS and macOS video exports or Rust renderers. CI compiles every translation, renders the SkSL, WGSL, Metal and AGSL ones and compares them with the GLSL original, and `compatibility.json` in the npm package gives the result for each transition and target.
 
----
+**Browse them and edit them live at [gl-transitions.com](https://gl-transitions.com).**
+
+## Use the transitions
+
+| Platform | Package | Install |
+|---|---|---|
+| Any JavaScript: the sources in every language, with their parameters | [`gl-transitions`](packages/gl-transitions) | `npm install gl-transitions` |
+| WebGL, regl, gl-react, rendering videos from the command line | [`gl-transition`, `regl-transition`, `react-gl-transition`, `gl-transition-scripts`](https://github.com/gre/gl-transition-libs) | `npm install gl-transition` (or `regl-transition`, `react-gl-transition`, `gl-transition-scripts`) |
+| React Native Skia | [`@gl-transitions/react-native-skia`](packages/react-native-skia) | `npm install gl-transitions @gl-transitions/react-native-skia`, with `@shopify/react-native-skia` |
+| Remotion | [`@gl-transitions/remotion`](packages/remotion) | `npm install gl-transitions @gl-transitions/remotion @remotion/transitions` |
+| Apple platforms: Metal, AVFoundation video compositions, SwiftUI | [`GLTransitions`](swift) | Swift Package Manager, from [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift) |
+| Android 13+: AGSL `RuntimeShader`, Kotlin and Java | [`com.gl-transitions:gl-transitions`](android) | Gradle, from Maven Central |
+| Rust: skia-safe, wgpu, Bevy… | [`gl-transitions`](crates/gl-transitions) | `cargo add gl-transitions` |
+| Coding agents | [llms.txt](https://cdn.jsdelivr.net/npm/gl-transitions@1/llms.txt), [Agent Skill](skills/gl-transitions/SKILL.md) | |
+
+Each package's README has a usage example. Example apps: [SwiftUI](examples/swiftui), [Android](examples/android), [React Native Skia](examples/react-native-skia), [Remotion](examples/remotion), [fframes](examples/fframes).
+
+Outside this project, the transitions are also used by [editly](https://github.com/mifi/editly), [ffmpeg-gl-transition](https://github.com/transitive-bullshit/ffmpeg-gl-transition) and [xfade-easing](https://github.com/scriptituk/xfade-easing) (FFmpeg).
+
+## Contribute a transition
+
+1. Write it in the [editor](https://gl-transitions.com/editor), which renders it as you type.
+2. Open a pull request that adds `transitions/YourTransition.glsl`, following the [specification](#gl-transition-specification-v1) and [CONTRIBUTING.md](CONTRIBUTING.md).
+3. CI checks it, renders it and comments preview GIFs on the pull request.
+
+## Releases
+
+New transitions merged into master are published in the next minor release of the npm package, listed in the [changelog](packages/gl-transitions/CHANGELOG.md). The Swift package and the Android library are released with the same version, and the Rust crate with a patch release ([changelog](crates/gl-transitions/CHANGELOG.md)).
+
+## License
+
+[MIT](LICENSE). Each transition states its license in its header, and the packages give it with each transition: all are MIT except two under BSD licenses.
 
 # GL Transition Specification v1
 
-**NB. This is a technical documentation, for more informal information, please see the [gl-transitions.com](https://gl-transitions.com/) homepage.**
-
-This document specifies GL Transition Specification **v1**, `1` as in `gl-transitions @ 1` (consistently to the NPM package major). For any breaking changes in this specification, semver will be respected and the major will get bumped.
+This section specifies GL Transitions **v1**, `1` as in `gl-transitions@1`, the major version of the npm package. A breaking change to this specification bumps that major version.
 
 ## What is a transition?
 
 A Transition is an animation that smoothly animates the intermediary steps between 2 textures: `from` and `to`. The step is specified by a `progress` value that moves from `0.0` to `1.0`.
 
-> important feature to respect: When progress is 0.0, exclusively the `from` texture must be rendered. When progress is 1.0, exclusively the `to` texture must be rendered.
+> [!IMPORTANT]
+> When progress is 0.0, only the `from` texture must be rendered. When progress is 1.0, only the `to` texture must be rendered.
 
 ## GL Transition
 
@@ -39,7 +66,13 @@ vec4 transition (vec2 uv) {
 }
 ```
 
-A GL Transition is a GLSL code that implements a `transition` function which takes a `vec2 uv` pixel position and returns a `vec4` color. This color represents the mix of the `from` to the `to` textures based on the variation of a contextual `progress` value from `0.0` to `1.0`.
+A GL Transition is GLSL code that implements a `transition` function which takes a `vec2 uv` position and returns a `vec4` color. This color represents the mix of the `from` to the `to` textures based on the variation of a contextual `progress` value from `0.0` to `1.0`.
+
+### Language and coordinates
+
+- The code is GLSL ES 1.00 (WebGL 1). The implementer provides the rest of the fragment shader: the precision, the contextual variables and functions below, and `main()`. So a transition must not define `main()` or declare a `precision`, and doesn't need `#ifdef GL_ES`.
+- `uv` goes from `vec2(0.0)` to `vec2(1.0)` over the output, with the origin at the bottom left. Don't use `gl_FragCoord` or a `resolution` uniform: the transition must render the same at any size.
+- `transition` returns the color as straight (not premultiplied) RGBA, like the colors `getFromColor` and `getToColor` return. It returns it rather than writing `gl_FragColor`.
 
 ### Contextual variables
 
@@ -51,7 +84,19 @@ A GL Transition is a GLSL code that implements a `transition` function which tak
 - `vec4 getFromColor(vec2 uv)`: lookup the "from" texture at a given uv coordinate.
 - `vec4 getToColor(vec2 uv)`: lookup the "to" texture at a given uv coordinate.
 
-> don't directly use `texture2D` to get a texture pixel out of from and to textures. Instead, use `getFromColor(vec2)` and `getToColor(vec2)`. That way, the "implementer" can properly implement ratio preserving support as well as choosing a different color for the "out of bound" case.
+> don't directly use `texture2D` to get a texture pixel out of the from and to textures. Instead, use `getFromColor(vec2)` and `getToColor(vec2)`. That way, the "implementer" can properly implement ratio preserving support as well as choosing a different color for the "out of bound" case.
+
+### Header
+
+Header comments credit the transition, usually at the top of the file:
+
+```glsl
+// Author: Your Name
+// License: MIT
+```
+
+- `Author` and `License` are required. The value of `Author` must not contain `:` (write `name (gitlab.com/handle)` rather than a URL with a scheme), so that tools reading `key: value` lines don't misread it.
+- Tools reading a transition without `License` treat it as MIT.
 
 ### Transition parameters
 
@@ -59,7 +104,9 @@ Transition parameters are parameters that the final user can set to tweak the tr
 
 > any constant you define in your transitions are potential parameters to expose.
 
-When you define a transition parameter, you must also define a default value that will get set in case the final user didn't provide it. It's unfortunately not possible to initialize a uniform in GLSL 120 (WebGL 1) but we support commented code `// = value`
+A parameter is a `uniform` of type `bool`, `int`, `float`, `vec2`, `vec3`, `vec4`, `ivec2`, `ivec3` or `ivec4`, with a default value. A uniform without a default value isn't a parameter.
+
+When you define a transition parameter, you must also define a default value that will get set in case the final user didn't provide it. It's unfortunately not possible to initialize a uniform in GLSL ES 1.00 (WebGL 1) but we support commented code `// = value`
 
 Examples:
 
@@ -113,7 +160,7 @@ Hints are on their own line (not after the default value) so that existing parse
 
 ### Extra textures
 
-A transition may declare additional `uniform sampler2D` inputs (e.g. `luma`, `displacement`). They are listed in the `textures` field of `gl-transitions.json`; the implementer is responsible for providing them.
+A transition may declare additional `uniform sampler2D` inputs (e.g. `luma`, `displacement`). They are listed in the `textures` field of `gl-transitions.json`; the implementer is responsible for providing them. They are sampled with `texture2D` directly (e.g. `texture2D(luma, uv)`).
 
 ### `gl-transitions.json` format
 
@@ -133,4 +180,6 @@ The npm package exposes the collection as an array of objects:
 
 # `gl-transitions` collection policy
 
-- If we have duplicated transitions or one transition is more generic than another one, we don't necessarily drop the less generic one: it might be more performant and might fit for some users. We also want to keep backward compat'. If we still want to drop it, what we will do is to deprecate it and drop it at the next major bump.
+- A transition's name (its file name) never changes once it is published.
+- If we have duplicated transitions or one transition is more generic than another one, we don't necessarily drop the less generic one: it might be more performant and might fit for some users, and we keep backward compatibility. If we still want to drop it, we deprecate it and drop it at the next major version.
+- New transitions are preferably MIT licensed, and come with a `Description` and `Tags` (see [Transition metadata](#transition-metadata-optional)).

@@ -42,12 +42,12 @@ vec4 transition(vec2 uv) {
 1. **Author comment** on the first line: `// Author: Your Name`
 2. **License comment** on the second line: `// License: MIT` (MIT is strongly preferred)
 3. **`transition` function**: `vec4 transition(vec2 uv)` - the entry point
-4. Use **`getFromColor(uv)`** and **`getToColor(uv)`** to sample textures (not `texture2D`)
+4. Use **`getFromColor(uv)`** and **`getToColor(uv)`** to sample the `from` and `to` images (`texture2D` is only for extra `sampler2D` textures)
 5. Use the contextual **`progress`** variable (0.0 to 1.0)
 
 ### Transition parameters
 
-Define parameters as uniforms with commented default values (GLSL 120 / WebGL 1 does not support uniform initialization):
+Define parameters as uniforms with commented default values (GLSL ES 1.00 / WebGL 1 does not support uniform initialization):
 
 ```glsl
 uniform float speed; // = 1.0
