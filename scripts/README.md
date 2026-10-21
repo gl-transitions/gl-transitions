@@ -19,6 +19,7 @@ pnpm run build       # the gl-transitions package, in packages/gl-transitions/di
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
 | `rust-crate/` | `build-crate.mjs`, which writes the sources of the [Rust crate](../crates/gl-transitions) from the built npm package (see below), and `sync-version.mjs`, which copies the crate's version from changesets into `Cargo.toml` |
 | `swift-package/` | `build-swift-package.mjs`, which writes the catalog of the [Swift package](../swift) from the built npm package, and `check.mjs`, which compares its Metal renders with the reference renders (see below) |
+| `android-library/` | `build-android-library.mjs`, which writes the catalog and AGSL sources of the [Android library](../android) from the built npm package, and `check.mjs`, which compares its renders on a device with the reference renders (see below) |
 | `npm-package/` | `build.sh`, which builds `packages/gl-transitions` (its manifest, README and types) into its `dist/`, and `write-transition-changesets.mjs`, which writes a changeset for each transition added or changed since the last release |
 
 The reference renders are the ground truth for every other target: each target renders the same procedural images at the same progress values and is compared pixel by pixel. CI (**Reference renders** workflow) also renders the base branch and the PR to report transitions whose output changed.
@@ -138,3 +139,15 @@ node scripts/swift-package/check.mjs /tmp/refs   # renders every transition with
 ```
 
 The **Swift package** workflow runs these on macOS, with the npm package and the references built on Linux, and builds the package for iOS.
+
+## Android library
+
+[`android`](../android) is the Android library (Gradle, Kotlin): the npm package's SkSL sources, which Android runs as AGSL (`RuntimeShader`, Android 13+), and its catalog. `android-library/build-android-library.mjs` writes `android/gl-transitions/src/main/kotlin/com/gltransitions/generated/Catalog.kt` (one function per transition: a single list would exceed the JVM's method size limit) and the AGSL sources and license notices as Java resources (`src/main/resources/com/gltransitions/`). None of them is committed.
+
+```sh
+pnpm run build && pnpm run build:android
+cd android && ./gradlew :gl-transitions:testDebugUnitTest :gl-transitions:connectedDebugAndroidTest   # device tests: every shader compiled, some rendered
+node scripts/android-library/check.mjs /tmp/refs   # renders every transition on the connected device, compared with the references
+```
+
+The **Android library** workflow runs these on an emulator (SwiftShader, no GPU).
