@@ -1,8 +1,9 @@
 name: Swift package
 
-# Builds and tests the Swift package (swift/) on macOS, and renders every transition with its Metal
-# renderer to compare with the GLSL reference renders (scripts/swift-package/check.mjs). The npm
-# package and the references are built on Linux, as for the other targets.
+# Builds and tests the Swift package (swift/) and its example app (examples/swiftui/) on macOS, and
+# renders every transition with its Metal renderer to compare with the GLSL reference renders
+# (scripts/swift-package/check.mjs). The npm package and the references are built on Linux, as for
+# the other targets.
 
 on:
   pull_request:
@@ -10,6 +11,7 @@ on:
       - "transitions/**"
       - "scripts/**"
       - "swift/**"
+      - "examples/swiftui/**"
       - "packages/gl-transitions/**"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -94,6 +96,13 @@ jobs:
       - name: Build for iOS
         working-directory: swift
         run: xcodebuild build -quiet -scheme GLTransitions -destination generic/platform=iOS
+
+      - name: Example app
+        working-directory: examples/swiftui
+        run: |
+          swift test
+          swift build --product gl-transitions-example
+          xcodebuild build -quiet -project iOS/GLTransitionsExample.xcodeproj -scheme GLTransitionsExampleApp -destination generic/platform=iOS CODE_SIGNING_ALLOWED=NO
 
       - name: Check
         run: node scripts/swift-package/check.mjs /tmp/swift-inputs/references --renders /tmp/swift/renders --report /tmp/swift/report.json

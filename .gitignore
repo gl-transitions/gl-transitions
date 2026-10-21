@@ -22,6 +22,12 @@ swift/LICENSES.md
 swift/.build/
 swift/.swiftpm/
 
+# The Swift example app (examples/swiftui).
+examples/swiftui/.build/
+examples/swiftui/.swiftpm/
+examples/swiftui/iOS/*.xcodeproj/project.xcworkspace/
+examples/swiftui/iOS/*.xcodeproj/xcuserdata/
+
 # The Android library: its catalog and resources are written by scripts/android-library/build-android-library.mjs.
 android/gl-transitions/src/main/kotlin/com/gltransitions/generated/
 android/gl-transitions/src/main/resources/
