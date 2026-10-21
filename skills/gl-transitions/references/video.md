@@ -60,12 +60,43 @@ The constants go at the top of the file, so they are defined before any function
 
 Without a custom FFmpeg build, render the transition frames yourself (WebGL in headless Chrome with `references/webgl.md`, or CanvasKit in Node with `references/skia.md`) and encode them with FFmpeg, or use editly, which does exactly that.
 
-## Remotion (planned)
+## Remotion
 
-There is no gl-transitions presentation for `@remotion/transitions` yet (a `@gl-transitions/remotion` package is planned). For images and videos, a component can do it today:
+`@gl-transitions/remotion` (README at `https://github.com/gl-transitions/gl-transitions/tree/gl-transitions@<version>/packages/remotion`, `<version>` being the one in the title of `catalog.md`): `glTransition()` makes any transition a presentation for `<TransitionSeries>`, between any two scenes (images, videos, text, other compositions). Requires Remotion 4.0.500 or later.
+
+```sh
+npm install gl-transitions @gl-transitions/remotion @remotion/transitions
+```
+
+```tsx
+import { linearTiming, TransitionSeries } from "@remotion/transitions";
+import { glTransition } from "@gl-transitions/remotion";
+
+<TransitionSeries>
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneA />
+  </TransitionSeries.Sequence>
+  <TransitionSeries.Transition
+    presentation={glTransition({ name: "cube", params: { persp: 0.7 } })}
+    timing={linearTiming({ durationInFrames: 30 })}
+  />
+  <TransitionSeries.Sequence durationInFrames={60}>
+    <SceneB />
+  </TransitionSeries.Sequence>
+</TransitionSeries>
+```
+
+- `params` is typed per transition; omitted ones keep their default. Extra textures go in `textures` as URLs, e.g. `glTransition({ name: "luma", textures: { luma: staticFile("spiral.png") } })`.
+- Scenes are captured with Remotion's HTML-in-canvas: rendering works out of the box (without a GPU, render with `--gl=swangle`, the default on Lambda; with one, `--gl=angle`). The Studio preview needs Chrome 149 or later with `chrome://flags/#canvas-draw-element` enabled.
+
+Below Remotion 4.0.500, or for a Studio preview without that flag, a component can still transition between images or videos:
 
 - render a `<canvas>` and draw with the WebGL recipe from `references/webgl.md`;
 - compute `progress` from `useCurrentFrame()` (e.g. `interpolate(frame, [start, start + duration], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })`);
 - load images with `delayRender` / `continueRender` so frames are not captured before textures are ready, and pass `preserveDrawingBuffer: true` to `getContext("webgl")`.
 
-Transitions between arbitrary React scenes are not possible this way: the scenes would have to be rasterized first.
+This fallback cannot transition between arbitrary React scenes: they would have to be rasterized first.
+
+## AVFoundation (iOS, macOS)
+
+The Swift package `GLTransitions` puts transitions between video clips (`TransitionComposition`, `TransitionCompositor`); see `native.md`.

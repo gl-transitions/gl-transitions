@@ -7,6 +7,40 @@
 const REPO = "https://github.com/gl-transitions/gl-transitions";
 const SITE = "https://gl-transitions.com";
 
+// The packages built from this one, linked at the release's tag (gl-transitions@<version>).
+const PACKAGES = [
+  {
+    dir: "packages/react-native-skia",
+    title: "React Native Skia",
+    description: "`@gl-transitions/react-native-skia`, a `<Transition>` component drawing the SkSL versions",
+  },
+  {
+    dir: "packages/remotion",
+    title: "Remotion",
+    description:
+      "`@gl-transitions/remotion`, `glTransition()` presentations for `<TransitionSeries>`, drawing the GLSL with WebGL 2",
+  },
+  {
+    dir: "crates/gl-transitions",
+    title: "Rust",
+    description: "the `gl-transitions` crate, every source with typed parameters and packed uniforms",
+  },
+  {
+    dir: "swift",
+    title: "Swift",
+    description: "the `GLTransitions` package (Metal renderer, AVFoundation compositor), from gl-transitions-swift",
+  },
+  {
+    dir: "android",
+    title: "Android",
+    description: "`com.gl-transitions:gl-transitions` on Maven Central, AGSL shaders (drawing needs Android 13+)",
+  },
+];
+
+function packageLinks(version) {
+  return PACKAGES.map((p) => `- [${p.title}](${REPO}/tree/gl-transitions@${version}/${p.dir}): ${p.description}`);
+}
+
 function cdn(version) {
   return `https://cdn.jsdelivr.net/npm/gl-transitions@${version}`;
 }
@@ -31,7 +65,7 @@ function formatParam(name, p) {
 }
 
 function summary(transitions, version) {
-  return `> The open collection of GL Transitions: ${transitions.length} GLSL shaders that turn one image into another as \`progress\` goes from 0 to 1. Each one is also published as an SkSL runtime effect for Skia. This document describes gl-transitions@${version} (npm).`;
+  return `> The open collection of GL Transitions: ${transitions.length} GLSL shaders that turn one image into another as \`progress\` goes from 0 to 1. The npm package also ships SkSL (Skia), GLSL ES 3.00, WGSL (WebGPU) and Metal versions of those that translate. Packages built from it: React Native Skia (SkSL), Remotion (GLSL with WebGL 2), Rust (every source), Swift (Metal) and Android (AGSL). This document describes gl-transitions@${version} (npm).`;
 }
 
 const SPEC = `Every transition is GLSL (WebGL 1 / GLSL ES 1.00) that implements \`vec4 transition(vec2 uv)\`. The host provides:
@@ -54,9 +88,11 @@ function renderLlmsTxt(transitions, { version }) {
     "## Docs",
     "",
     `- [Full catalog](${base}/llms-full.txt): every transition with its description, tags, parameters and source links`,
-    `- [Agent Skill](${base}/skills/gl-transitions/SKILL.md): how to pick a transition and wire it into WebGL, Skia, FFmpeg or editly`,
+    `- [Agent Skill](${base}/skills/gl-transitions/SKILL.md): how to pick a transition and wire it into WebGL, WebGPU, Skia, Remotion, editly, FFmpeg, Rust, Swift or Android`,
     `- [Catalog JSON](${base}/gl-transitions.json): the same data as an array of objects (name, glsl, params, tags, ...), typed in index.d.ts`,
-    `- [Package README](${base}/README.md): files of the npm package and the SkSL contract`,
+    `- [Package README](${base}/README.md): files of the npm package and the contracts of its SkSL, GLSL ES 3.00, WGSL and Metal versions`,
+    `- [Compatibility](${base}/compatibility.json): which transitions each target supports, and how close each one renders to the GLSL`,
+    ...packageLinks(version),
     `- [Specification](${REPO}#gl-transition-specification-v1): GL Transition Specification v1`,
     "",
     "## Transitions",
@@ -87,7 +123,13 @@ function renderLlmsFullTxt(transitions, { version, sksl = new Set() }) {
     "",
     `SkSL versions (\`sksl/<name>.sksl\`) are standalone Skia runtime effects: children \`_from\`, \`_to\` (then one per extra texture), uniforms \`float2 _resolution\` (output size in pixels), \`progress\`, \`ratio\` and each parameter by name (\`bool\` parameters are \`int\` 0 or 1), entry point \`half4 main(float2 coord)\` with a top-left origin. Draw both images at the output size.`,
     "",
+    `The same transitions as GLSL ES 3.00, WGSL and Metal are at \`glsl3/<name>.glsl\`, \`wgsl/<name>.wgsl\` and \`msl/<name>.metal\` (contracts in the package README, uniform layouts in \`layouts.json\`); \`compatibility.json\` lists the transitions each target supports.`,
+    "",
     `Install: \`npm install gl-transitions\` (\`import transitions from "gl-transitions"\`), or fetch the files below. Latest version: ${cdn(1)}/`,
+    "",
+    "Packages built from it:",
+    "",
+    ...packageLinks(version),
     "",
   ];
   for (const t of transitions) {
@@ -141,4 +183,4 @@ function renderCatalogReference(transitions, { version }) {
   return out.join("\n");
 }
 
-export { renderLlmsTxt, renderLlmsFullTxt, renderCatalogReference, glslLiteral };
+export { renderLlmsTxt, renderLlmsFullTxt, renderCatalogReference, glslLiteral, PACKAGES };
