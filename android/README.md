@@ -2,6 +2,16 @@
 
 The [gl-transitions](https://gl-transitions.com) collection for Android: 100+ transitions between two images as AGSL shaders ([`RuntimeShader`](https://developer.android.com/reference/android/graphics/RuntimeShader), Android 13+), with their metadata and typed parameters. Kotlin, usable from Java.
 
+## Installation
+
+From Maven Central, where each release of the [gl-transitions npm package](https://www.npmjs.com/package/gl-transitions) is published with the same version (the latest: [![Maven Central](https://img.shields.io/maven-central/v/com.gl-transitions/gl-transitions)](https://central.sonatype.com/artifact/com.gl-transitions/gl-transitions)):
+
+```kotlin
+dependencies {
+    implementation("com.gl-transitions:gl-transitions:1.76.1")
+}
+```
+
 ## Drawing a transition
 
 ```kotlin
@@ -36,7 +46,7 @@ Transitions with extra images (`transition.textures`, e.g. `luma`) take them in 
 
 ## Development
 
-This library is built in the [gl-transitions repository](https://github.com/gl-transitions/gl-transitions): its catalog and AGSL sources are generated from the npm package build and not committed. JDK 17 and the Android SDK are needed.
+This library is built in the [gl-transitions repository](https://github.com/gl-transitions/gl-transitions): its catalog and AGSL sources are generated from the npm package build and not committed. CI publishes it to Maven Central with each release of the npm package. JDK 17 and the Android SDK are needed.
 
 ```sh
 # From the repository root

@@ -129,10 +129,17 @@ Releases are prepared with [changesets](https://github.com/changesets/changesets
 
 - A pull request that adds or changes transitions needs nothing more: each one is listed in the changelog of the next release.
 - A pull request that changes a published package otherwise (its code, the build scripts, the Agent Skill) adds a changeset with `pnpm changeset`. CI checks it.
-- On master, the "Version Packages" pull request collects the pending changes. Merging it publishes the new versions to npm, then the Rust crate to crates.io. Both publish jobs run in the `release` environment, restricted to master, and the npm and crates.io trusted publishers require it.
+- On master, the "Version Packages" pull request collects the pending changes. Merging it publishes the new versions to npm, then the Rust crate to crates.io, the Swift package to gl-transitions-swift and the Android library to Maven Central. The publish jobs run in the `release` environment, restricted to master, and the npm and crates.io trusted publishers require it; it holds the other secrets.
 
 The Rust crate ([crates/gl-transitions](crates/gl-transitions)) is versioned by changesets too, as the private package `gl-transitions-crate` (its `package.json` only carries the version):
 
 - Each release of the `gl-transitions` npm package bumps the crate's patch version, so that `^0.x` users get the new transitions. A change to the crate's API (`crates/gl-transitions/src`, `scripts/rust-crate/`) adds a changeset for `gl-transitions-crate`, a minor one when it breaks something while the crate is in 0.x.
 - `pnpm run changeset:version` copies its version into `Cargo.toml` and the `Cargo.lock` files (`scripts/rust-crate/sync-version.mjs`); a test checks that they agree.
 - Once the npm packages are published, CI builds the crate's sources from the published `gl-transitions` package, packages the crate and publishes it with crates.io trusted publishing (no token). The release is tagged `gl-transitions-crate@<version>`, with its GitHub release. A version that is already on crates.io is skipped, and one that failed to publish is retried on the next push to master.
+
+The Swift package ([swift](swift)) and the Android library ([android](android)) take the version of the `gl-transitions` npm package: they need no changeset, and a change to them ships with the next release of the npm package. Once the npm packages are published, CI builds them from the published `gl-transitions` package, as for the crate, and tests them, without secrets; then:
+
+- The Swift package is pushed to [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift), a read-only mirror (SwiftPM installs from git tags): a commit on `main` replacing its content (`scripts/swift-package/build-mirror.mjs`: `swift/` with its catalog, without the `gl-transitions-check` executable), tagged with the version (`scripts/swift-package/publish-mirror.mjs`). The job pushes with a deploy key of that repository (`SWIFT_DEPLOY_KEY`), never force-pushes, and skips a tag that exists.
+- The Android library is published by Gradle to a local repository, then signed with GPG (`SIGNING_KEY`, `SIGNING_PASSWORD`) and uploaded to the [Central Portal](https://central.sonatype.com) (`MAVEN_CENTRAL_USERNAME`, `MAVEN_CENTRAL_PASSWORD`: a user token), which releases it once validated; the job holding these secrets builds nothing. A version already on Maven Central is skipped.
+
+As for the crate, a version that failed to publish is retried on the next push to master. On pull requests, the Swift workflow publishes the package to a local repository and installs it from there, and the Android one publishes the library to its local repository.

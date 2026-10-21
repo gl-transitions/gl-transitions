@@ -97,6 +97,29 @@ jobs:
         working-directory: swift
         run: xcodebuild build -quiet -scheme GLTransitions -destination generic/platform=iOS
 
+      # What ci.yml publishes to gl-transitions-swift, published to a local repository and installed
+      # from it.
+      - name: Published package
+        run: |
+          version=$(node -p 'require("/tmp/swift-inputs/package/package.json").version')
+          node scripts/swift-package/build-mirror.mjs --package /tmp/swift-inputs/package --out /tmp/mirror/content
+          git init -q --bare /tmp/mirror/gl-transitions-swift.git
+          node scripts/swift-package/publish-mirror.mjs /tmp/mirror/content --remote /tmp/mirror/gl-transitions-swift.git --version "$version"
+          mkdir -p /tmp/mirror/app/Sources/App
+          cat > /tmp/mirror/app/Package.swift <<EOF
+          // swift-tools-version:6.0
+          import PackageDescription
+          let package = Package(
+              name: "App",
+              platforms: [.macOS(.v13)],
+              dependencies: [.package(url: "file:///tmp/mirror/gl-transitions-swift.git", from: "$version")],
+              targets: [.executableTarget(name: "App", dependencies: [.product(name: "GLTransitions", package: "gl-transitions-swift")])]
+          )
+          EOF
+          echo 'import GLTransitions; print(GLTransitions.catalogVersion)' > /tmp/mirror/app/Sources/App/main.swift
+          swift build --package-path /tmp/mirror/app
+          test "$("$(swift build --package-path /tmp/mirror/app --show-bin-path)/App")" = "$version"
+
       - name: Example app
         working-directory: examples/swiftui
         run: |
