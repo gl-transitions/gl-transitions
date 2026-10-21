@@ -37,6 +37,8 @@ for (const [name, data] of Object.entries({ from: fromImage, to: toImage, extra:
   png.data = Buffer.from(data);
   fs.writeFileSync(path.join(images, `${name}.png`), PNG.sync.write(png));
 }
+// A file rather than an instrumentation argument, which recent Android Gradle plugins split on commas.
+fs.writeFileSync(path.join(images, "progress.txt"), PROGRESS.join(","));
 fs.rmSync(path.join(LIBRARY, "build/outputs/connected_android_test_additional_output"), {
   recursive: true,
   force: true,
@@ -46,7 +48,7 @@ execFileSync(
   [
     ":gl-transitions:connectedDebugAndroidTest",
     "-Pandroid.testInstrumentationRunnerArguments.class=com.gltransitions.CheckTest",
-    `-Pandroid.testInstrumentationRunnerArguments.checkProgress=${PROGRESS.join(",")}`,
+    "-Pandroid.testInstrumentationRunnerArguments.renderStrips=true",
     "--console=plain",
   ],
   { cwd: path.join(ROOT, "android"), stdio: "inherit" },
