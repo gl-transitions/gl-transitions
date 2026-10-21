@@ -1,7 +1,8 @@
 name: Android library
 
 # Builds and tests the Android library (android/) and renders every transition with it on an
-# emulator, compared with the GLSL reference renders (scripts/android-library/check.mjs).
+# emulator, compared with the GLSL reference renders (scripts/android-library/check.mjs). Also
+# builds and tests the example app (examples/android) on the same emulator.
 
 on:
   pull_request:
@@ -9,6 +10,7 @@ on:
       - "transitions/**"
       - "scripts/**"
       - "android/**"
+      - "examples/android/**"
       - "packages/gl-transitions/**"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -23,6 +25,7 @@ on:
       - "transitions/**"
       - "scripts/**"
       - "android/**"
+      - "examples/android/**"
       - "packages/gl-transitions/**"
       - "package.json"
       - "pnpm-lock.yaml"
@@ -83,6 +86,10 @@ jobs:
         working-directory: android
         run: ./gradlew :gl-transitions:assembleDebug :gl-transitions:testDebugUnitTest :gl-transitions:assembleDebugAndroidTest --console=plain
 
+      - name: Build the example app
+        working-directory: examples/android
+        run: ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest --console=plain
+
       - name: Enable KVM
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -104,6 +111,7 @@ jobs:
           script: |
             android/gradlew -p android :gl-transitions:connectedDebugAndroidTest --console=plain
             node scripts/android-library/check.mjs /tmp/refs --renders /tmp/android/renders --report /tmp/android/report.json
+            examples/android/gradlew -p examples/android :app:connectedDebugAndroidTest --console=plain
 
       - name: Summary
         if: always()
@@ -119,4 +127,5 @@ jobs:
           path: |
             /tmp/android/
             android/gl-transitions/build/reports/
+            examples/android/app/build/reports/
           if-no-files-found: warn

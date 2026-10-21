@@ -2,6 +2,9 @@ plugins {
     id("com.android.library")
 }
 
+// The coordinates of the published library (and of the dependency examples/android substitutes).
+group = "com.gl-transitions"
+
 android {
     namespace = "com.gltransitions"
     compileSdk = 36
