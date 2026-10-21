@@ -30,7 +30,7 @@ public enum TransitionError: Error, Equatable, LocalizedError {
     }
 }
 
-extension Transition {
+extension GLTransition {
     /// The uniform buffer of the shader: `progress`, `ratio` (width / height of the output), then
     /// each parameter, from `params` or its default. `bool` parameters are written as 0 or 1.
     public func uniformBuffer(progress: Float, ratio: Float, params: [String: ParamValue] = [:]) throws -> [UInt8] {

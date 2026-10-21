@@ -130,7 +130,7 @@ The **Rust crate** workflow runs these, Clippy and `cargo publish --dry-run`. Th
 
 ## Swift package
 
-[`swift`](../swift) is the Swift package: the npm package's Metal sources and catalog, a Metal renderer and an AVFoundation compositor. `swift-package/build-swift-package.mjs` writes `swift/Sources/GLTransitions/Generated/Catalog.swift`, one `Transition` per transition with its Metal source as a string (each one is compiled at run time into its own library: the translated shaders all name their entry point `main_`), and `swift/LICENSES.md`. Neither is committed.
+[`swift`](../swift) is the Swift package: the npm package's Metal sources and catalog, a Metal renderer and an AVFoundation compositor. `swift-package/build-swift-package.mjs` writes `swift/Sources/GLTransitions/Generated/Catalog.swift`, one `GLTransition` per transition with its Metal source as a string (each one is compiled at run time into its own library: the translated shaders all name their entry point `main_`), and `swift/LICENSES.md`. Neither is committed.
 
 ```sh
 pnpm run build && pnpm run build:swift

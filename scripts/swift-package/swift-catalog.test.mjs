@@ -30,7 +30,7 @@ test("swift catalog: sorted, only the transitions with a Metal source", () => {
     version: "1.2.3",
   });
   assert.match(swift, /public static let catalogVersion = "1\.2\.3"/);
-  assert.match(swift, /public static let all: \[Transition\] = \[transition0, transition1\]/);
+  assert.match(swift, /public static let all: \[GLTransition\] = \[transition0, transition1\]/);
   assert.ok(swift.indexOf('name: "Bounce"') < swift.indexOf('name: "fade"'));
   assert.doesNotMatch(swift, /noMetal/);
   assert.match(swift, /metalSource: #"""\nfragment bounce\n"""#/);

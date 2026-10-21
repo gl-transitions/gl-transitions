@@ -47,7 +47,7 @@ public final class TransitionRenderer: @unchecked Sendable {
     }
 
     /// Compiles the transition for targets of this pixel format, ahead of the first `encode`.
-    public func prepare(_ transition: Transition, pixelFormat: MTLPixelFormat = .bgra8Unorm) throws {
+    public func prepare(_ transition: GLTransition, pixelFormat: MTLPixelFormat = .bgra8Unorm) throws {
         _ = try pipeline(transition, pixelFormat: pixelFormat)
     }
 
@@ -55,7 +55,7 @@ public final class TransitionRenderer: @unchecked Sendable {
     /// `target`. `params` default to the transition's defaults; `textures` must have each of the
     /// transition's extra textures. The images are stretched to the target.
     public func encode(
-        _ transition: Transition,
+        _ transition: GLTransition,
         from: MTLTexture,
         to: MTLTexture,
         progress: Float,
@@ -94,7 +94,7 @@ public final class TransitionRenderer: @unchecked Sendable {
     }
 
     // Compiled outside the lock, so that drawing cached transitions doesn't wait for a compilation.
-    private func pipeline(_ transition: Transition, pixelFormat: MTLPixelFormat) throws -> MTLRenderPipelineState {
+    private func pipeline(_ transition: GLTransition, pixelFormat: MTLPixelFormat) throws -> MTLRenderPipelineState {
         let key = PipelineKey(name: transition.name, pixelFormat: pixelFormat)
         if let pipeline = lock.withLock({ pipelines[key] }) { return pipeline }
         let descriptor = MTLRenderPipelineDescriptor()
@@ -107,7 +107,7 @@ public final class TransitionRenderer: @unchecked Sendable {
     }
 
     // Each transition is its own library: the translated shaders all name their entry point `main_`.
-    private func fragmentFunction(_ transition: Transition) throws -> MTLFunction {
+    private func fragmentFunction(_ transition: GLTransition) throws -> MTLFunction {
         if let function = lock.withLock({ functions[transition.name] }) { return function }
         do {
             let library = try device.makeLibrary(source: transition.metalSource, options: nil)

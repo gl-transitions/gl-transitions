@@ -3,13 +3,13 @@ public enum GLTransitions {
     private static let byName = Dictionary(uniqueKeysWithValues: all.map { ($0.name, $0) })
 
     /// The transition with this name (as in gl-transitions.com), if the collection has it.
-    public static func named(_ name: String) -> Transition? {
+    public static func named(_ name: String) -> GLTransition? {
         byName[name]
     }
 }
 
 /// A transition between two images: its metadata, parameters and Metal fragment shader.
-public struct Transition: Hashable, Sendable {
+public struct GLTransition: Hashable, Sendable {
     public let name: String
     public let author: String
     public let license: String
@@ -26,7 +26,7 @@ public struct Transition: Hashable, Sendable {
     /// textures; uv in `[[user(loc0)]]` with a bottom-left origin.
     public let metalSource: String
 
-    public static func == (lhs: Transition, rhs: Transition) -> Bool {
+    public static func == (lhs: GLTransition, rhs: GLTransition) -> Bool {
         lhs.name == rhs.name
     }
 

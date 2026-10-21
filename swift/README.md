@@ -46,7 +46,7 @@ Transitions with extra textures (`transition.textures`, e.g. `luma`) take them i
 
 ## The collection
 
-`GLTransitions.all` lists the transitions, `GLTransitions.named(_:)` finds one. Each `Transition` has its `name`, `author`, `license`, `description`, `tags`, `params` (type, default, range, whether it is a color), extra `textures`, its Metal source (`metalSource`) and its `uniformLayout`, to draw it with your own renderer; `uniformBuffer(progress:ratio:params:)` packs its uniforms. The bindings are those of the [Metal files of the npm package](https://github.com/gl-transitions/gl-transitions/tree/master/packages/gl-transitions#wgsl-and-metal-contract).
+`GLTransitions.all` lists the transitions, `GLTransitions.named(_:)` finds one. Each `GLTransition` has its `name`, `author`, `license`, `description`, `tags`, `params` (type, default, range, whether it is a color), extra `textures`, its Metal source (`metalSource`) and its `uniformLayout`, to draw it with your own renderer; `uniformBuffer(progress:ratio:params:)` packs its uniforms. The bindings are those of the [Metal files of the npm package](https://github.com/gl-transitions/gl-transitions/tree/master/packages/gl-transitions#wgsl-and-metal-contract).
 
 `GLTransitions.catalogVersion` is the version of the [gl-transitions npm package](https://www.npmjs.com/package/gl-transitions) the transitions come from; their Metal sources are translated from the original GLSL by [naga](https://github.com/gfx-rs/wgpu/tree/trunk/naga). In CI, every transition is rendered with this package's renderer and compared with the GLSL reference renders.
 

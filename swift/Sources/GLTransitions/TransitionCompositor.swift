@@ -12,7 +12,7 @@ public final class TransitionInstruction: NSObject, AVVideoCompositionInstructio
     public let requiredSourceTrackIDs: [NSValue]?
     public let passthroughTrackID: CMPersistentTrackID
 
-    public let transition: Transition?
+    public let transition: GLTransition?
     public let fromTrackID: CMPersistentTrackID
     public let toTrackID: CMPersistentTrackID
     public let params: [String: ParamValue]
@@ -33,7 +33,7 @@ public final class TransitionInstruction: NSObject, AVVideoCompositionInstructio
     }
 
     public init(
-        _ transition: Transition,
+        _ transition: GLTransition,
         from fromTrackID: CMPersistentTrackID,
         to toTrackID: CMPersistentTrackID,
         timeRange: CMTimeRange,
