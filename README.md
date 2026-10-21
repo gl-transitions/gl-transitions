@@ -44,15 +44,14 @@ New transitions merged into master are published in the next minor release of th
 
 # GL Transition Specification v1
 
-**NB. This is a technical documentation, for more informal information, please see the [gl-transitions.com](https://gl-transitions.com/) homepage.**
-
-This document specifies GL Transition Specification **v1**, `1` as in `gl-transitions @ 1` (consistently to the NPM package major). For any breaking changes in this specification, semver will be respected and the major will get bumped.
+This section specifies GL Transitions **v1**, `1` as in `gl-transitions@1`, the major version of the npm package. A breaking change to this specification bumps that major version.
 
 ## What is a transition?
 
 A Transition is an animation that smoothly animates the intermediary steps between 2 textures: `from` and `to`. The step is specified by a `progress` value that moves from `0.0` to `1.0`.
 
-> important feature to respect: When progress is 0.0, exclusively the `from` texture must be rendered. When progress is 1.0, exclusively the `to` texture must be rendered.
+> [!IMPORTANT]
+> When progress is 0.0, only the `from` texture must be rendered. When progress is 1.0, only the `to` texture must be rendered.
 
 ## GL Transition
 
@@ -67,7 +66,13 @@ vec4 transition (vec2 uv) {
 }
 ```
 
-A GL Transition is a GLSL code that implements a `transition` function which takes a `vec2 uv` pixel position and returns a `vec4` color. This color represents the mix of the `from` to the `to` textures based on the variation of a contextual `progress` value from `0.0` to `1.0`.
+A GL Transition is GLSL code that implements a `transition` function which takes a `vec2 uv` position and returns a `vec4` color. This color represents the mix of the `from` to the `to` textures based on the variation of a contextual `progress` value from `0.0` to `1.0`.
+
+### Language and coordinates
+
+- The code is GLSL ES 1.00 (WebGL 1). The implementer provides the rest of the fragment shader: the precision, the contextual variables and functions below, and `main()`. So a transition must not define `main()` or declare a `precision`, and doesn't need `#ifdef GL_ES`.
+- `uv` goes from `vec2(0.0)` to `vec2(1.0)` over the output, with the origin at the bottom left. Don't use `gl_FragCoord` or a `resolution` uniform: the transition must render the same at any size.
+- `transition` returns the color as straight (not premultiplied) RGBA, like the colors `getFromColor` and `getToColor` return. It returns it rather than writing `gl_FragColor`.
 
 ### Contextual variables
 
@@ -81,11 +86,25 @@ A GL Transition is a GLSL code that implements a `transition` function which tak
 
 > don't directly use `texture2D` to get a texture pixel out of the from and to textures. Instead, use `getFromColor(vec2)` and `getToColor(vec2)`. That way, the "implementer" can properly implement ratio preserving support as well as choosing a different color for the "out of bound" case.
 
+### Header
+
+Header comments credit the transition, usually at the top of the file:
+
+```glsl
+// Author: Your Name
+// License: MIT
+```
+
+- `Author` and `License` are required. The value of `Author` must not contain `:` (write `name (gitlab.com/handle)` rather than a URL with a scheme), so that tools reading `key: value` lines don't misread it.
+- Tools reading a transition without `License` treat it as MIT.
+
 ### Transition parameters
 
 Transition parameters are parameters that the final user can set to tweak the transition. They are constant over a full run of a transition *(no parameter changes when progress moves from 0.0 to 1.0)*.
 
 > any constant you define in your transitions are potential parameters to expose.
+
+A parameter is a `uniform` of type `bool`, `int`, `float`, `vec2`, `vec3`, `vec4`, `ivec2`, `ivec3` or `ivec4`, with a default value. A uniform without a default value isn't a parameter.
 
 When you define a transition parameter, you must also define a default value that will get set in case the final user didn't provide it. It's unfortunately not possible to initialize a uniform in GLSL ES 1.00 (WebGL 1) but we support commented code `// = value`
 
@@ -161,4 +180,6 @@ The npm package exposes the collection as an array of objects:
 
 # `gl-transitions` collection policy
 
-- If we have duplicated transitions or one transition is more generic than another one, we don't necessarily drop the less generic one: it might be more performant and might fit for some users. We also want to keep backward compat'. If we still want to drop it, what we will do is to deprecate it and drop it at the next major bump.
+- A transition's name (its file name) never changes once it is published.
+- If we have duplicated transitions or one transition is more generic than another one, we don't necessarily drop the less generic one: it might be more performant and might fit for some users, and we keep backward compatibility. If we still want to drop it, we deprecate it and drop it at the next major version.
+- New transitions are preferably MIT licensed, and come with a `Description` and `Tags` (see [Transition metadata](#transition-metadata-optional)).
