@@ -2,6 +2,16 @@
 
 The [gl-transitions](https://gl-transitions.com) collection for Apple platforms: 100+ transitions between two images as Metal shaders, with their metadata and typed parameters, a Metal renderer, and an AVFoundation compositor to put transitions between video clips. iOS 16, macOS 13, tvOS 16, visionOS 1; Xcode 16 or later.
 
+## Installation
+
+With the Swift Package Manager, from [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift), where each release of the [gl-transitions npm package](https://www.npmjs.com/package/gl-transitions) is published with the same version (in Xcode: File > Add Package Dependencies…):
+
+```swift
+.package(url: "https://github.com/gl-transitions/gl-transitions-swift", from: "1.76.1"),
+```
+
+and `.product(name: "GLTransitions", package: "gl-transitions-swift")` in your target's dependencies.
+
 ## Transitions between video clips
 
 ```swift
@@ -52,7 +62,7 @@ Transitions with extra textures (`transition.textures`, e.g. `luma`) take them i
 
 ## Development
 
-This package is built in the [gl-transitions repository](https://github.com/gl-transitions/gl-transitions): its catalog (`Sources/GLTransitions/Generated/`) and `LICENSES.md` are generated from the npm package build and not committed.
+This package is built in the [gl-transitions repository](https://github.com/gl-transitions/gl-transitions): its catalog (`Sources/GLTransitions/Generated/`) and `LICENSES.md` are generated from the npm package build and not committed. CI publishes it to [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift) with each release of the npm package.
 
 ```sh
 # From the repository root
@@ -64,4 +74,6 @@ node scripts/rendering/render-references.mjs --out /tmp/refs
 node scripts/swift-package/check.mjs /tmp/refs
 ```
 
-Each transition keeps the license of its source (`license`): MIT for nearly all of them, BSD for a few, whose notices and conditions are in `LICENSES.md`.
+## License
+
+MIT ([LICENSE](LICENSE)). Each transition keeps the license of its source (`license`): MIT for nearly all of them, BSD for a few, whose notices and conditions are in `LICENSES.md`.

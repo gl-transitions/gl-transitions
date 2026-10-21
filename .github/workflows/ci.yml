@@ -311,3 +311,250 @@ jobs:
         run: |
           grep -q "^version = \"$VERSION\"" Cargo.toml
           cargo publish --locked --no-verify --allow-dirty
+
+  # The Swift package, after npm, to the gl-transitions-swift repository (SwiftPM installs from git
+  # tags), with the npm package's version, when that tag does not exist yet. As for the crate, a
+  # version that failed to publish is retried on the next push to master.
+  pack-swift:
+    needs: [release-mode, pack, publish]
+    if: ${{ !cancelled() && needs.release-mode.result == 'success' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    runs-on: macos-15
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          cache: false
+          install_args: node
+
+      - name: Is the version on gl-transitions-swift?
+        id: version
+        run: |
+          version=$(node -p 'require("./packages/gl-transitions/package.json").version')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          status=0
+          git ls-remote --exit-code https://github.com/gl-transitions/gl-transitions-swift "refs/tags/$version" > /dev/null || status=$?
+          case "$status" in
+            0) echo "$version is on gl-transitions-swift"; echo "publish=false" >> "$GITHUB_OUTPUT" ;;
+            2) echo "$version is to publish"; echo "publish=true" >> "$GITHUB_OUTPUT" ;;
+            *) exit 1 ;;
+          esac
+
+      - name: Build the package from the npm package
+        if: steps.version.outputs.publish == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/npm"
+          for attempt in 1 2 3 4 5 6; do
+            if npm pack "gl-transitions@$VERSION" --pack-destination "$RUNNER_TEMP/npm"; then break; fi
+            if [ "$attempt" = 6 ]; then exit 1; fi
+            sleep 20
+          done
+          tar -xzf "$RUNNER_TEMP/npm/gl-transitions-$VERSION.tgz" -C "$RUNNER_TEMP/npm"
+          node scripts/swift-package/build-mirror.mjs --package "$RUNNER_TEMP/npm/package" --out "$RUNNER_TEMP/gl-transitions-swift"
+
+      - name: Test
+        if: steps.version.outputs.publish == 'true'
+        working-directory: ${{ runner.temp }}/gl-transitions-swift
+        run: |
+          swift test --scratch-path "$RUNNER_TEMP/swift-build"
+          xcodebuild build -quiet -scheme GLTransitions -destination generic/platform=iOS -derivedDataPath "$RUNNER_TEMP/derived-data"
+
+      # Without the hidden files (the .swiftpm/ of xcodebuild).
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.version.outputs.publish == 'true'
+        with:
+          name: gl-transitions-swift
+          path: ${{ runner.temp }}/gl-transitions-swift
+          if-no-files-found: error
+          retention-days: 30
+
+  # Pushes it with a deploy key of gl-transitions-swift. The host keys are GitHub's
+  # (https://api.github.com/meta).
+  publish-swift:
+    needs: pack-swift
+    if: ${{ !cancelled() && needs.pack-swift.result == 'success' && needs.pack-swift.outputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          cache: false
+          install_args: node
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: gl-transitions-swift
+          path: ${{ runner.temp }}/gl-transitions-swift
+
+      - name: Publish
+        env:
+          VERSION: ${{ needs.pack-swift.outputs.version }}
+          SWIFT_DEPLOY_KEY: ${{ secrets.SWIFT_DEPLOY_KEY }}
+        run: |
+          ssh_dir="$RUNNER_TEMP/ssh"
+          mkdir -m 700 "$ssh_dir"
+          trap 'rm -rf "$ssh_dir"' EXIT
+          (umask 077 && printf '%s\n' "$SWIFT_DEPLOY_KEY" > "$ssh_dir/key")
+          cat > "$ssh_dir/known_hosts" <<'KEYS'
+          github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+          github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+          github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=
+          KEYS
+          export GIT_SSH_COMMAND="ssh -i $ssh_dir/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh_dir/known_hosts -o StrictHostKeyChecking=yes"
+          node scripts/swift-package/publish-mirror.mjs "$RUNNER_TEMP/gl-transitions-swift" \
+            --remote git@github.com:gl-transitions/gl-transitions-swift.git --version "$VERSION"
+
+  # The Android library, after npm, to Maven Central with the npm package's version, when it is not
+  # there yet (retried on the next push to master too). Built, tested and published to a local
+  # repository here: publish-android only signs and uploads it.
+  pack-android:
+    needs: [release-mode, pack, publish]
+    if: ${{ !cancelled() && needs.release-mode.result == 'success' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ steps.version.outputs.publish }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          cache: false
+          install_args: node
+
+      - name: Is the version on Maven Central?
+        id: version
+        run: |
+          version=$(node -p 'require("./packages/gl-transitions/package.json").version')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          status=$(curl -sS -o /dev/null -w '%{http_code}' \
+            "https://repo1.maven.org/maven2/com/gl-transitions/gl-transitions/$version/gl-transitions-$version.pom")
+          case "$status" in
+            200) echo "$version is on Maven Central"; echo "publish=false" >> "$GITHUB_OUTPUT" ;;
+            404) echo "$version is to publish"; echo "publish=true" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::Maven Central answered $status"; exit 1 ;;
+          esac
+
+      - name: Build the library's sources from the npm package
+        if: steps.version.outputs.publish == 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/npm"
+          for attempt in 1 2 3 4 5 6; do
+            if npm pack "gl-transitions@$VERSION" --pack-destination "$RUNNER_TEMP/npm"; then break; fi
+            if [ "$attempt" = 6 ]; then exit 1; fi
+            sleep 20
+          done
+          tar -xzf "$RUNNER_TEMP/npm/gl-transitions-$VERSION.tgz" -C "$RUNNER_TEMP/npm"
+          node scripts/android-library/build-android-library.mjs --package "$RUNNER_TEMP/npm/package"
+
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        if: steps.version.outputs.publish == 'true'
+        with:
+          distribution: zulu
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        if: steps.version.outputs.publish == 'true'
+        with:
+          cache-disabled: true
+
+      - name: Test and publish to a local repository
+        if: steps.version.outputs.publish == 'true'
+        working-directory: android
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: ./gradlew :gl-transitions:testDebugUnitTest :gl-transitions:publishReleasePublicationToStagingRepository -Pversion="$VERSION" --console=plain
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.version.outputs.publish == 'true'
+        with:
+          name: gl-transitions-android
+          path: android/gl-transitions/build/staging-repo
+          if-no-files-found: error
+          retention-days: 30
+
+  # Signs the publication and uploads it to the Central Portal, which releases it once validated
+  # (https://central.sonatype.org/publish/publish-portal-api/). Nothing is built here.
+  publish-android:
+    needs: pack-android
+    if: ${{ !cancelled() && needs.pack-android.result == 'success' && needs.pack-android.outputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: release
+    permissions: {}
+    env:
+      VERSION: ${{ needs.pack-android.outputs.version }}
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: gl-transitions-android
+          path: ${{ runner.temp }}/gl-transitions-android
+
+      - name: Sign
+        working-directory: ${{ runner.temp }}/gl-transitions-android
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
+          dir="com/gl-transitions/gl-transitions/$VERSION"
+          files=("$dir/gl-transitions-$VERSION".{pom,module,aar} "$dir/gl-transitions-$VERSION"-{sources,javadoc}.jar)
+          grep -q "<version>$VERSION</version>" "$dir/gl-transitions-$VERSION.pom"
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          mkdir -m 700 "$GNUPGHOME"
+          trap 'rm -rf "$GNUPGHOME"' EXIT
+          printf '%s\n' "$SIGNING_KEY" | gpg --batch --quiet --import
+          for file in "${files[@]}"; do
+            printf '%s' "$SIGNING_PASSWORD" | gpg --batch --quiet --pinentry-mode loopback --passphrase-fd 0 --armor --detach-sign "$file"
+          done
+          zip -q "$RUNNER_TEMP/bundle.zip" "${files[@]}" "${files[@]/%/.asc}" "${files[@]/%/.md5}" "${files[@]/%/.sha1}"
+
+      # Unless the version is published already: on a re-run, or while repo1.maven.org does not serve
+      # a version just published yet.
+      - name: Upload and release
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+        run: |
+          token=$(printf '%s:%s' "$MAVEN_CENTRAL_USERNAME" "$MAVEN_CENTRAL_PASSWORD" | base64 -w0)
+          echo "::add-mask::$token"
+          api() { curl --fail-with-body -sS -H "Authorization: Bearer $token" "$@"; }
+          published=$(api "https://central.sonatype.com/api/v1/publisher/published?namespace=com.gl-transitions&name=gl-transitions&version=$VERSION" | jq -r .published)
+          case "$published" in
+            true) echo "$VERSION is already on Maven Central"; exit 0 ;;
+            false) ;;
+            *) exit 1 ;;
+          esac
+          id=$(api -X POST -F "bundle=@$RUNNER_TEMP/bundle.zip;type=application/octet-stream" \
+            "https://central.sonatype.com/api/v1/publisher/upload?name=gl-transitions-$VERSION&publishingType=AUTOMATIC")
+          [[ "$id" =~ ^[0-9a-f-]+$ ]]
+          echo "Deployment $id"
+          for attempt in $(seq 1 100); do
+            sleep 30
+            status=$(api -X POST "https://central.sonatype.com/api/v1/publisher/status?id=$id") || continue
+            state=$(jq -r .deploymentState <<< "$status")
+            echo "$state"
+            case "$state" in
+              PUBLISHED) exit 0 ;;
+              FAILED) jq . <<< "$status"; exit 1 ;;
+            esac
+          done
+          echo "::error::Deployment $id is not published yet"
+          exit 1

@@ -82,9 +82,10 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
+      # Publishing too: the publication ci.yml signs and uploads to Maven Central.
       - name: Build and run the unit tests
         working-directory: android
-        run: ./gradlew :gl-transitions:assembleDebug :gl-transitions:testDebugUnitTest :gl-transitions:assembleDebugAndroidTest --console=plain
+        run: ./gradlew :gl-transitions:assembleDebug :gl-transitions:testDebugUnitTest :gl-transitions:assembleDebugAndroidTest :gl-transitions:publishReleasePublicationToStagingRepository --console=plain
 
       - name: Build the example app
         working-directory: examples/android
