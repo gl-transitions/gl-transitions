@@ -1,6 +1,8 @@
 - Website: [gl-transitions.com](https://gl-transitions.com) *(alternative hosting: [gl-transitions.surge.sh](https://gl-transitions.surge.sh/))*
 - NPM package: [gl-transitions](https://www.npmjs.com/package/gl-transitions)
-- Rust crate: [gl-transitions](crates/gl-transitions) (SkSL, WGSL, Metal and GLSL sources with typed parameters, for skia-safe, wgpu, Bevy…; not on crates.io yet)
+- React Native Skia: [@gl-transitions/react-native-skia](packages/react-native-skia), with an [example app](examples/react-native-skia)
+- Remotion: [@gl-transitions/remotion](packages/remotion), with an [example](examples/remotion)
+- Rust crate: [gl-transitions](https://crates.io/crates/gl-transitions) (SkSL, WGSL, Metal and GLSL sources with typed parameters, for skia-safe, wgpu, Bevy…; [source](crates/gl-transitions)), with an [fframes example](examples/fframes)
 - Swift package: [GLTransitions](swift) (Metal shaders, a Metal renderer and an AVFoundation compositor for transitions between video clips; iOS, macOS, tvOS, visionOS; installed from [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift)), with an [example app](examples/swiftui)
 - Android library: [gl-transitions](android) (AGSL shaders for RuntimeShader, Android 13+, with typed parameters; Kotlin and Java; on [Maven Central](https://central.sonatype.com/artifact/com.gl-transitions/gl-transitions)), with an [example app](examples/android)
 - Libraries for gl-transitions: [gl-transition-libs](https://github.com/gre/gl-transition-libs)
@@ -8,7 +10,7 @@
 
 ---
 
-New transitions merged into [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions)'s master are published in the next npm minor release, listed in the [changelog](packages/gl-transitions/CHANGELOG.md).
+New transitions merged into [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions)'s master are published in the next minor release of the npm package, listed in the [changelog](packages/gl-transitions/CHANGELOG.md). The Swift package and the Android library are released with the same version, and the Rust crate with a patch release ([changelog](crates/gl-transitions/CHANGELOG.md)).
 
 [![CI](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml/badge.svg)](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml) [![npm version](https://badge.fury.io/js/gl-transitions.svg)](https://badge.fury.io/js/gl-transitions)
 
@@ -51,7 +53,7 @@ A GL Transition is a GLSL code that implements a `transition` function which tak
 - `vec4 getFromColor(vec2 uv)`: lookup the "from" texture at a given uv coordinate.
 - `vec4 getToColor(vec2 uv)`: lookup the "to" texture at a given uv coordinate.
 
-> don't directly use `texture2D` to get a texture pixel out of from and to textures. Instead, use `getFromColor(vec2)` and `getToColor(vec2)`. That way, the "implementer" can properly implement ratio preserving support as well as choosing a different color for the "out of bound" case.
+> don't directly use `texture2D` to get a texture pixel out of the from and to textures. Instead, use `getFromColor(vec2)` and `getToColor(vec2)`. That way, the "implementer" can properly implement ratio preserving support as well as choosing a different color for the "out of bound" case.
 
 ### Transition parameters
 
@@ -59,7 +61,7 @@ Transition parameters are parameters that the final user can set to tweak the tr
 
 > any constant you define in your transitions are potential parameters to expose.
 
-When you define a transition parameter, you must also define a default value that will get set in case the final user didn't provide it. It's unfortunately not possible to initialize a uniform in GLSL 120 (WebGL 1) but we support commented code `// = value`
+When you define a transition parameter, you must also define a default value that will get set in case the final user didn't provide it. It's unfortunately not possible to initialize a uniform in GLSL ES 1.00 (WebGL 1) but we support commented code `// = value`
 
 Examples:
 
@@ -113,7 +115,7 @@ Hints are on their own line (not after the default value) so that existing parse
 
 ### Extra textures
 
-A transition may declare additional `uniform sampler2D` inputs (e.g. `luma`, `displacement`). They are listed in the `textures` field of `gl-transitions.json`; the implementer is responsible for providing them.
+A transition may declare additional `uniform sampler2D` inputs (e.g. `luma`, `displacement`). They are listed in the `textures` field of `gl-transitions.json`; the implementer is responsible for providing them. They are sampled with `texture2D` directly (e.g. `texture2D(luma, uv)`).
 
 ### `gl-transitions.json` format
 
