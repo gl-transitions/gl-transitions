@@ -1,6 +1,6 @@
 {
   "name": "gl-transitions",
-  "version": "1.76.1",
+  "version": "1.76.2",
   "description": "The open collection of GL Transitions",
   "main": "index.js",
   "license": "MIT",
