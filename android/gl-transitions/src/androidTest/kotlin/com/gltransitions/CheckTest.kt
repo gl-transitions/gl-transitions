@@ -13,18 +13,18 @@ import org.junit.runner.RunWith
 /**
  * Renders every transition between the images of the GLSL reference renders and writes one strip
  * per transition (`check/<name>.png` in the test outputs, one frame per progress value), laid out
- * as the references, or `check/<name>.error`. scripts/android-library/check.mjs runs it
- * (instrumentation argument `checkProgress`, the comma-separated progress values) and compares
- * the strips with the references.
+ * as the references, or `check/<name>.error`. scripts/android-library/check.mjs runs it with the
+ * instrumentation argument `renderStrips=true`, the input images and `progress.txt` (the
+ * comma-separated progress values) in its assets, and compares the strips with the references.
  */
 @RunWith(AndroidJUnit4::class)
 class CheckTest {
     @Test
     fun renderStrips() {
-        val progressArgument = InstrumentationRegistry.getArguments().getString("checkProgress")
-        assumeTrue(progressArgument != null)
-        val progressValues = progressArgument!!.split(",").map { it.toFloat() }
+        assumeTrue(InstrumentationRegistry.getArguments().getString("renderStrips") == "true")
         val context = InstrumentationRegistry.getInstrumentation().context
+        val progressValues = context.assets.open("check/progress.txt").bufferedReader().use { it.readText() }
+            .split(",").map { it.trim() }.filter { it.isNotEmpty() }.map { it.toFloat() }
         fun image(name: String): Bitmap = context.assets.open("check/$name.png").use {
             BitmapFactory.decodeStream(it, null, BitmapFactory.Options().apply { inScaled = false })!!
         }
