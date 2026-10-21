@@ -84,35 +84,47 @@ Images: `CanvasKit.MakeImageFromEncoded(bytes)` (PNG/JPEG bytes). Read back with
 
 ## React Native Skia
 
-Not tested in this repository's CI; a ready-made `<Transition>` component is planned (`@gl-transitions/react-native-skia`). With `@shopify/react-native-skia` the same file works as a runtime effect:
+Use `@gl-transitions/react-native-skia`, whose README is at `https://github.com/gl-transitions/gl-transitions/tree/gl-transitions@<version>/packages/react-native-skia` (`<version>`: the one in the title of `catalog.md`) (React Native Skia 2, React 19; Reanimated only to animate `progress` without re-rendering):
+
+```sh
+npx expo install @shopify/react-native-skia react-native-reanimated
+npm install gl-transitions @gl-transitions/react-native-skia
+```
 
 ```tsx
-import { Canvas, Fill, ImageShader, Shader, Skia, useImage } from "@shopify/react-native-skia";
+import { Canvas } from "@shopify/react-native-skia";
+import { Transition } from "@gl-transitions/react-native-skia";
 
-const effect = Skia.RuntimeEffect.Make(sksl)!; // sksl: the file content, bundled as a string
+<Canvas style={{ width: 360, height: 240 }}>
+  <Transition name="crosswarp" from={from} to={to} progress={progress} width={360} height={240} />
+</Canvas>
+```
 
-function Transition({ from, to, progress, width, height, params }) {
+- `from`, `to`: `SkImage` (`useImage(...)`, or the `currentFrame` of `useVideo(...)`), or shared values of them. While an image (or extra texture) is `null` nothing is drawn; a shared value still holding `null` is drawn as a transparent image instead.
+- `progress`: a number or a Reanimated shared value.
+- `params` (typed per transition; omitted ones keep their default), `textures` for extra images by name (`luma` for "luma", `displacementMap` for "displacement"), `fit` (default `"cover"`), `x`, `y`.
+
+For your own children, `useTransitionEffect(name)` returns the compiled `effect` and `uniforms(width, height, progress, params?)`, a function that returns the uniforms object for a numeric `progress` (it is not a worklet: to animate with a shared value, call it once on the JS thread and override `progress` in `useDerivedValue(() => ({ ...base, progress: progress.value }))`, as `<Transition>` does). Children: `from`, `to`, then the extra textures, drawn at the output size and clamped. `getTransitionEffect(name)` is the same outside components.
+
+```tsx
+import { Fill, ImageShader, Shader } from "@shopify/react-native-skia";
+import { useTransitionEffect } from "@gl-transitions/react-native-skia";
+
+// Inside a <Canvas>; from, to: loaded SkImages, progress: a number.
+function Wipe({ from, to, progress, width, height }) {
+  const { effect, uniforms } = useTransitionEffect("wind");
   const rect = { x: 0, y: 0, width, height };
   return (
-    <Canvas style={{ width, height }}>
-      <Fill>
-        <Shader
-          source={effect}
-          uniforms={{ _resolution: [width, height], progress, ratio: width / height, ...params }}
-        >
-          <ImageShader image={from} fit="cover" rect={rect} />
-          <ImageShader image={to} fit="cover" rect={rect} />
-        </Shader>
-      </Fill>
-    </Canvas>
+    <Fill>
+      <Shader source={effect} uniforms={uniforms(width, height, progress, { size: 0.4 })}>
+        <ImageShader image={from} fit="cover" rect={rect} tx="clamp" ty="clamp" />
+        <ImageShader image={to} fit="cover" rect={rect} tx="clamp" ty="clamp" />
+      </Shader>
+    </Fill>
   );
 }
 ```
 
-- `params` must contain every parameter (defaults from the catalog); pass `bool` parameters as 0 or 1.
-- `progress` can be a Reanimated shared value or derived value to animate on the UI thread.
-- Children order matters: `from`, `to`, then the extra textures.
-
 ## Other Skia hosts
 
-skia-safe (Rust), Skia C++ (`SkRuntimeEffect::MakeForShader`), SkiaSharp (`SKRuntimeEffect.CreateShader`) and Compose Multiplatform (Skiko `RuntimeEffect`) take the same file with the same contract. Android's AGSL (`RuntimeShader`) is close but not identical and is not generated yet.
+Skia C++ (`SkRuntimeEffect::MakeForShader`), SkiaSharp (`SKRuntimeEffect.CreateShader`) and Compose Multiplatform (Skiko `RuntimeEffect`) take the same file with the same contract. For skia-safe (Rust), the `gl-transitions` crate has the SkSL and packs its uniforms; on Android, the `com.gl-transitions:gl-transitions` library ships AGSL versions for `RuntimeShader` (see `native.md`).

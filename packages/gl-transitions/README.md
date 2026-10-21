@@ -49,7 +49,7 @@ A Transition is an object with the following shape (TypeScript types are include
 | `layouts.json` | Uniform buffer layout and textures of the WGSL and Metal shaders |
 | `compatibility.json` | Status of every transition in every target (see below) |
 | `llms.txt`, `llms-full.txt` | The collection for LLMs and coding agents ([llms.txt](https://llmstxt.org/) format) |
-| `skills/gl-transitions/` | An [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) that teaches coding agents to pick a transition and wire it into WebGL, Skia, editly or FFmpeg |
+| `skills/gl-transitions/` | An [Agent Skill](https://docs.claude.com/en/docs/agents-and-tools/agent-skills/overview) that teaches coding agents to pick a transition and wire it into WebGL, WebGPU, Skia, Remotion, editly, FFmpeg, Rust, Swift or Android |
 
 ### GLSL ES 3.00 contract
 
