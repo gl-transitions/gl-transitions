@@ -16,3 +16,8 @@ crates/*/generated/
 crates/*/target/
 examples/fframes/target/
 examples/fframes/out/
+# The Swift package: its catalog and license notices are written by scripts/swift-package/build-swift-package.mjs.
+swift/Sources/GLTransitions/Generated/
+swift/LICENSES.md
+swift/.build/
+swift/.swiftpm/

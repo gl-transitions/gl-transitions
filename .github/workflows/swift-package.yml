@@ -1,0 +1,113 @@
+name: Swift package
+
+# Builds and tests the Swift package (swift/) on macOS, and renders every transition with its Metal
+# renderer to compare with the GLSL reference renders (scripts/swift-package/check.mjs). The npm
+# package and the references are built on Linux, as for the other targets.
+
+on:
+  pull_request:
+    paths:
+      - "transitions/**"
+      - "scripts/**"
+      - "swift/**"
+      - "packages/gl-transitions/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "mise.toml"
+      - "mise.lock"
+      - ".github/workflows/swift-package.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swift-package-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  references:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libglapi-mesa libosmesa6
+
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter gl-transitions-repository --filter gl-transitions
+
+      - name: Cache shader toolchain
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules/.cache/gl-transitions-toolchain
+          key: shader-toolchain-${{ runner.os }}-${{ hashFiles('scripts/targets/toolchain.mjs') }}
+
+      - name: Build the npm package and render the references
+        run: |
+          pnpm run build
+          xvfb-run -s "-ac -screen 0 1280x1024x24" node scripts/rendering/render-references.mjs --out /tmp/swift-inputs/references > /dev/null
+          mkdir -p /tmp/swift-inputs/package
+          cp -r packages/gl-transitions/dist/{gl-transitions.json,layouts.json,package.json,msl} /tmp/swift-inputs/package/
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: swift-inputs
+          path: /tmp/swift-inputs/
+
+  swift:
+    needs: references
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: jdx/mise-action@9b200bcecbfd6303e69a4a261b2e09e3757440a7 # v5.2.0
+        with:
+          install_args: node pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter gl-transitions-repository
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: swift-inputs
+          path: /tmp/swift-inputs
+
+      - name: Generate the catalog
+        run: node scripts/swift-package/build-swift-package.mjs --package /tmp/swift-inputs/package
+
+      - name: Test
+        working-directory: swift
+        run: |
+          swift --version
+          swift test
+
+      - name: Build for iOS
+        working-directory: swift
+        run: xcodebuild build -quiet -scheme GLTransitions -destination generic/platform=iOS
+
+      - name: Check
+        run: node scripts/swift-package/check.mjs /tmp/swift-inputs/references --renders /tmp/swift/renders --report /tmp/swift/report.json
+
+      - name: Summary
+        if: always()
+        run: |
+          if [ -f /tmp/swift/report.json ]; then
+            node -e 'const r = require("/tmp/swift/report.json"); console.log(`**Swift (Metal):** ${Object.entries(r.counts).map(([k, v]) => `${v} ${k}`).join(", ")} (of ${r.total})`)' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: swift-renders
+          path: /tmp/swift/
+          if-no-files-found: warn
