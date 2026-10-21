@@ -2,7 +2,7 @@ import AVFoundation
 
 /// A transition between two clips of a `TransitionComposition`.
 public struct TransitionStep {
-    public var transition: Transition
+    public var transition: GLTransition
     /// How long the two clips overlap.
     public var duration: CMTime
     public var params: [String: ParamValue]
@@ -10,7 +10,7 @@ public struct TransitionStep {
     public var textures: [String: CGImage]
 
     public init(
-        _ transition: Transition,
+        _ transition: GLTransition,
         duration: CMTime = CMTime(value: 1, timescale: 1),
         params: [String: ParamValue] = [:],
         textures: [String: CGImage] = [:]

@@ -1,5 +1,5 @@
 // Renders the Swift catalog of the GLTransitions package (swift/Sources/GLTransitions/Generated/
-// Catalog.swift) from the built npm package: one `Transition` per entry of gl-transitions.json,
+// Catalog.swift) from the built npm package: one `GLTransition` per entry of gl-transitions.json,
 // with its Metal source and its uniform layout from layouts.json.
 
 // GLSL parameter types → [Swift `ParamType` case, component count, integer].
@@ -86,7 +86,7 @@ function renderCatalog({ transitions, layouts, msl, version }) {
   // One constant per transition: a single array literal of them would be slow to type-check.
   const entries = sorted.map((t, i) => {
     const params = Object.entries(t.params ?? {}).map(([name, p]) => param(name, p, t.name));
-    return `private let transition${i} = Transition(
+    return `private let transition${i} = GLTransition(
     name: ${str(t.name)},
     author: ${str(t.author ?? "")},
     license: ${str(t.license ?? "")},
@@ -106,7 +106,7 @@ extension GLTransitions {
     public static let catalogVersion = ${str(version)}
 
     /// Every transition, sorted by name.
-    public static let all: [Transition] = [${sorted.map((_, i) => `transition${i}`).join(", ")}]
+    public static let all: [GLTransition] = [${sorted.map((_, i) => `transition${i}`).join(", ")}]
 }
 
 ${entries.join("\n\n")}

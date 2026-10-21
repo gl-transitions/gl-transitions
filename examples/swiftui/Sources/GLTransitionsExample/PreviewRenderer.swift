@@ -2,10 +2,6 @@ import GLTransitions
 import Metal
 import MetalKit
 
-/// `Transition` is also a SwiftUI protocol, and `GLTransitions` the module's enum as well: this
-/// file doesn't import SwiftUI.
-typealias GLTransition = Transition
-
 /// Draws a transition between two of the sample images.
 final class PreviewRenderer {
     let renderer: TransitionRenderer
@@ -25,7 +21,7 @@ final class PreviewRenderer {
 
     /// From image `image` to the next one.
     func encode(
-        _ transition: Transition,
+        _ transition: GLTransition,
         params: [String: ParamValue],
         image: Int,
         progress: Float,

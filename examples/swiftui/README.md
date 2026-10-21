@@ -7,8 +7,6 @@ A SwiftUI app (macOS 13, iOS 16) that plays the transitions of the [Swift packag
 
 The views are in the `GLTransitionsExample` library, used by the macOS executable `gl-transitions-example` and by the iOS app of `iOS/GLTransitionsExample.xcodeproj`. The package comes from this repository (`../../swift`).
 
-In a file that imports SwiftUI, `Transition` is ambiguous (SwiftUI has a `Transition` protocol): the app names it `GLTransition`.
-
 ## Run it
 
 ```sh
