@@ -21,7 +21,7 @@ android {
 }
 
 dependencies {
-    implementation("androidx.annotation:annotation:1.9.1")
+    implementation("androidx.annotation:annotation:1.11.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.6.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
