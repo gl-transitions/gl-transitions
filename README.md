@@ -1,20 +1,46 @@
-- Website: [gl-transitions.com](https://gl-transitions.com) *(alternative hosting: [gl-transitions.surge.sh](https://gl-transitions.surge.sh/))*
-- NPM package: [gl-transitions](https://www.npmjs.com/package/gl-transitions)
-- React Native Skia: [@gl-transitions/react-native-skia](packages/react-native-skia), with an [example app](examples/react-native-skia)
-- Remotion: [@gl-transitions/remotion](packages/remotion), with an [example](examples/remotion)
-- Rust crate: [gl-transitions](https://crates.io/crates/gl-transitions) (SkSL, WGSL, Metal and GLSL sources with typed parameters, for skia-safe, wgpu, Bevy…; [source](crates/gl-transitions)), with an [fframes example](examples/fframes)
-- Swift package: [GLTransitions](swift) (Metal shaders, a Metal renderer and an AVFoundation compositor for transitions between video clips; iOS, macOS, tvOS, visionOS; installed from [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift)), with an [example app](examples/swiftui)
-- Android library: [gl-transitions](android) (AGSL shaders for RuntimeShader, Android 13+, with typed parameters; Kotlin and Java; on [Maven Central](https://central.sonatype.com/artifact/com.gl-transitions/gl-transitions)), with an [example app](examples/android)
-- Libraries for gl-transitions: [gl-transition-libs](https://github.com/gre/gl-transition-libs)
-- For coding agents: [llms.txt](https://cdn.jsdelivr.net/npm/gl-transitions@1/llms.txt) and an [Agent Skill](skills/gl-transitions/SKILL.md)
+# GL Transitions
 
----
+[![CI](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml/badge.svg)](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/gl-transitions)](https://www.npmjs.com/package/gl-transitions)
+[![crates.io](https://img.shields.io/crates/v/gl-transitions)](https://crates.io/crates/gl-transitions)
+[![Maven Central](https://img.shields.io/maven-central/v/com.gl-transitions/gl-transitions)](https://central.sonatype.com/artifact/com.gl-transitions/gl-transitions)
 
-New transitions merged into [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions)'s master are published in the next minor release of the npm package, listed in the [changelog](packages/gl-transitions/CHANGELOG.md). The Swift package and the Android library are released with the same version, and the Rust crate with a patch release ([changelog](crates/gl-transitions/CHANGELOG.md)).
+<a href="https://gl-transitions.com/gallery"><img src=".github/readme/transitions.webp" width="800" alt="Twelve transitions playing between sample images: cube, doorway, crosswarp, ripple, Swirl, BookFlip, GlitchMemories, windowslice, InvertedPageCurl, pixelize, morph and wind"></a>
 
-[![CI](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml/badge.svg)](https://github.com/gl-transitions/gl-transitions/actions/workflows/ci.yml) [![npm version](https://badge.fury.io/js/gl-transitions.svg)](https://badge.fury.io/js/gl-transitions)
+An open collection of 100+ transitions between two images, written by the community as small GLSL functions that follow one [specification](#gl-transition-specification-v1). They are translated to SkSL, GLSL ES 3.00, WGSL, Metal and AGSL, for web pages, React Native and Android apps, iOS and macOS video exports or Rust renderers. CI compiles every translation, renders the SkSL, WGSL, Metal and AGSL ones and compares them with the GLSL original, and `compatibility.json` in the npm package gives the result for each transition and target.
 
----
+**Browse them and edit them live at [gl-transitions.com](https://gl-transitions.com).**
+
+## Use the transitions
+
+| Platform | Package | Install |
+|---|---|---|
+| Any JavaScript: the sources in every language, with their parameters | [`gl-transitions`](packages/gl-transitions) | `npm install gl-transitions` |
+| WebGL, regl, gl-react, rendering videos from the command line | [`gl-transition`, `regl-transition`, `react-gl-transition`, `gl-transition-scripts`](https://github.com/gre/gl-transition-libs) | `npm install gl-transition` (or `regl-transition`, `react-gl-transition`, `gl-transition-scripts`) |
+| React Native Skia | [`@gl-transitions/react-native-skia`](packages/react-native-skia) | `npm install gl-transitions @gl-transitions/react-native-skia`, with `@shopify/react-native-skia` |
+| Remotion | [`@gl-transitions/remotion`](packages/remotion) | `npm install gl-transitions @gl-transitions/remotion @remotion/transitions` |
+| Apple platforms: Metal, AVFoundation video compositions, SwiftUI | [`GLTransitions`](swift) | Swift Package Manager, from [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift) |
+| Android 13+: AGSL `RuntimeShader`, Kotlin and Java | [`com.gl-transitions:gl-transitions`](android) | Gradle, from Maven Central |
+| Rust: skia-safe, wgpu, Bevy… | [`gl-transitions`](crates/gl-transitions) | `cargo add gl-transitions` |
+| Coding agents | [llms.txt](https://cdn.jsdelivr.net/npm/gl-transitions@1/llms.txt), [Agent Skill](skills/gl-transitions/SKILL.md) | |
+
+Each package's README has a usage example. Example apps: [SwiftUI](examples/swiftui), [Android](examples/android), [React Native Skia](examples/react-native-skia), [Remotion](examples/remotion), [fframes](examples/fframes).
+
+Outside this project, the transitions are also used by [editly](https://github.com/mifi/editly), [ffmpeg-gl-transition](https://github.com/transitive-bullshit/ffmpeg-gl-transition) and [xfade-easing](https://github.com/scriptituk/xfade-easing) (FFmpeg).
+
+## Contribute a transition
+
+1. Write it in the [editor](https://gl-transitions.com/editor), which renders it as you type.
+2. Open a pull request that adds `transitions/YourTransition.glsl`, following the [specification](#gl-transition-specification-v1) and [CONTRIBUTING.md](CONTRIBUTING.md).
+3. CI checks it, renders it and comments preview GIFs on the pull request.
+
+## Releases
+
+New transitions merged into master are published in the next minor release of the npm package, listed in the [changelog](packages/gl-transitions/CHANGELOG.md). The Swift package and the Android library are released with the same version, and the Rust crate with a patch release ([changelog](crates/gl-transitions/CHANGELOG.md)).
+
+## License
+
+[MIT](LICENSE). Each transition states its license in its header, and the packages give it with each transition: all are MIT except two under BSD licenses.
 
 # GL Transition Specification v1
 
