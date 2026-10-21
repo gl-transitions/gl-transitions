@@ -38,11 +38,15 @@ updates:
         patterns: ["*"]
         update-types: ["minor", "patch"]
 
-  # The Android library (android/): the Android Gradle plugin, the test libraries and the Gradle wrapper.
+  # The Android library (android/) and its example app: the Android Gradle plugin, the libraries
+  # and the Gradle wrappers.
   - package-ecosystem: gradle
-    directory: /android
+    directories: ["/android", "/examples/android"]
     schedule:
       interval: weekly
+    ignore:
+      # Follows the Kotlin version built into the Android Gradle plugin.
+      - dependency-name: "org.jetbrains.kotlin.plugin.compose"
     groups:
       gradle-dependencies:
         patterns: ["*"]

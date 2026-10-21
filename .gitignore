@@ -29,3 +29,9 @@ android/.gradle/
 android/build/
 android/gl-transitions/build/
 android/local.properties
+
+# The Android example app (examples/android).
+examples/android/.gradle/
+examples/android/build/
+examples/android/app/build/
+examples/android/local.properties
