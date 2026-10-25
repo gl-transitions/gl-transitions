@@ -24,7 +24,7 @@ function gradient(blue: number): SkImage {
 export const fromImage = gradient(0);
 export const toImage = gradient(255);
 
-/** Extra textures (e.g. `luma` for "luma"), by name: the same gradient works for all. */
+/** Extra textures (e.g. `luma` for "LumaWipe"), by name: the same gradient works for all. */
 export function texturesFor(names: readonly string[]): { [name: string]: SkImage } {
   return Object.fromEntries(names.map((name) => [name, fromImage]));
 }

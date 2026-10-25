@@ -72,7 +72,7 @@ private const val TRANSITION = 1.5f
 
 @Composable
 fun App(images: List<Bitmap>) {
-    var name by rememberSaveable { mutableStateOf("crosswarp") }
+    var name by rememberSaveable { mutableStateOf("CrossWarp") }
     val transition = GLTransitions.named(name) ?: GLTransitions.all.first()
     val params = remember(transition) { mutableStateMapOf<String, ParamValue>() }
     val textures = remember(transition) { transition.textures.associateWith { lumaTexture } }
@@ -217,7 +217,7 @@ private fun TransitionList(selected: Transition, modifier: Modifier, onSelect: (
 // Without the email some authors give.
 private val Transition.authorName get() = author.substringBefore(" <")
 
-// The extra image of the transitions that take one (luma, displacement…): a grayscale spiral.
+// The extra image of the transitions that take one (LumaWipe, DisplacementMap…): a grayscale spiral.
 val lumaTexture: Bitmap by lazy {
     val size = 256
     val pixels = IntArray(size * size) { i ->

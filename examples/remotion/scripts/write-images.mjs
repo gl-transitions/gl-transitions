@@ -15,7 +15,7 @@ for (const [name, data] of Object.entries({ from: fromImage, to: toImage, extra:
   fs.writeFileSync(path.join(out, `${name}.png`), PNG.sync.write(png));
 }
 
-// The luma texture of the Showcase: a soft spiral, so "luma" sweeps around the center.
+// The luma texture of the Showcase: a soft spiral, so "LumaWipe" sweeps around the center.
 const W = 640;
 const H = 360;
 const spiral = new PNG({ width: W, height: H });

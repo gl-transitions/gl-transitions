@@ -36,7 +36,7 @@ pub struct Transition {
 }
 
 impl Transition {
-    /// Stable identifier, e.g. `"crosswarp"` (case-sensitive, also the file name).
+    /// Identifier, e.g. `"CrossWarp"`: PascalCase, case-sensitive, also the file name.
     pub fn name(&self) -> &'static str {
         self.name
     }

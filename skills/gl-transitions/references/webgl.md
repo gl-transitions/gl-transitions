@@ -13,7 +13,7 @@ void main() {
   _uv = _p * 0.5 + 0.5;
 }`;
 
-// transition.glsl is the source of one transition (e.g. transitions.find(t => t.name === "cube").glsl).
+// transition.glsl is the source of one transition (e.g. transitions.find(t => t.name === "Cube").glsl).
 const fragmentShader = (transitionGlsl) => `
 precision highp float;
 varying vec2 _uv;

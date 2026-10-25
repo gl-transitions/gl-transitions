@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "@remotion/transitions": ">=4.0.500",
-    "gl-transitions": "^1.76.1",
+    "gl-transitions": "^2.0.0",
     "remotion": ">=4.0.500"
   },
   "devDependencies": {

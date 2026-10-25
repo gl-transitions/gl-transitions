@@ -10,7 +10,7 @@ A Transition is an object with the following shape (TypeScript types are include
 
 ```ts
 {
-  name: string,          // stable identifier, also the file name
+  name: string,          // PascalCase identifier, also the file name
   author: string,
   license: string,
   glsl: string,          // implements vec4 transition(vec2 uv)
@@ -33,6 +33,19 @@ A Transition is an object with the following shape (TypeScript types are include
 }
 ```
 
+## Migrating from 1.x
+
+2.0 gives every transition a PascalCase name: `crosswarp` is now `CrossWarp`, `wipeLeft` is `WipeLeft`. Names that were misleading or unclear got a better one at the same time (`burn` is now `FlashFade`, `fragment` is `Shatter`), and two near-duplicates were removed: `CircleCrop` (use `CircleIris`) and `PuzzleRight` (use `GridFlip`). The renamed transitions render exactly as before, with the same parameters. The two replacements look alike but differ: `CircleIris` closes into an ellipse that follows the image's shape, over a dark gray `backColor` (RGB) instead of black `bgcolor`; `GridFlip` has thicker dividers, a `bgcolor` and a random order (`randomness`).
+
+`renamed.json` maps each 1.x name that changed to its 2.0 name, for names stored in projects, settings or URLs:
+
+```js
+import renamed from "gl-transitions/renamed.json" with { type: "json" };
+
+const upgrade = (name) => (Object.hasOwn(renamed, name) ? renamed[name] : name);
+upgrade("crosswarp"); // "CrossWarp"
+```
+
 ## Files
 
 | Path | Content |
@@ -40,6 +53,7 @@ A Transition is an object with the following shape (TypeScript types are include
 | `index.js` | The collection (CommonJS; `import` works too) |
 | `gl-transitions.json` | The same, as JSON |
 | `gl-transitions.js` | The same, as a `window.GLTransitions` script |
+| `renamed.json` | The names that changed in 2.0: `{ [1.x name]: 2.0 name }` (see [Migrating from 1.x](#migrating-from-1x)) |
 | `transitions/<name>.glsl` | Each transition's GLSL source |
 | `sksl/<name>.sksl` | Each transition as a standalone [SkSL](https://skia.org/docs/user/sksl/) runtime effect, for Skia-based renderers (React Native Skia, CanvasKit, Flutter/Skia, Compose Multiplatform, skia-safe) |
 | `sksl/index.js` | The same SkSL sources as `{ [name]: source }`, for bundlers that can't import `.sksl` files (React Native, …) |
@@ -96,7 +110,7 @@ In CI, each WGSL file is validated by naga and rendered with Dawn (Chrome's WebG
 ```json
 {
   "targets": { "wgsl": { "language": "WGSL", "path": "wgsl/{name}.wgsl", "rendered": true }, ... },
-  "transitions": { "fade": { "sksl": { "status": "match", "differingPixels": 0 }, "glsl3": { "status": "compiled" }, ... } }
+  "transitions": { "Fade": { "sksl": { "status": "match", "differingPixels": 0 }, "glsl3": { "status": "compiled" }, ... } }
 }
 ```
 
@@ -142,7 +156,7 @@ import GLTransitions from "gl-transitions";
 **dist script:**
 
 ```
-https://unpkg.com/gl-transitions@1/gl-transitions.js
+https://unpkg.com/gl-transitions@2/gl-transitions.js
 ```
 
 ```js
@@ -152,7 +166,7 @@ const GLTransitions = window.GLTransitions
 **for coding agents:**
 
 ```
-https://cdn.jsdelivr.net/npm/gl-transitions@1/llms.txt
+https://cdn.jsdelivr.net/npm/gl-transitions@2/llms.txt
 ```
 
 To install the Agent Skill, copy `node_modules/gl-transitions/skills/gl-transitions` into your agent's skills folder (for Claude Code: `.claude/skills/`).
@@ -160,5 +174,5 @@ To install the Agent Skill, copy `node_modules/gl-transitions/skills/gl-transiti
 **vanilla JSON:**
 
 ```
-https://unpkg.com/gl-transitions@1/gl-transitions.json
+https://unpkg.com/gl-transitions@2/gl-transitions.json
 ```

@@ -15,7 +15,7 @@ All features are on by default; turn off the ones you don't use to keep their so
 ## Example
 
 ```rust
-let transition = gl_transitions::get("directionalwarp").expect("in the collection");
+let transition = gl_transitions::get("DirectionalWarp").expect("in the collection");
 println!("{} by {}: {:?}", transition.name(), transition.author(), transition.description());
 
 // Parameters start from their defaults and are type-checked.

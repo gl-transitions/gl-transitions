@@ -18,7 +18,7 @@ import { SIZE, fromImage, texturesFor, toImage } from "./images";
 
 // Runs on the device, through the native Skia build, what the spec validation checks with
 // WebGL: for every transition with an SkSL version (the SkSL build reports the others), progress 0 shows `from` and 1 shows `to`; a solid color at
-// 0.5 is only a warning, as there (CircleCrop is all black halfway). Then the Reanimated path:
+// 0.5 is only a warning, as there (CircleIris is a solid color halfway). Then the Reanimated path:
 // an animated progress and an animated image still loading, then another transition with
 // other uniforms on the same <Transition>, compared halfway with a static render of it. Each result is logged with the
 // GLT_E2E prefix (logcat: ReactNativeJS), the last line is "GLT_E2E done: <passed>/<total> passed".
@@ -112,7 +112,7 @@ const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // Drawn on screen: progress and `from` are shared values, `from` starts null (still loading).
 function AnimatedCheck({ onDone }: { onDone: (result: Result) => void }) {
   const ref = useCanvasRef();
-  const [name, setName] = useState("fade");
+  const [name, setName] = useState("Fade");
   const progress = useSharedValue(0);
   const from = useSharedValue<SkImage | null>(null);
   useEffect(() => {
@@ -127,15 +127,15 @@ function AnimatedCheck({ onDone }: { onDone: (result: Result) => void }) {
         progress.value = 1;
         await wait(500);
         const atEnd = await ref.current!.makeImageSnapshotAsync();
-        // fadecolor has a `color` uniform that fade has not: the new shader must not get fade's uniforms.
-        setName("fadecolor");
+        // FadeColor has a `color` uniform that Fade has not: the new shader must not get Fade's uniforms.
+        setName("FadeColor");
         await wait(500);
         progress.value = 0.5;
         await wait(500);
         const switched = await ref.current!.makeImageSnapshotAsync();
         const fadecolor = await draw(
           <Transition
-            name="fadecolor"
+            name="FadeColor"
             from={fromImage}
             to={toImage}
             progress={0.5}
@@ -152,7 +152,7 @@ function AnimatedCheck({ onDone }: { onDone: (result: Result) => void }) {
             expectMatch("progress 0 is not `from`", readRGBA(atStart), await drawImage(fromImage, width, height)),
             expectMatch("progress 1 is not `to`", readRGBA(atEnd), to),
             expectMatch(
-              "after changing the transition, progress 0.5 is not fadecolor's",
+              "after changing the transition, progress 0.5 is not FadeColor's",
               readRGBA(switched),
               fadecolor,
             ),

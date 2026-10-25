@@ -26,7 +26,7 @@ const loadSksl = async (name) => fs.readFileSync(`node_modules/gl-transitions/sk
 In the browser (CanvasKit also needs `locateFile` to find its `.wasm`, see its README):
 
 ```js
-const loadSksl = (name) => fetch(`https://cdn.jsdelivr.net/npm/gl-transitions@1/sksl/${name}.sksl`).then((r) => r.text());
+const loadSksl = (name) => fetch(`https://cdn.jsdelivr.net/npm/gl-transitions@2/sksl/${name}.sksl`).then((r) => r.text());
 ```
 
 Then, in both:
@@ -36,7 +36,7 @@ import CanvasKitInit from "canvaskit-wasm";
 import transitions from "gl-transitions";
 
 const CanvasKit = await CanvasKitInit();
-const transition = transitions.find((t) => t.name === "cube");
+const transition = transitions.find((t) => t.name === "Cube");
 const sksl = await loadSksl(transition.name);
 let error = "";
 const effect = CanvasKit.RuntimeEffect.Make(sksl, (e) => (error += e));
@@ -63,7 +63,7 @@ function uniforms(values) {
   return out;
 }
 
-// extraImages: one image per transition.textures entry, in that order (e.g. the luma map of `luma`).
+// extraImages: one image per transition.textures entry, in that order (e.g. the luma map of `LumaWipe`).
 function draw(progress, fromImage, toImage, params = {}, extraImages = []) {
   const values = { _resolution: [width, height], progress, ratio: width / height };
   for (const [name, p] of Object.entries(transition.params)) values[name] = params[name] ?? p.default; // never unset
@@ -96,13 +96,13 @@ import { Canvas } from "@shopify/react-native-skia";
 import { Transition } from "@gl-transitions/react-native-skia";
 
 <Canvas style={{ width: 360, height: 240 }}>
-  <Transition name="crosswarp" from={from} to={to} progress={progress} width={360} height={240} />
+  <Transition name="CrossWarp" from={from} to={to} progress={progress} width={360} height={240} />
 </Canvas>
 ```
 
 - `from`, `to`: `SkImage` (`useImage(...)`, or the `currentFrame` of `useVideo(...)`), or shared values of them. While an image (or extra texture) is `null` nothing is drawn; a shared value still holding `null` is drawn as a transparent image instead.
 - `progress`: a number or a Reanimated shared value.
-- `params` (typed per transition; omitted ones keep their default), `textures` for extra images by name (`luma` for "luma", `displacementMap` for "displacement"), `fit` (default `"cover"`), `x`, `y`.
+- `params` (typed per transition; omitted ones keep their default), `textures` for extra images by name (`luma` for "LumaWipe", `displacementMap` for "DisplacementMap"), `fit` (default `"cover"`), `x`, `y`.
 
 For your own children, `useTransitionEffect(name)` returns the compiled `effect` and `uniforms(width, height, progress, params?)`, a function that returns the uniforms object for a numeric `progress` (it is not a worklet: to animate with a shared value, call it once on the JS thread and override `progress` in `useDerivedValue(() => ({ ...base, progress: progress.value }))`, as `<Transition>` does). Children: `from`, `to`, then the extra textures, drawn at the output size and clamped. `getTransitionEffect(name)` is the same outside components.
 
@@ -112,7 +112,7 @@ import { useTransitionEffect } from "@gl-transitions/react-native-skia";
 
 // Inside a <Canvas>; from, to: loaded SkImages, progress: a number.
 function Wipe({ from, to, progress, width, height }) {
-  const { effect, uniforms } = useTransitionEffect("wind");
+  const { effect, uniforms } = useTransitionEffect("Wind");
   const rect = { x: 0, y: 0, width, height };
   return (
     <Fill>

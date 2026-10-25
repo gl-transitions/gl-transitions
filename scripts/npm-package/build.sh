@@ -6,7 +6,7 @@ set -e
 DIST=packages/gl-transitions/dist
 rm -rf $DIST
 mkdir -p $DIST/sksl
-cp packages/gl-transitions/README.md packages/gl-transitions/index.d.ts $DIST/
+cp packages/gl-transitions/README.md packages/gl-transitions/index.d.ts packages/gl-transitions/renamed.json $DIST/
 if [ -f packages/gl-transitions/CHANGELOG.md ]; then cp packages/gl-transitions/CHANGELOG.md $DIST/; fi
 cp packages/gl-transitions/sksl/index.d.ts $DIST/sksl/
 # The published manifest, with the version changesets set: without the build script and the

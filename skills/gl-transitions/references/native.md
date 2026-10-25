@@ -24,7 +24,7 @@ gl-transitions = "0.1"   # or: cargo add gl-transitions
 [crates.io/crates/gl-transitions](https://crates.io/crates/gl-transitions), with its own semver (0.x); each npm release publishes a patch release with its transitions, and `gl_transitions::CATALOG_VERSION` says which npm version they come from. It has the GLSL, SkSL, WGSL, Metal and GLSL ES 3.00 sources with metadata, typed parameters and uniform layouts; no dependencies and no GPU code (bring your own renderer). Each source is a Cargo feature (`sksl`, `wgsl`, `msl`, `glsl3`), all on by default.
 
 ```rust
-let transition = gl_transitions::get("directionalwarp").expect("in the collection");
+let transition = gl_transitions::get("DirectionalWarp").expect("in the collection");
 let mut params = transition.default_params();
 params.set("direction", [1.0, 0.0])?;
 
@@ -55,7 +55,7 @@ Between video clips (play with `composition.makePlayerItem()`, export with `comp
 ```swift
 let composition = try await TransitionComposition.make(
     clips: [AVURLAsset(url: first), AVURLAsset(url: second)],
-    transitions: [TransitionStep(GLTransitions.named("cube")!, params: ["persp": .float(0.7)])]
+    transitions: [TransitionStep(GLTransitions.named("Cube")!, params: ["persp": .float(0.7)])]
 )
 ```
 
@@ -64,7 +64,7 @@ Between Metal textures:
 ```swift
 let renderer = try TransitionRenderer()
 try renderer.encode(
-    GLTransitions.named("directionalwarp")!,
+    GLTransitions.named("DirectionalWarp")!,
     from: fromTexture, to: toTexture, progress: 0.5,
     params: ["direction": .vec2(SIMD2(1, 0))],
     into: targetTexture, commandBuffer: commandBuffer
@@ -86,7 +86,7 @@ import com.gltransitions.GLTransitions
 import com.gltransitions.ParamValue
 import com.gltransitions.TransitionShader
 
-val shader = TransitionShader(GLTransitions.named("directionalwarp")!!)
+val shader = TransitionShader(GLTransitions.named("DirectionalWarp")!!)
 // In a hardware-accelerated View's onDraw, the bitmaps stretched to the canvas:
 shader.draw(canvas, fromBitmap, toBitmap, progress, params = mapOf("direction" to ParamValue.vec2(1f, 0f)))
 ```

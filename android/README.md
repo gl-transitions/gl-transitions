@@ -19,7 +19,7 @@ import com.gltransitions.GLTransitions
 import com.gltransitions.ParamValue
 import com.gltransitions.TransitionShader
 
-val shader = TransitionShader(GLTransitions.named("directionalwarp")!!) // compiles it
+val shader = TransitionShader(GLTransitions.named("DirectionalWarp")!!) // compiles it
 
 // In a View's onDraw (hardware accelerated), the bitmaps stretched to the canvas:
 shader.draw(canvas, fromBitmap, toBitmap, progress, params = mapOf("direction" to ParamValue.vec2(1f, 0f)))
@@ -28,7 +28,7 @@ shader.draw(canvas, fromBitmap, toBitmap, progress, params = mapOf("direction" t
 `draw` sets the images, the progress and the parameters, then fills the canvas. For other uses, `update(from, to, progress, width, height, params, textures)` takes any `Shader`s drawing the images at the output size (`TransitionShader.imageShader(bitmap, width, height)` makes one) and `shader.shader` is the `RuntimeShader` to put in a `Paint`, or in Jetpack Compose:
 
 ```kotlin
-val transition = remember { TransitionShader(GLTransitions.named("cube")!!) }
+val transition = remember { TransitionShader(GLTransitions.named("Cube")!!) }
 Canvas(Modifier.fillMaxSize()) {
     val (w, h) = size.width.toInt() to size.height.toInt()
     transition.update(TransitionShader.imageShader(from, w, h), TransitionShader.imageShader(to, w, h), progress, size.width, size.height)

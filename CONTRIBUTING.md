@@ -9,13 +9,13 @@ Thanks for your interest in contributing! Here's what you need to know.
 Place your transition as a **single `.glsl` file** directly in the `transitions/` folder:
 
 ```
-transitions/MyTransition.glsl    <-- correct
-transitions/MyTransition.glsl/MyTransition.glsl   <-- WRONG (GitHub web UI sometimes creates this)
+transitions/MyWipe.glsl    <-- correct
+transitions/MyWipe.glsl/MyWipe.glsl   <-- WRONG (GitHub web UI sometimes creates this)
 ```
 
 Use UTF-8 and LF (Unix) line endings; CI checks both with `pnpm run lint`.
 
-If you use the GitHub web UI to create a file, make sure you type the full path `transitions/MyTransition.glsl` in the filename field, not just `MyTransition.glsl` after navigating into the `transitions/` folder.
+If you use the GitHub web UI to create a file, make sure you type the full path `transitions/MyWipe.glsl` in the filename field, not just `MyWipe.glsl` after navigating into the `transitions/` folder.
 
 ### File format
 
@@ -78,11 +78,20 @@ uniform bool reversed; // = false
 
 See [Transition metadata](README.md#transition-metadata-optional) for the full syntax.
 
-### Naming conventions
+### Naming
 
-- Use **PascalCase** for transition names (e.g., `StarWipe.glsl`, `CrossZoom.glsl`)
-- Choose a **descriptive name** that reflects what the transition does
-- Avoid generic names like `fragment.glsl` or `effect.glsl`
+The file name, without `.glsl`, is the transition's identifier in every package (npm, Rust, Swift, Android). Changing it later breaks everyone who uses the transition, so choose it with care. `pnpm run lint` and CI check the rules marked *(checked)*. To try a name before creating the file, run `node scripts/checks/transition-names.mjs MyName`.
+
+- **PascalCase** *(checked)*: a capital letter, then letters and digits: `CrossZoom`, `WipeLeft`, `ZoomInCircles`. No `_`, `-` or spaces.
+- **Acronyms are words** *(checked)*: never three capitals in a row. Write `HsvFade` and `TvStatic`, not `HSVFade` and `TVStatic`.
+- **Unique, ignoring case** *(checked)*: macOS and Windows file systems ignore case, so `Crosswarp` next to `CrossWarp` would break a checkout.
+- **Never a former name** *(checked)*: a 1.x name (`packages/gl-transitions/renamed.json`) stays with the transition it was renamed to. `Burn` was the 1.x name of `FlashFade`: code that only fixed the case of the old name would silently get a different effect.
+- **No `Transition`** *(checked)*: everything in the collection is one. The same goes for filler words such as `Simple`, `Advanced` or `WithParameter` (a few older names, such as `SimpleZoom`, predate this rule).
+- **Name what you see, not the code**: `FlowerWipe`, not `PolarFunction`; `ColorWrap`, not `AddColor`. Someone browsing or searching the catalog should guess the effect from the name.
+- **Follow the family**: shape reveals end with `Wipe` (`StarWipe`, `HeartWipe`), glitches start with `Glitch` (`GlitchDisplace`), a direction comes last and names the movement (`WipeLeft` moves toward the left, `BowTieVertical`). A direction that is a parameter stays out of the name.
+- **Avoid generic names** such as `Fragment` or `Effect`.
+
+Reviewers, human and Copilot (`.github/instructions/transitions.instructions.md`), check these rules on every pull request that adds or renames a transition.
 
 ### Before submitting
 
@@ -111,7 +120,7 @@ pnpm install --filter '!gl-transitions-react-native-skia-example'   # without th
 pnpm test
 pnpm run lint
 pnpm run format
-pnpm run validate -t transitions/MyTransition.glsl
+pnpm run validate -t transitions/MyWipe.glsl
 ```
 
 mise installs Rust with rustup (toolchains in `~/.rustup`, reusing an existing rustup) and selects the pinned version with `RUSTUP_TOOLCHAIN`, so `cargo` uses it anywhere in the repository. The crate's sources are generated from the npm package build:

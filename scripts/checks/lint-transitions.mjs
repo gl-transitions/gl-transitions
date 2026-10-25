@@ -7,6 +7,8 @@
 // - UTF-8 without BOM, LF line endings (see encoding.mjs)
 // - the header and parameters parse without errors, as the build requires
 //   (annotations, typed defaults such as `true`/`false` for bool, author; see catalog/parse-transition.mjs)
+// - the file name follows the naming rules (PascalCase, unique ignoring case, no 1.x name of
+//   another transition; see transition-names.mjs)
 // Hidden files (.DS_Store, …) are ignored, like the rest of the tooling does.
 
 import fs from "node:fs";
@@ -14,6 +16,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkEncoding } from "./encoding.mjs";
 import { parseTransition } from "../catalog/parse-transition.mjs";
+import { nameErrors } from "./transition-names.mjs";
 
 // Returns { count, errors } for the transitions in `dir`.
 function lintTransitions(dir) {
@@ -22,6 +25,9 @@ function lintTransitions(dir) {
     .filter((e) => !e.name.startsWith("."))
     .sort((a, b) => a.name.localeCompare(b.name));
   const errors = [];
+  const names = entries
+    .filter((e) => e.isFile() && e.name.endsWith(".glsl"))
+    .map((e) => path.basename(e.name, ".glsl"));
   for (const entry of entries) {
     const rel = path.join(path.basename(dir), entry.name);
     if (!entry.isFile()) {
@@ -34,6 +40,7 @@ function lintTransitions(dir) {
       errors.push(`${rel}: must have the .glsl extension`);
       continue;
     }
+    for (const e of nameErrors(path.basename(entry.name, ".glsl"), names)) errors.push(`${rel}: ${e}`);
     const buffer = fs.readFileSync(path.join(dir, entry.name));
     for (const e of checkEncoding(buffer)) errors.push(`${rel}: ${e}`);
     for (const e of parseTransition(buffer.toString("utf8"), entry.name).errors) errors.push(`${rel}: ${e}`);

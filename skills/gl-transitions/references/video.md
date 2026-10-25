@@ -20,13 +20,14 @@ await editly({
 - `transition` on a clip applies between that clip and the next one.
 - `params` sets transition parameters (undocumented in editly but supported); omitted ones keep their defaults.
 - Also `random`, `dummy` (none), and `directional-left|right|up|down`.
+- editly depends on `gl-transitions` 1.x, so it takes the 1.x names (`crosswarp`, `cube`), not the PascalCase names of 2.0 (`CrossWarp`, `Cube`); the package's `renamed.json` maps one to the other.
 
 ## FFmpeg (third-party filter)
 
 FFmpeg has no gl-transitions support of its own (its `xfade` filter has a separate, fixed set). The [`ffmpeg-gl-transition`](https://github.com/transitive-bullshit/ffmpeg-gl-transition) filter runs a `.glsl` file, but it needs FFmpeg rebuilt with the filter and an OpenGL context (GLFW or EGL for headless servers):
 
 ```sh
-ffmpeg -i a.mp4 -i b.mp4 -filter_complex "gltransition=duration=1:offset=2:source=crosswarp.glsl" -y out.mp4
+ffmpeg -i a.mp4 -i b.mp4 -filter_complex "gltransition=duration=1:offset=2:source=CrossWarp.glsl" -y out.mp4
 ```
 
 The filter sets `progress` and `ratio` but **no parameters**: their uniforms stay 0. For a transition with parameters, bake the values in before writing the `.glsl` file, turning each parameter uniform into a constant:
@@ -56,7 +57,7 @@ function bakeParams(transition, values = {}) {
 }
 ```
 
-The constants go at the top of the file, so they are defined before any function uses them. Transitions with extra textures (`displacement`, `luma`) do not work with this filter.
+The constants go at the top of the file, so they are defined before any function uses them. Transitions with extra textures (`DisplacementMap`, `LumaWipe`) do not work with this filter.
 
 Without a custom FFmpeg build, render the transition frames yourself (WebGL in headless Chrome with `references/webgl.md`, or CanvasKit in Node with `references/skia.md`) and encode them with FFmpeg, or use editly, which does exactly that.
 
@@ -77,7 +78,7 @@ import { glTransition } from "@gl-transitions/remotion";
     <SceneA />
   </TransitionSeries.Sequence>
   <TransitionSeries.Transition
-    presentation={glTransition({ name: "cube", params: { persp: 0.7 } })}
+    presentation={glTransition({ name: "Cube", params: { persp: 0.7 } })}
     timing={linearTiming({ durationInFrames: 30 })}
   />
   <TransitionSeries.Sequence durationInFrames={60}>
@@ -86,7 +87,7 @@ import { glTransition } from "@gl-transitions/remotion";
 </TransitionSeries>
 ```
 
-- `params` is typed per transition; omitted ones keep their default. Extra textures go in `textures` as URLs, e.g. `glTransition({ name: "luma", textures: { luma: staticFile("spiral.png") } })`.
+- `params` is typed per transition; omitted ones keep their default. Extra textures go in `textures` as URLs, e.g. `glTransition({ name: "LumaWipe", textures: { luma: staticFile("spiral.png") } })`.
 - Scenes are captured with Remotion's HTML-in-canvas: rendering works out of the box (without a GPU, render with `--gl=swangle`, the default on Lambda; with one, `--gl=angle`). The Studio preview needs Chrome 149 or later with `chrome://flags/#canvas-draw-element` enabled.
 
 Below Remotion 4.0.500, or for a Studio preview without that flag, a component can still transition between images or videos:

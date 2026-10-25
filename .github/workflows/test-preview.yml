@@ -47,8 +47,8 @@ jobs:
       - name: Validate test transitions
         run: |
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
-            node scripts/checks/validate-transition.mjs -t transitions/fade.glsl &&
-            node scripts/checks/validate-transition.mjs -t transitions/crosswarp.glsl &&
+            node scripts/checks/validate-transition.mjs -t transitions/Fade.glsl &&
+            node scripts/checks/validate-transition.mjs -t transitions/CrossWarp.glsl &&
             node scripts/checks/validate-transition.mjs -t transitions/Bounce.glsl
           '
 
@@ -57,11 +57,11 @@ jobs:
           mkdir -p /tmp/test-previews
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
             node scripts/rendering/render-preview.mjs \
-              --transition transitions/fade.glsl \
-              --output /tmp/test-previews/fade.gif &&
+              --transition transitions/Fade.glsl \
+              --output /tmp/test-previews/Fade.gif &&
             node scripts/rendering/render-preview.mjs \
-              --transition transitions/crosswarp.glsl \
-              --output /tmp/test-previews/crosswarp.gif &&
+              --transition transitions/CrossWarp.glsl \
+              --output /tmp/test-previews/CrossWarp.gif &&
             node scripts/rendering/render-preview.mjs \
               --transition transitions/Bounce.glsl \
               --output /tmp/test-previews/Bounce.gif

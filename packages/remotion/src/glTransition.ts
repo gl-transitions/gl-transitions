@@ -40,12 +40,12 @@ const shader: HtmlInCanvasShader<PassedProps> = (canvas) => {
 const presentation = makeHtmlInCanvasPresentation(shader);
 
 export interface GlTransitionOptions<N extends TransitionName | (string & {}) = TransitionName> {
-  /** Transition name, as in gl-transitions (e.g. "cube"). */
+  /** Transition name, as in gl-transitions (e.g. "Cube"). */
   name: N;
   /** Parameters of the transition; the ones left out keep their default value. */
   params?: TransitionParams<N>;
   /**
-   * Images some transitions need (see `transition.textures`, e.g. `luma` for "luma"), by name:
+   * Images some transitions need (see `transition.textures`, e.g. `luma` for "LumaWipe"), by name:
    * URLs, for example from `staticFile()`.
    */
   textures?: { [name: string]: string };

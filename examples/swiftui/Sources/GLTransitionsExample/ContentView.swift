@@ -5,7 +5,7 @@ import SwiftUI
 final class Model: ObservableObject {
     enum Mode: Hashable { case preview, video }
 
-    @Published var transition = GLTransitions.named("crosswarp") ?? GLTransitions.all[0] {
+    @Published var transition = GLTransitions.named("CrossWarp") ?? GLTransitions.all[0] {
         didSet { if transition != oldValue { params = [:] } }
     }
 

@@ -22,7 +22,7 @@ export interface TransitionParam {
 }
 
 export interface Transition {
-  /** File name without `.glsl`. Stable: never renamed once published. */
+  /** File name without `.glsl`, PascalCase. Only renamed in a major version; `renamed.json` maps the 1.x names. */
   name: string;
   author: string;
   license: string;
