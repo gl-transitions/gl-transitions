@@ -1,7 +1,7 @@
 {
   "name": "gl-transitions-crate",
   "private": true,
-  "version": "0.1.1",
+  "version": "1.0.0",
   "description": "Versions the gl-transitions Rust crate with changesets (scripts/rust-crate/sync-version.mjs copies the version into Cargo.toml); it is published to crates.io, not npm.",
   "license": "MIT",
   "dependencies": {

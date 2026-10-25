@@ -1,6 +1,6 @@
 {
   "name": "@gl-transitions/remotion",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Use any of the gl-transitions as a Remotion presentation",
   "license": "MIT",
   "type": "module",
