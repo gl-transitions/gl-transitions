@@ -18,4 +18,6 @@ When a name breaks a rule, say which one and suggest a name that follows the fam
 
 Renaming an existing transition breaks users: accept it only in a major version, with an entry added to `packages/gl-transitions/renamed.json` (entries are never removed) and a major changeset.
 
+Transparency (README.md, "Transparency"): the images' alpha must be kept (flag `vec4(color.rgb, 1.0)` and similar), areas where no image is drawn return `vec4(0.0)`, not opaque black, and a fill color is a `vec4` parameter with `@color`.
+
 Also check that the file sits directly in `transitions/` (not `transitions/Name.glsl/Name.glsl`), starts with `// Author:` and `// License:`, and that progress 0 renders the outgoing image and progress 1 the incoming one.

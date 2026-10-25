@@ -11,6 +11,7 @@
 // 6. Has required metadata (Author, License)
 // 7. Contains a transition(vec2) function
 // 8. Description, Tags and parameter annotations are well formed
+// 9. With transparent images (and @color parameters), the output stays transparent
 //
 // Exit code 0 = pass, 1 = errors found
 // Outputs JSON to stdout: { name, valid, errors[], warnings[] }
@@ -121,13 +122,14 @@ void main() {
 }`;
 
 // Validation textures: from = vec4(uv, 0, 1), to = vec4(uv, 1, 1)
-// This lets us verify that progress=0 shows from and progress=1 shows to
-const fragSrc = `
+// This lets us verify that progress=0 shows from and progress=1 shows to. With `alpha` 0, the
+// images are transparent (check 4).
+const fragmentSource = (alpha) => `
 precision highp float;
 varying vec2 _uv;
 uniform float progress, ratio;
-vec4 getFromColor(vec2 uv) { return vec4(uv, 0.0, 1.0); }
-vec4 getToColor(vec2 uv) { return vec4(uv, 1.0, 1.0); }
+vec4 getFromColor(vec2 uv) { return vec4(uv, 0.0, ${alpha.toFixed(1)}); }
+vec4 getToColor(vec2 uv) { return vec4(uv, 1.0, ${alpha.toFixed(1)}); }
 ${glsl}
 void main() { gl_FragColor = transition(_uv); }`;
 
@@ -137,37 +139,11 @@ if (vs.error) {
   fail();
 }
 
-const fragShader = compileShader(gl.FRAGMENT_SHADER, fragSrc);
-if (fragShader.error) {
-  // Extract meaningful error lines
-  const lines = fragShader.error.split("\n").filter((l) => l.includes("ERROR"));
-  errors.push(`Fragment shader compile error: ${lines.join("; ") || fragShader.error}`);
-  fail();
-}
-
-const program = gl.createProgram();
-gl.attachShader(program, vs.shader);
-gl.attachShader(program, fragShader.shader);
-gl.linkProgram(program);
-if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-  errors.push(`Program link error: ${gl.getProgramInfoLog(program)}`);
-  fail();
-}
-gl.useProgram(program);
-
 const buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, -1, 4, 4, -1]), gl.STATIC_DRAW);
-const posLoc = gl.getAttribLocation(program, "_p");
-gl.enableVertexAttribArray(posLoc);
-gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
 gl.viewport(0, 0, width, height);
 
-// Set ratio
-const ratioLoc = gl.getUniformLocation(program, "ratio");
-if (ratioLoc) gl.uniform1f(ratioLoc, width / height);
-
-// Set default uniform values
 const uniformSetters = {
   float: (loc, v) => gl.uniform1f(loc, v),
   int: (loc, v) => gl.uniform1i(loc, v),
@@ -180,6 +156,41 @@ const uniformSetters = {
   ivec4: (loc, v) => gl.uniform4iv(loc, v),
 };
 
+// Compiles and links the transition with the validation images of the given alpha, and sets its
+// ratio and parameters (their defaults; with `transparentColors`, @color parameters get alpha 0).
+function makeProgram(alpha, transparentColors = false) {
+  const frag = compileShader(gl.FRAGMENT_SHADER, fragmentSource(alpha));
+  if (frag.error) {
+    // Extract meaningful error lines
+    const lines = frag.error.split("\n").filter((l) => l.includes("ERROR"));
+    errors.push(`Fragment shader compile error: ${lines.join("; ") || frag.error}`);
+    fail();
+  }
+  const program = gl.createProgram();
+  gl.attachShader(program, vs.shader);
+  gl.attachShader(program, frag.shader);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    errors.push(`Program link error: ${gl.getProgramInfoLog(program)}`);
+    fail();
+  }
+  gl.useProgram(program);
+  const posLoc = gl.getAttribLocation(program, "_p");
+  gl.enableVertexAttribArray(posLoc);
+  gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+  const ratioLoc = gl.getUniformLocation(program, "ratio");
+  if (ratioLoc) gl.uniform1f(ratioLoc, width / height);
+  for (const [uname, value] of Object.entries(uniformDefaults)) {
+    const loc = gl.getUniformLocation(program, uname);
+    const type = uniformTypes[uname];
+    const clear = transparentColors && type === "vec4" && transition.params[uname]?.color;
+    if (loc && uniformSetters[type]) uniformSetters[type](loc, clear ? [...value.slice(0, 3), 0] : value);
+  }
+  return { program, progressLoc: gl.getUniformLocation(program, "progress") };
+}
+
+const { program } = makeProgram(1);
+
 // Check for unused uniforms
 for (const uname of declaredUniforms) {
   if (["progress", "ratio"].includes(uname)) continue;
@@ -189,14 +200,8 @@ for (const uname of declaredUniforms) {
   }
 }
 
-for (const [uname, value] of Object.entries(uniformDefaults)) {
-  const loc = gl.getUniformLocation(program, uname);
-  const type = uniformTypes[uname];
-  if (loc && uniformSetters[type]) uniformSetters[type](loc, value);
-}
-
 const pixels = new Uint8Array(width * height * 4);
-const progressLoc = gl.getUniformLocation(program, "progress");
+let progressLoc = gl.getUniformLocation(program, "progress");
 
 // Pick 5 sample positions (corners + center, with padding)
 const pad = Math.floor(width / 8);
@@ -286,6 +291,22 @@ for (let i = 0; i < width * height * 4; i += 4) {
 }
 if (allSame) {
   warnings.push("progress=0.5 renders a single solid color — transition may not be working correctly");
+}
+
+// Check 4: with transparent images, and transparent @color parameters, nothing gets opaque. A
+// transition carries the images' alpha and returns vec4(0.0) where it draws no image (README.md,
+// "Transparency"); colors it fills an area with are @color parameters, which the user can make transparent.
+({ progressLoc } = makeProgram(0, true));
+for (const p of [0.25, 0.5, 0.75]) {
+  drawAndRead(p);
+  let opaque = 0;
+  for (let i = 3; i < pixels.length; i += 4) if (pixels[i] > 8) opaque++;
+  if (opaque) {
+    errors.push(
+      `with transparent images, ${opaque} of ${width * height} pixels are not transparent at progress=${p}: keep the images' alpha, return vec4(0.0) where no image is drawn, and take fill colors as vec4 @color parameters`,
+    );
+    break;
+  }
 }
 
 // Output results

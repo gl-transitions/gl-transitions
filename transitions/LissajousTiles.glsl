@@ -35,5 +35,5 @@ vec4 transition (vec2 uv) {
       }
     }
   }
-  return vec4(0., 0., 0., 1.);
+  return vec4(0.); // between the tiles: transparent
 }

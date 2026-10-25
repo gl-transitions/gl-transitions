@@ -68,21 +68,23 @@ float frameGlitch(float f) {
 
 vec4 chromaFrom(vec2 uv, float amt) {
   vec2 o = vec2(amt, 0.0);
+  vec4 center = getFromColor(safeUv(uv));
   return vec4(
     getFromColor(safeUv(uv + o)).r,
-    getFromColor(safeUv(uv)).g,
+    center.g,
     getFromColor(safeUv(uv - o)).b,
-    1.0
+    center.a
   );
 }
 
 vec4 chromaTo(vec2 uv, float amt) {
   vec2 o = vec2(amt, 0.0);
+  vec4 center = getToColor(safeUv(uv));
   return vec4(
     getToColor(safeUv(uv - o)).r,
-    getToColor(safeUv(uv)).g,
+    center.g,
     getToColor(safeUv(uv + o)).b,
-    1.0
+    center.a
   );
 }
 
@@ -154,5 +156,5 @@ vec4 transition(vec2 uv) {
   float exposurePulse = (hash12(vec2(f, 12.4)) - 0.35) * 0.10 * glitch;
   color.rgb += exposurePulse;
 
-  return vec4(sat(color.r), sat(color.g), sat(color.b), 1.0);
+  return vec4(sat(color.r), sat(color.g), sat(color.b), color.a);
 }

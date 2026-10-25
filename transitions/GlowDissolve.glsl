@@ -47,7 +47,7 @@ vec4 transition(vec2 uv) {
     vec3 burnColor = mix(uSpreadClr, uHotClr, factor);
     burnColor = pow(burnColor, vec3(uPow)) * uIntensity;
     vec3 finalRGB = mix(from.rgb, burnColor, factor * step(0.0001, progress));
-    outColor = vec4(finalRGB * from.a, from.a);
+    outColor = vec4(finalRGB, from.a); // straight alpha, like the images
   }
   return outColor;
 }

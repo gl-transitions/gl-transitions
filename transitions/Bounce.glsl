@@ -18,15 +18,16 @@ vec4 transition (vec2 uv) {
   float phase = time * PI * bounces;
   float y = (abs(cos(phase))) * (1.0 - stime);
   float d = uv.y - y;
+  vec4 to = getToColor(uv);
   return mix(
     mix(
-      getToColor(uv),
-      shadow_colour,
+      to,
+      vec4(shadow_colour.rgb, 1.0), // shadow_colour.a is in the amount: the shadow darkens, it does not make the image transparent
       step(d, shadow_height) * (1. - mix(
         ((d / shadow_height) * shadow_colour.a) + (1.0 - shadow_colour.a),
         1.0,
         smoothstep(0.95, 1., progress) // fade-out the shadow at the end
-      ))
+      )) * to.a // cast on the incoming image, not on its transparent areas
     ),
     getFromColor(vec2(uv.x, uv.y + (1.0 - y))),
     step(d, 0.0)

@@ -145,7 +145,8 @@ vec4 behindSurface(vec2 p, float yc, vec3 point, mat3 rrotation)
         {
                 shado = 0.0;
         }
-        return vec4(getToColor(p).rgb - shado, 1.0);
+        vec4 to = getToColor(p);
+        return vec4(to.rgb - shado, to.a);
 }
 
 vec4 transition(vec2 p) {
@@ -211,7 +212,7 @@ vec4 transition(vec2 p) {
                 float nyc2 = -yc / cylinderRadius;
                 shado *= nyc2 * nyc2 * nyc2;
                 shado *= 0.5;
-                otherColor = vec4(0.0, 0.0, 0.0, shado);
+                otherColor = vec4(0.0, 0.0, 0.0, shado * getToColor(p).a); // a shadow on the incoming image
         }
         else
         {

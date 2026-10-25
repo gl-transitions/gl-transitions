@@ -12,7 +12,9 @@ float rand (vec2 co) {
 // motion blur for texture from
 vec4 motionBlurFrom(vec2 _st, vec2 speed) {
     vec2 texCoord = _st.xy / vec2(1.0).xy;
+    // Premultiplied sums, so that transparent samples do not darken the blur
     vec3 color = vec3(0.0);
+    float alpha = 0.0;
     float total = 0.0;
     float offset = rand(_st);
     for (float t = 0.0; t <= 20.0; t++) {
@@ -20,16 +22,19 @@ vec4 motionBlurFrom(vec2 _st, vec2 speed) {
         float weight = 4.0 * (percent - percent * percent);
         vec2 newuv = texCoord + speed * percent;
         newuv = fract(newuv);
-        color += getFromColor(newuv).rgb * weight;
+        vec4 c = getFromColor(newuv);
+        color += c.rgb * c.a * weight;
+        alpha += c.a * weight;
         total += weight;
     }
-    return vec4(color / total, 1.0);
+    return vec4(color / max(alpha, 1e-5), alpha / total);
 }
 
 // motion blur for texture to
 vec4 motionBlurTo(vec2 _st, vec2 speed) {
     vec2 texCoord = _st.xy / vec2(1.0).xy;
     vec3 color = vec3(0.0);
+    float alpha = 0.0;
     float total = 0.0;
     float offset = rand(_st);
     for (float t = 0.0; t <= 20.0; t++) {
@@ -37,10 +42,12 @@ vec4 motionBlurTo(vec2 _st, vec2 speed) {
         float weight = 4.0 * (percent - percent * percent);
         vec2 newuv = texCoord + speed * percent;
         newuv = fract(newuv);
-        color += getToColor(newuv).rgb * weight;
+        vec4 c = getToColor(newuv);
+        color += c.rgb * c.a * weight;
+        alpha += c.a * weight;
         total += weight;
     }
-    return vec4(color / total, 1.0);
+    return vec4(color / max(alpha, 1e-5), alpha / total);
 }
 
 

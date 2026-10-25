@@ -21,8 +21,8 @@ vec3 rgb2hsv(vec3 c) {
 }
 
 vec4 transition(vec2 uv) {
-  vec3 a = rgb2hsv(getFromColor(uv).rgb);
-  vec3 b = rgb2hsv(getToColor(uv).rgb);
-  vec3 m = mix(a, b, progress);
-  return vec4(hsv2rgb(m), 1.0);
+  vec4 from = getFromColor(uv);
+  vec4 to = getToColor(uv);
+  vec3 m = mix(rgb2hsv(from.rgb), rgb2hsv(to.rgb), progress);
+  return vec4(hsv2rgb(m), mix(from.a, to.a, progress));
 }
