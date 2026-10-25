@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import path from "node:path";
-import { changesetPackages, missingChangesets, workspacePackages } from "./check-changesets.mjs";
+import { changesetPackages, missingChangesets, onlyDevDependencies, workspacePackages } from "./check-changesets.mjs";
 
 const packages = [
   { name: "gl-transitions", roots: ["packages/gl-transitions/", "scripts/targets/"] },
@@ -65,4 +65,21 @@ test("missingChangesets: the crate's sources and build scripts need a changeset,
   assert.deepEqual(missingChangesets({ changed: lib, changesets: covered, packages: all }), []);
   const tests = ["crates/gl-transitions/tests/sksl.rs", "scripts/rust-crate/crate-catalog.test.mjs"];
   assert.deepEqual(missingChangesets({ changed: tests, changesets: [], packages: all }), []);
+});
+
+test("onlyDevDependencies: a devDependencies bump releases nothing, anything else does", () => {
+  const manifest = (fields) =>
+    JSON.stringify({ name: "p", version: "1.0.0", peerDependencies: { remotion: ">=4.0.500" }, ...fields }, null, 2);
+  const before = manifest({ devDependencies: { remotion: "4.0.536" } });
+  assert.equal(onlyDevDependencies(before, manifest({ devDependencies: { remotion: "4.0.537" } })), true);
+  assert.equal(onlyDevDependencies(before, manifest({ devDependencies: {} })), true);
+  assert.equal(
+    onlyDevDependencies(before, manifest({ peerDependencies: { remotion: ">=4.0.537" }, devDependencies: {} })),
+    false,
+  );
+  assert.equal(
+    onlyDevDependencies(before, manifest({ version: "1.0.1", devDependencies: { remotion: "4.0.536" } })),
+    false,
+  );
+  assert.equal(onlyDevDependencies(before, "{ not json"), false);
 });

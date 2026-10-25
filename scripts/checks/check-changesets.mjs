@@ -34,6 +34,20 @@ function packagesOf(file, packages) {
   return packages.filter(({ roots }) => roots.some((root) => file.startsWith(root))).map(({ name }) => name);
 }
 
+// Whether a package.json only changed its devDependencies, which are not part of the published
+// package (Dependabot bumps them): `before` and `after` are its contents.
+function onlyDevDependencies(before, after) {
+  const withoutDev = (content) => {
+    const { devDependencies, ...rest } = JSON.parse(content);
+    return JSON.stringify(rest);
+  };
+  try {
+    return withoutDev(before) === withoutDev(after);
+  } catch {
+    return false;
+  }
+}
+
 // The package names in a changeset's front matter.
 function changesetPackages(content) {
   const front = content.replace(/\r\n/g, "\n").match(/^---\n([\s\S]*?)\n?---/);
@@ -84,7 +98,18 @@ if (isMain) {
     })
       .split("\n")
       .filter(Boolean);
-  const changed = diff("ACDMR");
+  // A package.json that only bumps devDependencies releases nothing.
+  const devOnly = (file) => {
+    if (!/(^|\/)package\.json$/.test(file) || !fs.existsSync(path.join(ROOT, file))) return false;
+    let before;
+    try {
+      before = execFileSync("git", ["show", `${base}:${file}`], { cwd: ROOT, encoding: "utf8" });
+    } catch {
+      return false; // added
+    }
+    return onlyDevDependencies(before, fs.readFileSync(path.join(ROOT, file), "utf8"));
+  };
+  const changed = diff("ACDMR").filter((file) => !devOnly(file));
   const changesets = diff("AM")
     .filter((f) => /^\.changeset\/[^/]+\.md$/.test(f) && f !== ".changeset/README.md")
     .map((f) => fs.readFileSync(path.join(ROOT, f), "utf8"));
@@ -98,4 +123,4 @@ if (isMain) {
   console.log(changesets.length ? `${changesets.length} changesets` : "No published package changed");
 }
 
-export { changesetPackages, missingChangesets, workspacePackages };
+export { changesetPackages, missingChangesets, onlyDevDependencies, workspacePackages };
