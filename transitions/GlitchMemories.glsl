@@ -12,6 +12,7 @@ vec4 transition(vec2 p) {
   vec2 green = p + dist * .3;
   vec2 blue = p + dist * .5;
 
-  return vec4(mix(getFromColor(red), getToColor(red), progress).r,mix(getFromColor(green), getToColor(green), progress).g,mix(getFromColor(blue), getToColor(blue), progress).b,1.0);
+  vec4 center = mix(getFromColor(green), getToColor(green), progress);
+  return vec4(mix(getFromColor(red), getToColor(red), progress).r, center.g, mix(getFromColor(blue), getToColor(blue), progress).b, center.a);
 }
 

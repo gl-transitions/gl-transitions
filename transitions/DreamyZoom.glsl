@@ -38,5 +38,6 @@ vec4 transition(vec2 uv) {
   vec4 c = progress < 0.5 ? getFromColor(p) : getToColor(p);
 
   // Finally, apply the color
-  return c + (progress < 0.5 ? mix(0.0, 1.0, phase) : mix(1.0, 0.0, phase));
+  // The flash lights up the image, not the transparent areas around it.
+  return vec4(c.rgb + (progress < 0.5 ? mix(0.0, 1.0, phase) : mix(1.0, 0.0, phase)), c.a);
 }

@@ -14,7 +14,7 @@ vec4 transition (vec2 uv) {
   vec4 fc = getFromColor(uv);
   vec4 tc = getToColor(uv);
   return mix(
-    mix(vec4(grayscale(fc.rgb), 1.0), fc, smoothstep(1.0-intensity, 0.0, progress)),
-    mix(vec4(grayscale(tc.rgb), 1.0), tc, smoothstep(    intensity, 1.0, progress)),
+    mix(vec4(grayscale(fc.rgb), fc.a), fc, smoothstep(1.0-intensity, 0.0, progress)),
+    mix(vec4(grayscale(tc.rgb), tc.a), tc, smoothstep(    intensity, 1.0, progress)),
     progress);
 }

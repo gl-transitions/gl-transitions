@@ -52,7 +52,7 @@ glTransition({ name: "Cube", params: { persp: 0.7, unzoom: 0.3 } });
 glTransition({ name: "LumaWipe", textures: { luma: staticFile("spiral.png") } });
 ```
 
-Where a transition draws transparent pixels (LeftRight, TopBottom, the shadow of Bounce…), Remotion's output shows one of the captured scenes or black there, not the layers beneath `<TransitionSeries>`.
+Where a transition draws transparent pixels (where it draws no image, as around the cube of `Cube` or beside `LeftRight`'s images), Remotion's output shows one of the captured scenes or black there, not the layers beneath `<TransitionSeries>`.
 
 ## Development
 

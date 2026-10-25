@@ -23,6 +23,6 @@ vec4 transition(vec2 p) {
   } else if (progress > (1.0 - offset)) {
     return getToColor(p);
   } else {
-    return vec4(vec3(noise(p)), 1.0);
+    return vec4(vec3(noise(p)), max(getFromColor(p).a, getToColor(p).a)); // static where the images are
   }
 }

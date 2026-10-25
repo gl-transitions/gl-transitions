@@ -74,6 +74,16 @@ A GL Transition is GLSL code that implements a `transition` function which takes
 - `uv` goes from `vec2(0.0)` to `vec2(1.0)` over the output, with the origin at the bottom left. Don't use `gl_FragCoord` or a `resolution` uniform: the transition must render the same at any size.
 - `transition` returns the color as straight (not premultiplied) RGBA, like the colors `getFromColor` and `getToColor` return. It returns it rather than writing `gl_FragColor`.
 
+### Transparency
+
+The images can be transparent (a layer composited over others, a picture with an alpha channel), and a transition must keep them so:
+
+- Where it shows an image, the alpha comes from that image: `vec4(rgb, 1.0)` would make a transparent image opaque. A blur or a color separation keeps the alpha of the image it samples.
+- Where it draws no image (around a shrinking image, behind a 3D cube, between tiles), it returns `vec4(0.0)`, transparent: the host composites the output over its own background. Where alpha is ignored, as in most video, that is black.
+- A color that fills an area is a `vec4` parameter with a `@color` hint (`FadeColor`, `CircleIris`), so the user can make it transparent too (colors mix as straight RGBA: a transparent color is best `vec4(0.0)`, or its RGB tints the fade). A light added to the image (`FlashFade`) adds nothing to the alpha.
+
+`validate-transition.mjs` renders each transition with transparent images, and its `@color` parameters made transparent: no pixel may be opaque.
+
 ### Contextual variables
 
 - `progress` (float): a value that **moves from 0.0 to 1.0** during the transition.

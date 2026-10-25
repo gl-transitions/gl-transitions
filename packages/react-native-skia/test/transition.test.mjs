@@ -108,9 +108,12 @@ test("every transition compiles and gets exactly the uniforms its effect declare
   }
 });
 
+// Halfway, except two transitions that draw nothing (transparent) at 0.5: SimpleFlip's image is
+// edge-on, and StereoViewer is between its two cards.
+const emptyHalfway = new Set(["SimpleFlip", "StereoViewer"]);
 test("every transition draws", async () => {
   for (const { name } of catalog) {
-    const pixels = await render(name, 0.5);
+    const pixels = await render(name, emptyHalfway.has(name) ? 0.3 : 0.5);
     assert.ok(
       pixels.some((v, i) => i % 4 === 3 && v > 0),
       name,

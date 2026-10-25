@@ -87,21 +87,23 @@ float verticalMask(vec2 uv, float frame) {
 
 vec4 chromaFrom(vec2 uv, vec2 s) {
   uv = safeUv(uv);
+  vec4 center = getFromColor(uv);
   return vec4(
     getFromColor(safeUv(uv + s)).r,
-    getFromColor(uv).g,
+    center.g,
     getFromColor(safeUv(uv - s)).b,
-    1.0
+    center.a
   );
 }
 
 vec4 chromaTo(vec2 uv, vec2 s) {
   uv = safeUv(uv);
+  vec4 center = getToColor(uv);
   return vec4(
     getToColor(safeUv(uv - s)).r,
-    getToColor(uv).g,
+    center.g,
     getToColor(safeUv(uv + s)).b,
-    1.0
+    center.a
   );
 }
 
@@ -182,5 +184,5 @@ vec4 transition(vec2 uv) {
   float strobe = step(0.78, hash(vec2(frame, 3.14))) * pow(b, 1.65);
   color.rgb += vec3(strobe * flashAmount);
 
-  return vec4(clamp(color.rgb, vec3(0.0), vec3(1.0)), 1.0);
+  return vec4(clamp(color.rgb, vec3(0.0), vec3(1.0)), color.a);
 }

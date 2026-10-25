@@ -31,7 +31,7 @@ vec4 transition (vec2 uv) {
   );
   
   float noiseEnvelope = smoothstep(progress-span, progress, transitionEdge) * (1.0 - smoothstep(progress, progress + span, transitionEdge));
-  vec4 noise = vec4(vec3(rnd(uv*(1.0+progress))), 1.0);
+  vec4 noise = vec4(vec3(rnd(uv*(1.0+progress))), transitionMix.a); // static where the image is
   
 
   return mix(transitionMix, noise, noiseEnvelope);

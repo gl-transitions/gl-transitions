@@ -9,7 +9,7 @@ uniform float smoothness; // = 0.03
 // @param Center of the circle
 uniform vec2 center; // = vec2(0.5)
 // @color Color of the burning edge
-uniform vec3 color; // = vec3(0.0)
+uniform vec4 color; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 const float M_PI = 3.14159265358979323846;
 
@@ -51,5 +51,5 @@ vec4 transition(vec2 p) {
   float m = getGradient(getWave(p), dist);
   vec4 cfrom = getFromColor(p);
   vec4 cto = getToColor(p);
-  return mix(mix(cfrom, cto, m), mix(cfrom, vec4(color, 1.0), 0.75), step(m, -2.0));
+  return mix(mix(cfrom, cto, m), mix(cfrom, color, 0.75), step(m, -2.0));
 }
