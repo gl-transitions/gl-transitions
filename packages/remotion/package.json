@@ -41,12 +41,12 @@
     "remotion": ">=4.0.500"
   },
   "devDependencies": {
-    "@remotion/transitions": "4.0.536",
+    "@remotion/transitions": "4.0.537",
     "@types/react": "^19.2.0",
     "gl-transitions": "workspace:*",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "remotion": "4.0.536",
+    "remotion": "4.0.537",
     "typescript": "^7.0.2"
   }
 }
