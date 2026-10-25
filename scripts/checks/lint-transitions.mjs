@@ -7,8 +7,7 @@
 // - UTF-8 without BOM, LF line endings (see encoding.mjs)
 // - the header and parameters parse without errors, as the build requires
 //   (annotations, typed defaults such as `true`/`false` for bool, author; see catalog/parse-transition.mjs)
-// - the file name follows the naming rules (PascalCase, unique ignoring case, no 1.x name of
-//   another transition; see transition-names.mjs)
+// - the file name follows the naming rules (PascalCase, unique ignoring case; see transition-names.mjs)
 // Hidden files (.DS_Store, …) are ignored, like the rest of the tooling does.
 
 import fs from "node:fs";

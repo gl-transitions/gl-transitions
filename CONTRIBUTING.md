@@ -86,7 +86,6 @@ The file name, without `.glsl`, is the transition's identifier in every package 
 - **PascalCase** *(checked)*: a capital letter, then letters and digits: `CrossZoom`, `WipeLeft`, `ZoomInCircles`. No `_`, `-` or spaces.
 - **Acronyms are words** *(checked)*: never three capitals in a row. Write `HsvFade` and `TvStatic`, not `HSVFade` and `TVStatic`.
 - **Unique, ignoring case** *(checked)*: macOS and Windows file systems ignore case, so `Crosswarp` next to `CrossWarp` would break a checkout.
-- **Never a former name** *(checked)*: a 1.x name (`packages/gl-transitions/renamed.json`) stays with the transition it was renamed to. `Burn` was the 1.x name of `FlashFade`: code that only fixed the case of the old name would silently get a different effect.
 - **No `Transition`** *(checked)*: everything in the collection is one. The same goes for filler words such as `Simple`, `Advanced` or `WithParameter` (a few older names, such as `SimpleZoom`, predate this rule).
 - **Name what you see, not the code**: `FlowerWipe`, not `PolarFunction`; `ColorWrap`, not `AddColor`. Someone browsing or searching the catalog should guess the effect from the name.
 - **Follow the family**: shape reveals end with `Wipe` (`StarWipe`, `HeartWipe`), glitches start with `Glitch` (`GlitchDisplace`), a direction comes last and names the movement (`WipeLeft` moves toward the left, `BowTieVertical`). A direction that is a parameter stays out of the name.

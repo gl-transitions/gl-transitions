@@ -13,7 +13,7 @@ Read `references/catalog.md` (by tag, then one line per transition). If it is mi
 
 - Match the user's words against descriptions and tags (`wipe`, `zoom`, `glitch`, `3d`...). Offer 2 or 3 candidates when the request is vague, with their preview link `https://gl-transitions.com/editor/<name>`.
 - Prefer transitions without extra textures: `DisplacementMap` and `LumaWipe` need an additional image from the host.
-- Names are PascalCase and case-sensitive (`CrossWarp`, `CrossZoom`, `Cube`). Version 2.0 renamed them: code written for 1.x (`crosswarp`, `cube`) maps old names to new ones with the package's `renamed.json`.
+- Names are PascalCase and case-sensitive (`CrossWarp`, `CrossZoom`, `Cube`). Version 2.0 renamed them: code written for 1.x (`crosswarp`, `cube`) needs the new names, listed in the package's CHANGELOG.md.
 
 ## 2. Get the source
 

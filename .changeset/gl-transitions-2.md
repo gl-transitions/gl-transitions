@@ -1,20 +1,22 @@
 ---
 "gl-transitions": major
-"@gl-transitions/react-native-skia": minor
-"@gl-transitions/remotion": minor
-"gl-transitions-crate": minor
+"@gl-transitions/react-native-skia": major
+"@gl-transitions/remotion": major
+"gl-transitions-crate": major
 ---
 
-Every transition now has a PascalCase name, checked by the lint and CI along with the other naming rules (CONTRIBUTING.md, "Naming"). 45 names only change case, 34 get a clearer name, and two near-duplicates are removed. The renamed transitions render as before, with the same parameters (but see the transparency changes of this release: three fill colors became a `vec4`).
+gl-transitions 2.0 renames the transitions and makes them keep transparency. Every package takes the new names: update the names your code uses, with the tables below. The Swift package and the Android library follow the version of the npm package.
 
-`renamed.json`, in the npm package, maps each 1.x name to its new name, for names stored in projects or settings: `Object.hasOwn(renamed, name) ? renamed[name] : name`. The React Native Skia and Remotion packages and the Rust crate take the new names (and `gl-transitions` 2.0); the Swift package and the Android library follow the npm package version.
+**Names.** Every transition has a PascalCase name, checked by the lint along with the other naming rules (CONTRIBUTING.md, "Naming"): 45 names only change case, 34 get a clearer name. Two near-duplicates are removed: `CircleCrop` (the closest is `CircleIris`, an ellipse over a dark gray `backColor`) and `PuzzleRight` (the closest is `GridFlip`, with thicker dividers and a random order).
 
-Removed near-duplicates, mapped to the closest transition (which looks alike, but is not the same):
+**Transparency.** With transparent images (a layer to composite, a picture with an alpha channel), 29 transitions made pixels opaque; none does now, and `validate-transition.mjs` checks it (README.md, "Transparency"). With opaque images, every transition renders the same colors as before.
 
-| 1.x | Use instead | Differences |
-|---|---|---|
-| `CircleCrop` | `CircleIris` | An ellipse that follows the image's shape instead of a circle; a dark gray `backColor` instead of a black `bgcolor`; a `center` parameter |
-| `PuzzleRight` | `GridFlip` | Thicker dividers by default (`dividerWidth`), a `bgcolor`, tiles flipping in a random order (`randomness`) |
+- 13 transitions dropped the images' alpha (`HsvFade`, `FadeGrayscale`, `FlyEye`, `GlitchMemories`, `TangentMotionBlur`…) and now keep it; `GlowDissolve` returns straight RGBA instead of premultiplied.
+- Where no image is drawn, transitions return transparent instead of opaque black: `Cube`, `Swap`, `Doorway`, `StereoViewer`, `LeftRight`, `TopBottom`, `SimpleFlip`, `RotateScaleVanish`, `LissajousTiles`. Where alpha is ignored (most video), that is the same black.
+- Static noise (`TvStatic`, `StaticFade`, `StaticWipe`) covers the images, with their alpha. `Bounce`'s shadow darkens the incoming image instead of making it see-through.
+- `CircleIris`'s `backColor`, `FadeColor`'s `color` and `UndulatingBurnOut`'s `color` are now `vec4`, so they can be transparent: add an alpha of 1 to the values you pass (the Swift, Android and Rust packages reject a `vec3`).
+
+Thanks to @bradedelman, whose #203 raised the transparency problem.
 
 Renamed:
 
