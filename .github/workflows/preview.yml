@@ -46,7 +46,8 @@ jobs:
         env:
           PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          FILES=$(git diff --name-only origin/master...HEAD -- 'transitions/*.glsl' | tr '\n' ' ')
+          # Added, changed and renamed transitions; a removed one has nothing to render (d).
+          FILES=$(git diff --name-only --diff-filter=d origin/master...HEAD -- 'transitions/*.glsl' | tr '\n' ' ')
           if [ -z "$FILES" ]; then
             echo "No .glsl files changed"
             echo "files=" >> $GITHUB_OUTPUT
