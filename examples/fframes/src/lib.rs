@@ -101,7 +101,7 @@ pub fn image_of_size(
     )
 }
 
-/// A grayscale spiral, for transitions with an extra texture (`luma`, `displacement`).
+/// A grayscale spiral, for transitions with an extra texture (`LumaWipe`, `DisplacementMap`).
 pub fn spiral(width: u32, height: u32) -> image::DynamicImage {
     let (w, h) = (width as f32, height as f32);
     image::DynamicImage::ImageLuma8(image::GrayImage::from_fn(width, height, |x, y| {
@@ -137,12 +137,12 @@ impl Showcase {
                 .collect(),
             texture: image_of_size("spiral", &spiral(w, h), w, h),
             transitions: vec![
-                GlTransition::new("crosswarp"),
-                GlTransition::new("cube").with("persp", 0.5),
-                GlTransition::new("luma"),
-                GlTransition::new("directionalwarp").with("direction", [1.0, 0.0]),
+                GlTransition::new("CrossWarp"),
+                GlTransition::new("Cube").with("persp", 0.5),
+                GlTransition::new("LumaWipe"),
+                GlTransition::new("DirectionalWarp").with("direction", [1.0, 0.0]),
                 GlTransition::new("Bounce").with("bounces", 2.0),
-                GlTransition::new("doorway"),
+                GlTransition::new("Doorway"),
             ],
         }
     }

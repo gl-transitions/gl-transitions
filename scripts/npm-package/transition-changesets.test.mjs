@@ -49,6 +49,8 @@ test("write-transition-changesets: credits a new transition to the commit that a
     write("packages/gl-transitions/package.json", '{ "version": "1.0.0" }\n');
     write(".changeset/config.json", "{}\n");
     write("transitions/fade.glsl", glsl("getFromColor(uv)"));
+    write("transitions/old_wipe.glsl", glsl("getToColor(uv)"));
+    write("transitions/old_slide.glsl", glsl("getToColor(uv)"));
     git("add", ".");
     git("commit", "-qm", "1.0.0");
     git("tag", "v1.0.0");
@@ -64,9 +66,24 @@ test("write-transition-changesets: credits a new transition to the commit that a
     git("commit", "-qam", "edit fade again");
     const again = git("rev-parse", "HEAD");
 
+    // A rename listed in renamed.json is neither a new nor a removed transition; it is updated
+    // only when its content changed too. A new transition renamed before the release keeps the
+    // credit of the commit that added it.
+    write("packages/gl-transitions/renamed.json", '{ "old_wipe": "Wipe", "old_slide": "Slide" }\n');
+    git("mv", "transitions/old_wipe.glsl", "transitions/Wipe.glsl");
+    git("mv", "transitions/old_slide.glsl", "transitions/Slide.glsl");
+    write("transitions/Slide.glsl", glsl("getFromColor(1.0 - uv)"));
+    git("mv", "transitions/swirl.glsl", "transitions/Swirl.glsl");
+    git("add", ".");
+    git("commit", "-qm", "rename transitions");
+    const renamedAt = git("rev-parse", "HEAD");
+
     execFileSync("node", [path.join(import.meta.dirname, "write-transition-changesets.mjs"), root]);
     const read = (file) => fs.readFileSync(path.join(root, ".changeset", file), "utf8");
-    assert.match(read("transition-swirl.md"), new RegExp(`commit: ${added}\n\nNew transition: \`swirl\` by Jane\\.`));
+    const written = fs.readdirSync(path.join(root, ".changeset"));
+    assert.ok(!written.some((f) => /Wipe|old_wipe/.test(f) || /Wipe|old_wipe/.test(read(f))), written.join(", "));
+    assert.match(read(`transitions-updated-${renamedAt.slice(0, 12)}.md`), /Updated `Slide`\./);
+    assert.match(read("transition-Swirl.md"), new RegExp(`commit: ${added}\n\nNew transition: \`Swirl\` by Jane\\.`));
     // fade is listed under both commits that changed it.
     assert.match(read(`transitions-updated-${edited.slice(0, 12)}.md`), /Updated `fade`\./);
     assert.match(read(`transitions-updated-${again.slice(0, 12)}.md`), /Updated `fade`\./);

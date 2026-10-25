@@ -48,12 +48,12 @@ final class CatalogTests: XCTestCase {
     }
 
     func testParamErrors() throws {
-        let transition = try XCTUnwrap(GLTransitions.named("cube"))
+        let transition = try XCTUnwrap(GLTransitions.named("Cube"))
         XCTAssertThrowsError(try transition.uniformBuffer(progress: 0, ratio: 1, params: ["nope": .float(1)])) {
-            XCTAssertEqual($0 as? TransitionError, .unknownParam(transition: "cube", name: "nope"))
+            XCTAssertEqual($0 as? TransitionError, .unknownParam(transition: "Cube", name: "nope"))
         }
         XCTAssertThrowsError(try transition.uniformBuffer(progress: 0, ratio: 1, params: ["persp": .int(1)])) {
-            XCTAssertEqual($0 as? TransitionError, .wrongParamType(transition: "cube", name: "persp", expected: .float, got: .int))
+            XCTAssertEqual($0 as? TransitionError, .wrongParamType(transition: "Cube", name: "persp", expected: .float, got: .int))
         }
     }
 }

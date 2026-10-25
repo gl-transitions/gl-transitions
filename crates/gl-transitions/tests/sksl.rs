@@ -93,7 +93,7 @@ fn render(name: &str, progress: f32, from: Color, to: Color, (x, y): (usize, usi
 
 #[test]
 fn fade_mixes_the_two_images() {
-    let [r, g, b, a] = render("fade", 0.5, Color::RED, Color::BLUE, (3, 2));
+    let [r, g, b, a] = render("Fade", 0.5, Color::RED, Color::BLUE, (3, 2));
     assert!(
         r.abs_diff(128) <= 1 && g == 0 && b.abs_diff(128) <= 1 && a == 255,
         "{:?}",
@@ -103,11 +103,11 @@ fn fade_mixes_the_two_images() {
 
 #[test]
 fn wipes_go_the_documented_way() {
-    // wipeLeft: the incoming image enters from the right edge (the GLSL reference).
+    // WipeLeft: the incoming image enters from the right edge (the GLSL reference).
     let (from, to) = (Color::RED, Color::BLUE);
-    assert_eq!(render("wipeLeft", 0.25, from, to, (7, 1)), [0, 0, 255, 255]);
-    assert_eq!(render("wipeLeft", 0.25, from, to, (0, 1)), [255, 0, 0, 255]);
-    // wipeUp: the incoming image enters from the bottom edge, so uv has a bottom-left origin.
-    assert_eq!(render("wipeUp", 0.25, from, to, (4, 3)), [0, 0, 255, 255]);
-    assert_eq!(render("wipeUp", 0.25, from, to, (4, 0)), [255, 0, 0, 255]);
+    assert_eq!(render("WipeLeft", 0.25, from, to, (7, 1)), [0, 0, 255, 255]);
+    assert_eq!(render("WipeLeft", 0.25, from, to, (0, 1)), [255, 0, 0, 255]);
+    // WipeUp: the incoming image enters from the bottom edge, so uv has a bottom-left origin.
+    assert_eq!(render("WipeUp", 0.25, from, to, (4, 3)), [0, 0, 255, 255]);
+    assert_eq!(render("WipeUp", 0.25, from, to, (4, 0)), [255, 0, 0, 255]);
 }

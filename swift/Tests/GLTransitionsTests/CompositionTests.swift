@@ -74,7 +74,7 @@ final class CompositionTests: XCTestCase {
     func testFadeBetweenClips() async throws {
         let redClip = try await movie("red", color: (255, 0, 0))
         let blueClip = try await movie("blue", color: (0, 0, 255))
-        let fade = try XCTUnwrap(GLTransitions.named("fade"))
+        let fade = try XCTUnwrap(GLTransitions.named("Fade"))
         let composition = try await TransitionComposition.make(clips: [redClip, blueClip], transitions: [TransitionStep(fade)])
 
         // 2 s + 2 s overlapping by 1 s.
@@ -96,7 +96,7 @@ final class CompositionTests: XCTestCase {
     func testClipsOfAnotherSizeAreStretched() async throws {
         let small = try await movie("small", color: (255, 0, 0))
         let large = try await movie("large", color: (0, 0, 255), size: 128)
-        let fade = try XCTUnwrap(GLTransitions.named("fade"))
+        let fade = try XCTUnwrap(GLTransitions.named("Fade"))
         let composition = try await TransitionComposition.make(clips: [small, large], transitions: [TransitionStep(fade)])
         XCTAssertEqual(composition.videoComposition.renderSize, CGSize(width: 64, height: 64))
         for seconds in [0.5, 1.5, 2.5] {
@@ -109,7 +109,7 @@ final class CompositionTests: XCTestCase {
 
     func testValidation() async throws {
         let clip = try await movie("clip", color: (0, 0, 0), seconds: 1)
-        let fade = try XCTUnwrap(GLTransitions.named("fade"))
+        let fade = try XCTUnwrap(GLTransitions.named("Fade"))
         do {
             _ = try await TransitionComposition.make(clips: [clip, clip], transitions: [])
             XCTFail("a transition is missing")

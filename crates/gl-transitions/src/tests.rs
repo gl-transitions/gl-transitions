@@ -23,11 +23,11 @@ fn the_collection_is_complete_and_sorted() {
 
 #[test]
 fn get_finds_transitions_by_exact_name() {
-    let fade = get("fade").unwrap();
-    assert_eq!(fade.name(), "fade");
+    let fade = get("Fade").unwrap();
+    assert_eq!(fade.name(), "Fade");
     assert!(fade.glsl().contains("vec4 transition"));
     assert!(fade.params().is_empty() && fade.textures().is_empty());
-    assert!(get("Fade").is_none());
+    assert!(get("fade").is_none());
     assert!(get("nope").is_none());
 }
 
@@ -129,7 +129,7 @@ fn sksl_uniforms_are_packed_in_declaration_order() {
 
 #[test]
 fn bools_are_ints_in_the_shaders() {
-    let t = get("BowTieWithParameter").unwrap();
+    let t = get("BowTie").unwrap();
     let params = t.default_params().with("reverse", true).unwrap();
     let data = params.sksl_uniforms(0.5, 1.0, 1.0);
     assert_eq!(

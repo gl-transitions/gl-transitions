@@ -87,15 +87,15 @@ const slides: SlideProps[] = [
     seed: 5,
   },
   {
-    kicker: "next: cube",
+    kicker: "next: Cube",
     title: `${transitions.length} GLSL transitions`,
     palette: { base: [16, 6, 22], mid: [74, 28, 76], accent: [255, 120, 104] },
     seed: 3.1,
   },
   {
-    kicker: "next: luma",
+    kicker: "next: LumaWipe",
     title: "One line each",
-    code: 'glTransition({ name: "cube" })',
+    code: 'glTransition({ name: "Cube" })',
     palette: { base: [4, 18, 20], mid: [14, 70, 72], accent: [150, 255, 210] },
     seed: 7.4,
   },
@@ -118,9 +118,9 @@ const slides: SlideProps[] = [
 if (slides.length !== SHOWCASE_SLIDES) throw new Error(`timing.ts: SHOWCASE_SLIDES should be ${slides.length}`);
 
 const presentations = [
-  glTransition({ name: "crosswarp" }),
-  glTransition({ name: "cube", params: { persp: 0.7 } }),
-  glTransition({ name: "luma", textures: { luma: staticFile("spiral.png") } }),
+  glTransition({ name: "CrossWarp" }),
+  glTransition({ name: "Cube", params: { persp: 0.7 } }),
+  glTransition({ name: "LumaWipe", textures: { luma: staticFile("spiral.png") } }),
   glTransition({ name: "Dreamy" }),
 ];
 

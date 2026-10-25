@@ -70,10 +70,10 @@ class AppTest {
         compose.mainClock.autoAdvance = false
         compose.mainClock.advanceTimeBy(500)
         compose.onNodeWithTag("preview").captureToImage()
-        compose.onNodeWithTag("transitions").performScrollToNode(hasText("cube"))
-        compose.onNodeWithText("cube").performClick()
+        compose.onNodeWithTag("transitions").performScrollToNode(hasText("Cube"))
+        compose.onNodeWithText("Cube").performClick()
         compose.mainClock.advanceTimeBy(100)
-        compose.onNodeWithTag("title").assertTextEquals("cube")
+        compose.onNodeWithTag("title").assertTextEquals("Cube")
         compose.onNodeWithTag("preview").captureToImage()
     }
 }

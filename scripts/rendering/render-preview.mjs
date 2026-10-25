@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Renders a gl-transition to a GIF preview.
-// Usage: pnpm run render:preview --transition path/to/fade.glsl --output preview.gif
+// Usage: pnpm run render:preview --transition path/to/Fade.glsl --output preview.gif
 //
 // Requires: gl npm package, ffmpeg system binary
 

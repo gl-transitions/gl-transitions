@@ -5,7 +5,7 @@
 [![crates.io](https://img.shields.io/crates/v/gl-transitions)](https://crates.io/crates/gl-transitions)
 [![Maven Central](https://img.shields.io/maven-central/v/com.gl-transitions/gl-transitions)](https://central.sonatype.com/artifact/com.gl-transitions/gl-transitions)
 
-<a href="https://gl-transitions.com/gallery"><img src=".github/readme/transitions.webp" width="800" alt="Twelve transitions playing between sample images: cube, doorway, crosswarp, ripple, Swirl, BookFlip, GlitchMemories, windowslice, InvertedPageCurl, pixelize, morph and wind"></a>
+<a href="https://gl-transitions.com/gallery"><img src=".github/readme/transitions.webp" width="800" alt="Twelve transitions playing between sample images: Cube, Doorway, CrossWarp, Ripple, Swirl, BookFlip, GlitchMemories, WindowSlices, InvertedPageCurl, Pixelize, Morph and Wind"></a>
 
 An open collection of 100+ transitions between two images, written by the community as small GLSL functions that follow one [specification](#gl-transition-specification-v1). They are translated to SkSL, GLSL ES 3.00, WGSL, Metal and AGSL, for web pages, React Native and Android apps, iOS and macOS video exports or Rust renderers. CI compiles every translation, renders the SkSL, WGSL, Metal and AGSL ones and compares them with the GLSL original, and `compatibility.json` in the npm package gives the result for each transition and target.
 
@@ -22,7 +22,7 @@ An open collection of 100+ transitions between two images, written by the commun
 | Apple platforms: Metal, AVFoundation video compositions, SwiftUI | [`GLTransitions`](swift) | Swift Package Manager, from [gl-transitions-swift](https://github.com/gl-transitions/gl-transitions-swift) |
 | Android 13+: AGSL `RuntimeShader`, Kotlin and Java | [`com.gl-transitions:gl-transitions`](android) | Gradle, from Maven Central |
 | Rust: skia-safe, wgpu, Bevy… | [`gl-transitions`](crates/gl-transitions) | `cargo add gl-transitions` |
-| Coding agents | [llms.txt](https://cdn.jsdelivr.net/npm/gl-transitions@1/llms.txt), [Agent Skill](skills/gl-transitions/SKILL.md) | |
+| Coding agents | [llms.txt](https://cdn.jsdelivr.net/npm/gl-transitions@2/llms.txt), [Agent Skill](skills/gl-transitions/SKILL.md) | |
 
 Each package's README has a usage example. Example apps: [SwiftUI](examples/swiftui), [Android](examples/android), [React Native Skia](examples/react-native-skia), [Remotion](examples/remotion), [fframes](examples/fframes).
 
@@ -44,7 +44,7 @@ New transitions merged into master are published in the next minor release of th
 
 # GL Transition Specification v1
 
-This section specifies GL Transitions **v1**, `1` as in `gl-transitions@1`, the major version of the npm package. A breaking change to this specification bumps that major version.
+This section specifies GL Transitions **v1**, the contract between a transition's GLSL and the code that runs it. A breaking change to this specification bumps the major version of the npm package, which also changes for breaking changes to the collection itself: `gl-transitions@2` renamed the transitions and follows this same v1 specification.
 
 ## What is a transition?
 
@@ -168,7 +168,7 @@ The npm package exposes the collection as an array of objects:
 
 | Field | Description |
 |---|---|
-| `name` | File name without `.glsl`. Stable: never renamed once published |
+| `name` | File name without `.glsl`: PascalCase, unique ignoring case (see [Naming](CONTRIBUTING.md#naming)). Only renamed in a major version, as in 2.0 (`renamed.json` maps the 1.x names) |
 | `author`, `license` | From the header comments |
 | `glsl` | The transition source |
 | `paramsTypes`, `defaultParams` | Parameter types and default values (legacy, kept for compatibility) |

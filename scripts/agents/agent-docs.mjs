@@ -125,7 +125,7 @@ function renderLlmsFullTxt(transitions, { version, sksl = new Set() }) {
     "",
     `The same transitions as GLSL ES 3.00, WGSL and Metal are at \`glsl3/<name>.glsl\`, \`wgsl/<name>.wgsl\` and \`msl/<name>.metal\` (contracts in the package README, uniform layouts in \`layouts.json\`); \`compatibility.json\` lists the transitions each target supports.`,
     "",
-    `Install: \`npm install gl-transitions\` (\`import transitions from "gl-transitions"\`), or fetch the files below. Latest version: ${cdn(1)}/`,
+    `Install: \`npm install gl-transitions\` (\`import transitions from "gl-transitions"\`), or fetch the files below. Latest version: ${cdn(version.split(".")[0])}/`,
     "",
     "Packages built from it:",
     "",

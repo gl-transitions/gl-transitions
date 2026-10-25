@@ -1,6 +1,6 @@
 import { cancelRender, continueRender, delayRender } from "remotion";
 
-// The extra textures of some transitions (`luma`, `displacement`…), loaded once per URL.
+// The extra textures of some transitions (`LumaWipe`, `DisplacementMap`…), loaded once per URL.
 // Rendering waits for them (delayRender), so every frame is drawn with them.
 // HTMLImageElement rather than ImageBitmap: WebGL flips it on upload (UNPACK_FLIP_Y_WEBGL).
 

@@ -9,7 +9,7 @@ import { fromImage, texturesFor, toImage } from "./images";
 // Pick a transition: it plays back and forth, animated by Reanimated on the UI thread.
 export function Playground() {
   const { width } = useWindowDimensions();
-  const [name, setName] = useState("crosswarp");
+  const [name, setName] = useState("CrossWarp");
   const progress = useSharedValue(0);
   useEffect(() => {
     progress.value = withRepeat(withTiming(1, { duration: 1500, easing: Easing.inOut(Easing.cubic) }), -1, true);

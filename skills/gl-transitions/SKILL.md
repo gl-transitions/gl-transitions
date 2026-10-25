@@ -9,23 +9,23 @@ Each transition is a GLSL function `vec4 transition(vec2 uv)` that blends an out
 
 ## 1. Pick a transition
 
-Read `references/catalog.md` (by tag, then one line per transition). If it is missing, fetch `https://cdn.jsdelivr.net/npm/gl-transitions@1/skills/gl-transitions/references/catalog.md`.
+Read `references/catalog.md` (by tag, then one line per transition). If it is missing, fetch `https://cdn.jsdelivr.net/npm/gl-transitions@2/skills/gl-transitions/references/catalog.md`.
 
 - Match the user's words against descriptions and tags (`wipe`, `zoom`, `glitch`, `3d`...). Offer 2 or 3 candidates when the request is vague, with their preview link `https://gl-transitions.com/editor/<name>`.
-- Prefer transitions without extra textures: `displacement` and `luma` need an additional image from the host.
-- Names are case-sensitive and stable (`crosswarp`, `CrossZoom`, `cube`).
+- Prefer transitions without extra textures: `DisplacementMap` and `LumaWipe` need an additional image from the host.
+- Names are PascalCase and case-sensitive (`CrossWarp`, `CrossZoom`, `Cube`). Version 2.0 renamed them: code written for 1.x (`crosswarp`, `cube`) maps old names to new ones with the package's `renamed.json`.
 
 ## 2. Get the source
 
 | Need | Where |
 |---|---|
-| JS/TS project | `npm install gl-transitions`, then `import transitions from "gl-transitions"` and `transitions.find((t) => t.name === "cube")` (`glsl`, `params`, `textures`; typed in `index.d.ts`) |
-| GLSL file | `node_modules/gl-transitions/transitions/<name>.glsl` or `https://cdn.jsdelivr.net/npm/gl-transitions@1/transitions/<name>.glsl` |
-| SkSL file | `node_modules/gl-transitions/sksl/<name>.sksl` or `https://cdn.jsdelivr.net/npm/gl-transitions@1/sksl/<name>.sksl` |
+| JS/TS project | `npm install gl-transitions`, then `import transitions from "gl-transitions"` and `transitions.find((t) => t.name === "Cube")` (`glsl`, `params`, `textures`; typed in `index.d.ts`) |
+| GLSL file | `node_modules/gl-transitions/transitions/<name>.glsl` or `https://cdn.jsdelivr.net/npm/gl-transitions@2/transitions/<name>.glsl` |
+| SkSL file | `node_modules/gl-transitions/sksl/<name>.sksl` or `https://cdn.jsdelivr.net/npm/gl-transitions@2/sksl/<name>.sksl` |
 | GLSL ES 3.00, WGSL, Metal file | `glsl3/<name>.glsl`, `wgsl/<name>.wgsl`, `msl/<name>.metal` at the same places; uniform layouts in `layouts.json`, contracts in the package README |
 | Which targets a transition supports | `compatibility.json` (a target a compiler rejected has no file) |
 
-Pin the exact version (`gl-transitions@1.x.y`) in production URLs.
+Pin the exact version (`gl-transitions@2.x.y`) in production URLs.
 
 ## 3. Wire it into the host
 
@@ -47,7 +47,7 @@ The host defines `progress`, `ratio`, `getFromColor(uv)`, `getToColor(uv)` and o
 
 ## 4. Check the result
 
-- At `progress = 0` the output must be the outgoing image, at `progress = 1` the incoming one (the specification; a few transitions are off by a pixel or a slight blur at the ends, e.g. `AdvancedMosaic`, `tangentMotionBlur`). Render both ends and one middle frame.
+- At `progress = 0` the output must be the outgoing image, at `progress = 1` the incoming one (the specification; a few transitions are off by a pixel or a slight blur at the ends, e.g. `MosaicBlend`, `TangentMotionBlur`). Render both ends and one middle frame.
 - An upside-down result means the image rows are flipped: `uv` has its origin at the bottom left (see each reference).
 - A black or frozen result usually means a parameter was left unset or an extra texture is missing.
 - Credit the author and license from the catalog when the user ships the result (most are MIT).

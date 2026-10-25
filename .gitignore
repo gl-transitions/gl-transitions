@@ -41,3 +41,7 @@ examples/android/.gradle/
 examples/android/build/
 examples/android/app/build/
 examples/android/local.properties
+
+# Claude Code: local settings and worktrees stay out, the project skills are shared.
+.claude/*
+!.claude/skills/

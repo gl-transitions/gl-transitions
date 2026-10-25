@@ -104,7 +104,7 @@ public struct TransitionComposition {
         let renderSize = renderSize ?? clipSizes[0]
         // Frames of another size go through the compositor too, which stretches them (a fade
         // from a frame to itself).
-        let stretch = GLTransitions.named("fade")!
+        let stretch = GLTransitions.named("Fade")!
         var instructions: [TransitionInstruction] = []
         var audioRamps: [(track: Int, from: Float, to: Float, range: CMTimeRange)] = []
         for (i, segment) in segments.enumerated() {

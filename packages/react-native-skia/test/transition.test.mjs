@@ -118,23 +118,23 @@ test("every transition draws", async () => {
   }
 });
 
-// fade and luma have an exact expected output: they check the orientation, the order of
+// Fade and LumaWipe have an exact expected output: they check the orientation, the order of
 // the children (from, to, then textures) and the uniforms.
 test("draws `from`, `to` and the textures upright and in order", async () => {
   const mixed = fromImage.map((v, i) => Math.round((v + toImage[i]) / 2));
-  assert.equal(differing(await render("fade", 0), fromImage), 0);
-  assert.equal(differing(await render("fade", 1), toImage), 0);
-  assert.equal(differing(await render("fade", 0.5), mixed), 0);
-  // luma: `from` where the luma texture is brighter than progress, `to` elsewhere.
+  assert.equal(differing(await render("Fade", 0), fromImage), 0);
+  assert.equal(differing(await render("Fade", 1), toImage), 0);
+  assert.equal(differing(await render("Fade", 0.5), mixed), 0);
+  // LumaWipe: `from` where the luma texture is brighter than progress, `to` elsewhere.
   const luma = fromImage.map((v, i) => (extraImage[i - (i % 4)] / 255 >= 0.4 ? v : toImage[i]));
-  assert.ok(differing(await render("luma", 0.4), luma) <= 0.001);
+  assert.ok(differing(await render("LumaWipe", 0.4), luma) <= 0.001);
 });
 
 test("params override the defaults, bool params included", async () => {
-  const melt = (direction) => render("luminance_melt", 0.5, { direction });
+  const melt = (direction) => render("LuminanceMelt", 0.5, { direction });
   assert.ok(differing(await melt(true), await melt(false)) > 0.05);
-  assert.deepEqual(await render("cube", 0.5, { persp: 0.7 }), await render("cube", 0.5));
-  assert.ok(differing(await render("cube", 0.5, { persp: 0.1 }), await render("cube", 0.5)) > 0.05);
+  assert.deepEqual(await render("Cube", 0.5, { persp: 0.7 }), await render("Cube", 0.5));
+  assert.ok(differing(await render("Cube", 0.5, { persp: 0.1 }), await render("Cube", 0.5)) > 0.05);
 });
 
 test("unknown transitions throw", () => {

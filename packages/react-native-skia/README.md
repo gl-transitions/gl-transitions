@@ -31,7 +31,7 @@ export default function App() {
 
   return (
     <Canvas style={{ width: 360, height: 240 }}>
-      <Transition name="crosswarp" from={from} to={to} progress={progress} width={360} height={240} />
+      <Transition name="CrossWarp" from={from} to={to} progress={progress} width={360} height={240} />
     </Canvas>
   );
 }
@@ -49,12 +49,12 @@ Nothing is drawn until both images are loaded.
 | `width`, `height` | number                                     | Size of the drawn rectangle                                                                           |
 | `x`, `y`          | number                                     | Position, default 0                                                                                   |
 | `params`          | object                                     | The transition's parameters, typed per transition; the ones left out keep their default value         |
-| `textures`        | object                                     | Extra images a few transitions need, by name: `luma` for "luma", `displacementMap` for "displacement" |
+| `textures`        | object                                     | Extra images a few transitions need, by name: `luma` for "LumaWipe", `displacementMap` for "DisplacementMap" |
 | `fit`             | `Fit`                                      | How images fill the rectangle, default `"cover"`                                                      |
 
 ```tsx
 <Transition name="GridFlip" params={{ size: [6, 4], pause: 0.2 }} {...rest} />
-<Transition name="luma" textures={{ luma: useImage(require("./assets/spiral.png")) }} {...rest} />
+<Transition name="LumaWipe" textures={{ luma: useImage(require("./assets/spiral.png")) }} {...rest} />
 ```
 
 ### Your own children
@@ -66,7 +66,7 @@ import { Fill, ImageShader, Shader } from "@shopify/react-native-skia";
 import { useTransitionEffect } from "@gl-transitions/react-native-skia";
 
 function Wipe({ from, to, progress, width, height }) {
-  const { effect, uniforms } = useTransitionEffect("wind");
+  const { effect, uniforms } = useTransitionEffect("Wind");
   const rect = { x: 0, y: 0, width, height };
   return (
     <Fill>

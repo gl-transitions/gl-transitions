@@ -21,8 +21,8 @@ import GLTransitions
 let composition = try await TransitionComposition.make(
     clips: [AVURLAsset(url: first), AVURLAsset(url: second), AVURLAsset(url: third)],
     transitions: [
-        TransitionStep(GLTransitions.named("crosswarp")!),
-        TransitionStep(GLTransitions.named("cube")!, duration: CMTime(value: 3, timescale: 2), params: ["persp": .float(0.7)]),
+        TransitionStep(GLTransitions.named("CrossWarp")!),
+        TransitionStep(GLTransitions.named("Cube")!, duration: CMTime(value: 3, timescale: 2), params: ["persp": .float(0.7)]),
     ]
 )
 
@@ -40,7 +40,7 @@ For your own compositions, `TransitionInstruction` describes a segment (a track 
 
 ```swift
 let renderer = try TransitionRenderer() // the default Metal device
-let transition = GLTransitions.named("directionalwarp")!
+let transition = GLTransitions.named("DirectionalWarp")!
 
 try renderer.encode(
     transition,

@@ -3,7 +3,7 @@ import Foundation
 import ImageIO
 
 /// The sample images of the gl-transitions previews, and the extra image of the transitions that
-/// take one (luma, displacement…).
+/// take one (LumaWipe, DisplacementMap…).
 struct Samples: Sendable {
     let images: [CGImage]
     /// A grayscale spiral.

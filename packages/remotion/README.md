@@ -27,7 +27,7 @@ export const MyVideo = () => (
       <SceneA />
     </TransitionSeries.Sequence>
     <TransitionSeries.Transition
-      presentation={glTransition({ name: "crosswarp" })}
+      presentation={glTransition({ name: "CrossWarp" })}
       timing={linearTiming({ durationInFrames: 30 })}
     />
     <TransitionSeries.Sequence durationInFrames={60}>
@@ -45,11 +45,11 @@ Scenes can be any markup: images, videos, text, other compositions.
 | ---------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | `name`     | string | Any transition name from [gl-transitions.com](https://gl-transitions.com); autocompletes                                                      |
 | `params`   | object | The transition's parameters, typed per transition; the ones left out keep their default value                                                 |
-| `textures` | object | Extra images a few transitions need, by name, as URLs: `luma` for "luma", `displacementMap` for "displacement". Rendering waits for them to load |
+| `textures` | object | Extra images a few transitions need, by name, as URLs: `luma` for "LumaWipe", `displacementMap` for "DisplacementMap". Rendering waits for them to load |
 
 ```tsx
-glTransition({ name: "cube", params: { persp: 0.7, unzoom: 0.3 } });
-glTransition({ name: "luma", textures: { luma: staticFile("spiral.png") } });
+glTransition({ name: "Cube", params: { persp: 0.7, unzoom: 0.3 } });
+glTransition({ name: "LumaWipe", textures: { luma: staticFile("spiral.png") } });
 ```
 
 Where a transition draws transparent pixels (LeftRight, TopBottom, the shadow of Bounce…), Remotion's output shows one of the captured scenes or black there, not the layers beneath `<TransitionSeries>`.

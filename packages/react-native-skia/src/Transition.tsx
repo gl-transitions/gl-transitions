@@ -32,7 +32,7 @@ export interface AnimatedValue<T> {
 export type TransitionImage = SkImage | null | AnimatedValue<SkImage | null>;
 
 export interface TransitionProps<N extends TransitionName | (string & {}) = TransitionName> {
-  /** Transition name, as in gl-transitions (e.g. "crosswarp"). */
+  /** Transition name, as in gl-transitions (e.g. "CrossWarp"). */
   name: N;
   from: TransitionImage;
   to: TransitionImage;
@@ -44,7 +44,7 @@ export interface TransitionProps<N extends TransitionName | (string & {}) = Tran
   y?: number;
   /** Parameters of the transition; the ones left out keep their default value. */
   params?: TransitionParams<N>;
-  /** Extra images some transitions need, by name (e.g. `luma` for "luma"): see `transition.textures`. */
+  /** Extra images some transitions need, by name (e.g. `luma` for "LumaWipe"): see `transition.textures`. */
   textures?: { [name: string]: TransitionImage };
   /** How `from`, `to` and the textures fill the rectangle. Default: "cover". */
   fit?: Fit;

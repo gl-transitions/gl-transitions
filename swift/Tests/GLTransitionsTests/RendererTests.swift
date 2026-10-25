@@ -44,22 +44,22 @@ final class RendererTests: XCTestCase {
     }
 
     func testFade() throws {
-        XCTAssertEqual(try render("fade", progress: 0), SIMD4(255, 0, 0, 255))
-        XCTAssertEqual(try render("fade", progress: 1), SIMD4(0, 0, 255, 255))
-        let half = try render("fade", progress: 0.5)
+        XCTAssertEqual(try render("Fade", progress: 0), SIMD4(255, 0, 0, 255))
+        XCTAssertEqual(try render("Fade", progress: 1), SIMD4(0, 0, 255, 255))
+        let half = try render("Fade", progress: 0.5)
         XCTAssertEqual(Int(half.x), 128, accuracy: 1)
         XCTAssertEqual(Int(half.z), 128, accuracy: 1)
     }
 
     func testTextures() throws {
-        XCTAssertThrowsError(try render("luma", progress: 0.5)) {
-            XCTAssertEqual($0 as? TransitionError, .missingTexture(transition: "luma", name: "luma"))
+        XCTAssertThrowsError(try render("LumaWipe", progress: 0.5)) {
+            XCTAssertEqual($0 as? TransitionError, .missingTexture(transition: "LumaWipe", name: "luma"))
         }
-        XCTAssertThrowsError(try render("fade", progress: 0.5, textures: ["luma": texture(.zero)])) {
-            XCTAssertEqual($0 as? TransitionError, .unknownTexture(transition: "fade", name: "luma"))
+        XCTAssertThrowsError(try render("Fade", progress: 0.5, textures: ["luma": texture(.zero)])) {
+            XCTAssertEqual($0 as? TransitionError, .unknownTexture(transition: "Fade", name: "luma"))
         }
         // The dark parts of the mask go first.
-        XCTAssertEqual(try render("luma", progress: 0.5, textures: ["luma": texture(SIMD4(0, 0, 0, 255))]), SIMD4(0, 0, 255, 255))
-        XCTAssertEqual(try render("luma", progress: 0.5, textures: ["luma": texture(SIMD4(255, 255, 255, 255))]), SIMD4(255, 0, 0, 255))
+        XCTAssertEqual(try render("LumaWipe", progress: 0.5, textures: ["luma": texture(SIMD4(0, 0, 0, 255))]), SIMD4(0, 0, 255, 255))
+        XCTAssertEqual(try render("LumaWipe", progress: 0.5, textures: ["luma": texture(SIMD4(255, 255, 255, 255))]), SIMD4(255, 0, 0, 255))
     }
 }

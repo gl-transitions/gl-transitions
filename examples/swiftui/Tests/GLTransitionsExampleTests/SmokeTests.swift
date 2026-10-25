@@ -29,7 +29,7 @@ final class SmokeTests: XCTestCase {
     func testVideoComposition() async throws {
         let samples = try Samples.load()
         let clips = try await Video.makeClips(samples)
-        let luma = try XCTUnwrap(GLTransitions.named("luma"))
+        let luma = try XCTUnwrap(GLTransitions.named("LumaWipe"))
         let composition = try await Video.composition(clips: clips, transition: luma, params: [:], samples: samples)
         let duration = try await composition.composition.load(.duration)
         XCTAssertEqual(duration.seconds, 3 * Video.clipDuration - 2 * Video.transitionDuration.seconds, accuracy: 0.05)

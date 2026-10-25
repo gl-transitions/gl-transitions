@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Validates a gl-transition shader against the spec.
-// Usage: pnpm run validate --transition path/to/fade.glsl
+// Usage: pnpm run validate --transition path/to/Fade.glsl
 //
 // Checks:
 // 1. Shader compiles

@@ -76,12 +76,45 @@ const commits = git(
     return { commit, files };
   });
 
+// Renamed and removed transitions (renamed.json) have their own changeset, with the mapping: they
+// are not new, nor removed. A rename appears here as the old file removed and the new one added.
+const renamedFile = path.join(ROOT, "packages/gl-transitions/renamed.json");
+const renamed = fs.existsSync(renamedFile) ? JSON.parse(fs.readFileSync(renamedFile, "utf8")) : {};
+// New name → the 1.x names it replaces (a removed duplicate maps to the transition that replaces
+// it too), when their files were removed since the tag.
+const formerNames = new Map();
+for (const [old, now] of Object.entries(renamed)) {
+  if (net.get(`transitions/${old}.glsl`) === "D") formerNames.set(now, [...(formerNames.get(now) ?? []), old]);
+}
+const blob = (rev, file) => {
+  try {
+    return git("rev-parse", `${rev}:${file}`);
+  } catch {
+    return null;
+  }
+};
+
 const changes = [];
 for (const [file, status] of net) {
   const name = nameOf(file);
+  if (status === "D" && Object.hasOwn(renamed, name)) continue;
+  const former = status === "A" && formerNames.get(name);
+  if (former) {
+    // A renamed transition is listed as updated only if its content changed too.
+    if (former.some((old) => blob(tag, `transitions/${old}.glsl`) === blob("HEAD", file))) continue;
+    for (const { commit, files } of commits) {
+      if (files.some(([, f]) => f === file)) changes.push({ status: "M", name, commit });
+    }
+    continue;
+  }
   if (status === "A") {
-    // Credited to the commit that added it, not to later edits.
-    const commit = commits.findLast(({ files }) => files.some(([s, f]) => f === file && s === "A"))?.commit;
+    // Credited to the commit that first added it, also when it was renamed since. Git may see that
+    // addition as a copy of a similar transition (C): only commits since the tag count, so a
+    // transition derived from an older one is still credited to its own commit.
+    const commit = git("log", "--follow", "--diff-filter=AC", "--format=%H", `${tag}..HEAD`, "--", file)
+      .split("\n")
+      .filter(Boolean)
+      .pop();
     let author;
     try {
       author = parseTransition(fs.readFileSync(path.join(ROOT, file), "utf8"), path.basename(file)).transition.author;
