@@ -66,13 +66,12 @@ test("write-transition-changesets: credits a new transition to the commit that a
     git("commit", "-qam", "edit fade again");
     const again = git("rev-parse", "HEAD");
 
-    // A rename listed in renamed.json is neither a new nor a removed transition; it is updated
-    // only when its content changed too. A new transition renamed before the release keeps the
-    // credit of the commit that added it.
-    write("packages/gl-transitions/renamed.json", '{ "old_wipe": "Wipe", "old_slide": "Slide" }\n');
+    // A rename is neither a new nor a removed transition; it is updated only when its content
+    // changed too. A new transition renamed before the release keeps the credit of the commit that
+    // added it.
     git("mv", "transitions/old_wipe.glsl", "transitions/Wipe.glsl");
     git("mv", "transitions/old_slide.glsl", "transitions/Slide.glsl");
-    write("transitions/Slide.glsl", glsl("getFromColor(1.0 - uv)"));
+    write("transitions/Slide.glsl", glsl("getToColor(uv)") + "// Description: Slides in\n");
     git("mv", "transitions/swirl.glsl", "transitions/Swirl.glsl");
     git("add", ".");
     git("commit", "-qm", "rename transitions");

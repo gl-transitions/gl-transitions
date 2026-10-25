@@ -76,34 +76,37 @@ const commits = git(
     return { commit, files };
   });
 
-// Renamed and removed transitions (renamed.json) have their own changeset, with the mapping: they
-// are not new, nor removed. A rename appears here as the old file removed and the new one added.
-const renamedFile = path.join(ROOT, "packages/gl-transitions/renamed.json");
-const renamed = fs.existsSync(renamedFile) ? JSON.parse(fs.readFileSync(renamedFile, "utf8")) : {};
-// New name → the 1.x names it replaces (a removed duplicate maps to the transition that replaces
-// it too), when their files were removed since the tag.
-const formerNames = new Map();
-for (const [old, now] of Object.entries(renamed)) {
-  if (net.get(`transitions/${old}.glsl`) === "D") formerNames.set(now, [...(formerNames.get(now) ?? []), old]);
-}
-const blob = (rev, file) => {
-  try {
-    return git("rev-parse", `${rev}:${file}`);
-  } catch {
-    return null;
+// Renamed transitions, as git detects them (R<similarity>): new file → the old file and their
+// similarity. A rename is neither a new nor a removed transition (the changeset of the rename
+// lists it); it is listed as updated when its content changed too.
+const renamedFrom = new Set();
+const renamedTo = new Map();
+for (const line of git("diff", "--name-status", "-M", tag, "HEAD", "--", "transitions/").split("\n")) {
+  const [status, from, to] = line.split("\t");
+  if (status?.startsWith("R") && isTransition(from) && isTransition(to)) {
+    renamedFrom.add(from);
+    renamedTo.set(to, { from, similarity: Number(status.slice(1)) });
   }
-};
+}
 
 const changes = [];
 for (const [file, status] of net) {
   const name = nameOf(file);
-  if (status === "D" && Object.hasOwn(renamed, name)) continue;
-  const former = status === "A" && formerNames.get(name);
-  if (former) {
-    // A renamed transition is listed as updated only if its content changed too.
-    if (former.some((old) => blob(tag, `transitions/${old}.glsl`) === blob("HEAD", file))) continue;
+  if (status === "D" && renamedFrom.has(file)) continue;
+  if (status === "A" && renamedTo.has(file)) {
+    const { from, similarity } = renamedTo.get(file);
+    if (similarity === 100) continue;
+    // Under the commits that edited it, before or after the rename, and the rename itself when it
+    // edited the file too.
+    const editedInRename = (commit) =>
+      git("diff", "--name-status", "-M", `${commit}^`, commit, "--", from, file)
+        .split("\n")
+        .some((line) => /^R(?!100)\d+\t/.test(line));
     for (const { commit, files } of commits) {
-      if (files.some(([, f]) => f === file)) changes.push({ status: "M", name, commit });
+      const edited = files.some(([s, f]) => (f === file || f === from) && s === "M");
+      const renamed =
+        files.some(([s, f]) => f === file && s === "A") && files.some(([s, f]) => f === from && s === "D");
+      if (edited || (renamed && editedInRename(commit))) changes.push({ status: "M", name, commit });
     }
     continue;
   }

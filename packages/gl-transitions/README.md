@@ -37,14 +37,7 @@ A Transition is an object with the following shape (TypeScript types are include
 
 2.0 gives every transition a PascalCase name: `crosswarp` is now `CrossWarp`, `wipeLeft` is `WipeLeft`. Names that were misleading or unclear got a better one at the same time (`burn` is now `FlashFade`, `fragment` is `Shatter`), and two near-duplicates were removed: `CircleCrop` (use `CircleIris`) and `PuzzleRight` (use `GridFlip`). The renamed transitions render as before, with the same parameters, except three fill colors that became a `vec4` in 2.0, so they can be transparent: `CircleIris`'s `backColor`, `FadeColor`'s `color` and `UndulatingBurnOut`'s `color` (add an alpha of 1 to your values). The two replacements look alike but differ: `CircleIris` closes into an ellipse that follows the image's shape, over a dark gray `backColor` instead of black `bgcolor`; `GridFlip` has thicker dividers, a `bgcolor` and a random order (`randomness`).
 
-`renamed.json` maps each 1.x name that changed to its 2.0 name, for names stored in projects, settings or URLs:
-
-```js
-import renamed from "gl-transitions/renamed.json" with { type: "json" };
-
-const upgrade = (name) => (Object.hasOwn(renamed, name) ? renamed[name] : name);
-upgrade("crosswarp"); // "CrossWarp"
-```
+The [changelog](CHANGELOG.md) of 2.0 lists every renamed transition.
 
 ## Files
 
@@ -53,7 +46,6 @@ upgrade("crosswarp"); // "CrossWarp"
 | `index.js` | The collection (CommonJS; `import` works too) |
 | `gl-transitions.json` | The same, as JSON |
 | `gl-transitions.js` | The same, as a `window.GLTransitions` script |
-| `renamed.json` | The names that changed in 2.0: `{ [1.x name]: 2.0 name }` (see [Migrating from 1.x](#migrating-from-1x)) |
 | `transitions/<name>.glsl` | Each transition's GLSL source |
 | `sksl/<name>.sksl` | Each transition as a standalone [SkSL](https://skia.org/docs/user/sksl/) runtime effect, for Skia-based renderers (React Native Skia, CanvasKit, Flutter/Skia, Compose Multiplatform, skia-safe) |
 | `sksl/index.js` | The same SkSL sources as `{ [name]: source }`, for bundlers that can't import `.sksl` files (React Native, …) |

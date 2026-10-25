@@ -178,7 +178,7 @@ The npm package exposes the collection as an array of objects:
 
 | Field | Description |
 |---|---|
-| `name` | File name without `.glsl`: PascalCase, unique ignoring case (see [Naming](CONTRIBUTING.md#naming)). Only renamed in a major version, as in 2.0 (`renamed.json` maps the 1.x names) |
+| `name` | File name without `.glsl`: PascalCase, unique ignoring case (see [Naming](CONTRIBUTING.md#naming)). Only renamed in a major version, as in 2.0 |
 | `author`, `license` | From the header comments |
 | `glsl` | The transition source |
 | `paramsTypes`, `defaultParams` | Parameter types and default values (legacy, kept for compatibility) |

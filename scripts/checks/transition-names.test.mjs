@@ -25,22 +25,15 @@ test("nameErrors: names must differ ignoring case", () => {
   assert.deepEqual(nameErrors("CrossZoom", ["CrossZoom", "Fade"]), []);
 });
 
-test("nameErrors: a 1.x name only stays with its own transition", () => {
-  assert.deepEqual(nameErrors("CrossWarp"), []); // crosswarp became CrossWarp
-  assert.match(nameErrors("Burn")[0], /was the 1.x name of 'FlashFade'/);
-  assert.match(nameErrors("Dissolve")[0], /was the 1.x name of 'GlowDissolve'/);
-  assert.match(nameErrors("PuzzleRight")[0], /was the 1.x name of 'GridFlip'/); // removed, replaced by GridFlip
-});
-
 test("lintTransitions: reports naming errors", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lint-"));
   const ok = "// Author: a\n// License: MIT\nvec4 transition(vec2 uv) { return getToColor(uv); }\n";
   fs.writeFileSync(path.join(dir, "Good.glsl"), ok);
   fs.writeFileSync(path.join(dir, "snake_case.glsl"), ok);
-  fs.writeFileSync(path.join(dir, "Burn.glsl"), ok);
+  fs.writeFileSync(path.join(dir, "RGBSplit.glsl"), ok);
   const { errors } = lintTransitions(dir);
   assert.equal(errors.length, 2);
   assert.ok(errors.some((e) => /snake_case\.glsl: 'snake_case' must be PascalCase/.test(e)));
-  assert.ok(errors.some((e) => /Burn\.glsl: 'Burn' was the 1.x name of 'FlashFade'/.test(e)));
+  assert.ok(errors.some((e) => /RGBSplit\.glsl: 'RGBSplit' has three capitals in a row/.test(e)));
   fs.rmSync(dir, { recursive: true });
 });

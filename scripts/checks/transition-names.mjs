@@ -7,20 +7,15 @@
 // - acronyms written as words, so never three capitals in a row (`HsvFade`, not `HSVFade`)
 // - no `Transition` in the name: everything in the collection is one
 // - different from every other name, ignoring case (case-insensitive file systems)
-// - never a name of 1.x (packages/gl-transitions/renamed.json) for another transition: code that
-//   only fixed the case of an old name would silently get a different effect
 
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = path.join(import.meta.dirname, "..", "..");
-// 1.x name → 2.0 name (for the two removed duplicates, the transition that replaces them).
-const RENAMED = JSON.parse(fs.readFileSync(path.join(ROOT, "packages/gl-transitions/renamed.json"), "utf8"));
 
 // Names compare without case, dashes and underscores (`old_tv` and `OldTv` are the same name).
 const key = (name) => name.toLowerCase().replace(/[-_]/g, "");
-const formerNames = new Map(Object.entries(RENAMED).map(([old, now]) => [key(old), now]));
 
 // Returns the errors of `name`; `others` are the names of the other transitions.
 function nameErrors(name, others = []) {
@@ -33,10 +28,6 @@ function nameErrors(name, others = []) {
   if (/transition/i.test(name)) errors.push(`'${name}' must not contain 'Transition': every entry is one`);
   const same = others.find((other) => other !== name && key(other) === key(name));
   if (same) errors.push(`'${name}' only differs from '${same}' by case: names must differ ignoring case`);
-  const now = formerNames.get(key(name));
-  if (now && now !== name) {
-    errors.push(`'${name}' was the 1.x name of '${now}': pick another name, so old code does not get another effect`);
-  }
   return errors;
 }
 

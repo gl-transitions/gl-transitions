@@ -36,11 +36,9 @@ Read its `// Description:` line too. Note the direction of any movement (the out
 ## 3. Check it
 
 ```sh
-node scripts/checks/transition-names.mjs <Name>   # PascalCase, acronyms, unique ignoring case, not a former 1.x name
+node scripts/checks/transition-names.mjs <Name>   # PascalCase, acronyms, unique ignoring case, no Transition
 pnpm run lint                                      # the same rules on every file in transitions/
 ```
-
-A name that was the 1.x name of another transition (`packages/gl-transitions/renamed.json`) is refused: `Burn` was the 1.x name of `FlashFade`, and code that only fixed the case of the old name would silently get a different effect.
 
 Then search the catalog for the same effect under another name (a duplicate is worse than any name):
 
@@ -53,9 +51,8 @@ grep -h "^// Description:" transitions/*.glsl | grep -i "<keyword>"
 Only in a major version, and only when the name is wrong, misleading, a typo or a duplicate:
 
 1. `git mv` the file (on macOS, a case-only rename needs `git mv`, not a plain `mv`).
-2. Add `"<old name>": "<new name>"` to `packages/gl-transitions/renamed.json`; never remove an entry.
-3. Update the references: `git grep -n '"<old name>"'` in the packages, examples, tests, skills and READMEs. Texture names (`luma`, `displacementMap`) are uniforms, not transition names: leave them.
-4. Add a major changeset that lists the rename.
+2. Update the references: `git grep -n '"<old name>"'` in the packages, examples, tests, skills and READMEs. Texture names (`luma`, `displacementMap`) are uniforms, not transition names: leave them.
+3. Add a major changeset that lists the rename.
 
 ## Reviewing a pull request
 

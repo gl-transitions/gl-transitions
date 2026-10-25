@@ -20,7 +20,7 @@ await editly({
 - `transition` on a clip applies between that clip and the next one.
 - `params` sets transition parameters (undocumented in editly but supported); omitted ones keep their defaults.
 - Also `random`, `dummy` (none), and `directional-left|right|up|down`.
-- editly depends on `gl-transitions` 1.x, so it takes the 1.x names (`crosswarp`, `cube`), not the PascalCase names of 2.0 (`CrossWarp`, `Cube`); the package's `renamed.json` maps one to the other.
+- editly depends on `gl-transitions` 1.x, so it takes the 1.x names (`crosswarp`, `cube`), not the PascalCase names of 2.0 (`CrossWarp`, `Cube`).
 
 ## FFmpeg (third-party filter)
 
