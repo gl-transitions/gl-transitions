@@ -1,5 +1,45 @@
 # gl-transitions
 
+## 2.1.0
+
+### Minor Changes
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`abfc1df`](https://github.com/gl-transitions/gl-transitions/commit/abfc1dfa300f727f21eb860fc3b265b0f9666ca9) Thanks [@gre](https://github.com/gre)! - New transition: `ApertureWipe` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`ca6de66`](https://github.com/gl-transitions/gl-transitions/commit/ca6de66d8c388137533fe346756d3e265a080f73) Thanks [@gre](https://github.com/gre)! - New transition: `Comb` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`6173628`](https://github.com/gl-transitions/gl-transitions/commit/6173628876d9e217711ff37d3557e391a29c2c2c) Thanks [@gre](https://github.com/gre)! - New transition: `Curtains` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`abfc1df`](https://github.com/gl-transitions/gl-transitions/commit/abfc1dfa300f727f21eb860fc3b265b0f9666ca9) Thanks [@gre](https://github.com/gre)! - New transition: `DiamondWipe` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`3157207`](https://github.com/gl-transitions/gl-transitions/commit/31572072046e76f0edf3756afacebdef05bb677e) Thanks [@gre](https://github.com/gre)! - New transition: `DitherDissolve` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`6173628`](https://github.com/gl-transitions/gl-transitions/commit/6173628876d9e217711ff37d3557e391a29c2c2c) Thanks [@gre](https://github.com/gre)! - New transition: `FallOver` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`342d362`](https://github.com/gl-transitions/gl-transitions/commit/342d362071fb034dba2d038e0aad975e0afe25fc) Thanks [@gre](https://github.com/gre)! - New transition: `Fisheye` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`5294d07`](https://github.com/gl-transitions/gl-transitions/commit/5294d07ee6a5c3b82512c533227fcebb84794042) Thanks [@gre](https://github.com/gre)! - New transition: `Halftone` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`5294d07`](https://github.com/gl-transitions/gl-transitions/commit/5294d07ee6a5c3b82512c533227fcebb84794042) Thanks [@gre](https://github.com/gre)! - New transition: `Honeycomb` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`6173628`](https://github.com/gl-transitions/gl-transitions/commit/6173628876d9e217711ff37d3557e391a29c2c2c) Thanks [@gre](https://github.com/gre)! - New transition: `PaperTear` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`ca6de66`](https://github.com/gl-transitions/gl-transitions/commit/ca6de66d8c388137533fe346756d3e265a080f73) Thanks [@gre](https://github.com/gre)! - New transition: `Prisms` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`5294d07`](https://github.com/gl-transitions/gl-transitions/commit/5294d07ee6a5c3b82512c533227fcebb84794042) Thanks [@gre](https://github.com/gre)! - New transition: `Puzzle` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`ca6de66`](https://github.com/gl-transitions/gl-transitions/commit/ca6de66d8c388137533fe346756d3e265a080f73) Thanks [@gre](https://github.com/gre)! - New transition: `Shred` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`abfc1df`](https://github.com/gl-transitions/gl-transitions/commit/abfc1dfa300f727f21eb860fc3b265b0f9666ca9) Thanks [@gre](https://github.com/gre)! - New transition: `SpiralWipe` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`342d362`](https://github.com/gl-transitions/gl-transitions/commit/342d362071fb034dba2d038e0aad975e0afe25fc) Thanks [@gre](https://github.com/gre)! - New transition: `Tunnel` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`3157207`](https://github.com/gl-transitions/gl-transitions/commit/31572072046e76f0edf3756afacebdef05bb677e) Thanks [@gre](https://github.com/gre)! - New transition: `TvRoll` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`3157207`](https://github.com/gl-transitions/gl-transitions/commit/31572072046e76f0edf3756afacebdef05bb677e) Thanks [@gre](https://github.com/gre)! - New transition: `TvTurnOff` by gre.
+
+- [#342](https://github.com/gl-transitions/gl-transitions/pull/342) [`342d362`](https://github.com/gl-transitions/gl-transitions/commit/342d362071fb034dba2d038e0aad975e0afe25fc) Thanks [@gre](https://github.com/gre)! - New transition: `WhipPan` by gre.
+
 ## 2.0.0
 
 ### Major Changes
