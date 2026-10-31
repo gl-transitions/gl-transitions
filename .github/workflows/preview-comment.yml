@@ -8,9 +8,11 @@ on:
     types:
       - completed
 
-# Single global group: every run force-pushes the shared preview-assets branch.
+# One group per PR branch: a newer pending run replaces an older one of the same PR. Not a
+# global group, which keeps a single pending run and cancels the others' comments when a
+# stack is pushed; runs of different PRs retry their push to preview-assets instead.
 concurrency:
-  group: preview-assets-publish
+  group: preview-comment-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: false
 
 permissions:
@@ -87,16 +89,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git fetch origin preview-assets 2>/dev/null || true
-          if git rev-parse --verify origin/preview-assets >/dev/null 2>&1; then
-            git checkout origin/preview-assets
-          else
-            git checkout --orphan preview-assets
-            git rm -rf . 2>/dev/null || true
-          fi
-
           # Bounded: at most 20 GIFs and 100 MB per run, real GIFs only (the branch is served from
           # raw.githubusercontent.com), and only the 200 most recent GIFs are kept.
+          mkdir -p "$RUNNER_TEMP/gifs"
           COUNT=0
           TOTAL=0
           for gif in previews/*.gif; do
@@ -112,23 +107,42 @@ jobs:
               echo "::warning::Skipping $(basename -- "$gif"): over the per-run budget"
               continue
             fi
-            dest="${PREFIX}-$(basename -- "$gif")"
-            cp -- "$gif" "$dest"
-            git add -- "$dest"
+            cp -- "$gif" "$RUNNER_TEMP/gifs/${PREFIX}-$(basename -- "$gif")"
             basename -- "$gif" >> "$RUNNER_TEMP/published.txt"
             COUNT=$((COUNT + 1))
             TOTAL=$((TOTAL + size))
           done
+          [ "$COUNT" -gt 0 ] || exit 0
 
-          # Retention: keep the 200 most recent GIFs (run ids only grow).
-          git ls-files -- 'run-*.gif' | sort -t- -k2,2nr | tail -n +201 | xargs -r git rm -q --
+          # Runs of other PRs publish concurrently: commit on top of the latest preview-assets and
+          # push with a lease, refetching and retrying when another run pushed in between.
+          for attempt in 1 2 3 4 5; do
+            git fetch -q origin preview-assets 2>/dev/null || true
+            if BASE=$(git rev-parse -q --verify origin/preview-assets); then
+              git checkout -q -f --detach "$BASE"
+            else
+              BASE=""
+              git checkout -q -f --orphan "preview-assets-$attempt"
+              git rm -rfq . 2>/dev/null || true
+            fi
+            for gif in "$RUNNER_TEMP"/gifs/*.gif; do
+              cp -- "$gif" .
+              git add -- "$(basename -- "$gif")"
+            done
 
-          # Publish the branch as a single commit, so pruned GIFs don't stay in its history.
-          if [ "$COUNT" -gt 0 ]; then
+            # Retention: keep the 200 most recent GIFs (run ids only grow).
+            git ls-files -- 'run-*.gif' | sort -t- -k2,2nr | tail -n +201 | xargs -r git rm -q --
+
+            # Publish the branch as a single commit, so pruned GIFs don't stay in its history.
             TREE=$(git write-tree)
             COMMIT=$(git commit-tree "$TREE" -m "Preview GIFs (latest: ${PREFIX})")
-            git push -f origin "$COMMIT:refs/heads/preview-assets"
-          fi
+            if git push --force-with-lease="preview-assets:$BASE" origin "$COMMIT:refs/heads/preview-assets"; then
+              exit 0
+            fi
+            sleep $((attempt * 5 + RANDOM % 10))
+          done
+          echo "::error::Could not publish to preview-assets after 5 attempts"
+          exit 1
 
       - name: Post preview comment with inline GIFs
         if: steps.meta.outputs.pr != ''

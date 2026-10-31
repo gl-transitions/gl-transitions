@@ -1,8 +1,8 @@
 name: Preview
 
 on:
+  # Any base branch: a PR of a stack targets the PR below it.
   pull_request:
-    branches: [master]
     paths:
       - 'transitions/*.glsl'
 
@@ -26,10 +26,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          fetch-depth: 0
-
-      - name: Fetch master for diff
-        run: git fetch origin master
+          # The merge commit and its base parent, for the diff below.
+          fetch-depth: 2
 
       - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
 
@@ -47,7 +45,9 @@ jobs:
           PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           # Added, changed and renamed transitions; a removed one has nothing to render (d).
-          FILES=$(git diff --name-only --diff-filter=d origin/master...HEAD -- 'transitions/*.glsl' | tr '\n' ' ')
+          # HEAD is the merge commit of the PR into its base (HEAD^1), so a PR of a stack only
+          # previews its own transitions, not those of the PRs below it.
+          FILES=$(git diff --name-only --diff-filter=d HEAD^1 HEAD -- 'transitions/*.glsl' | tr '\n' ' ')
           if [ -z "$FILES" ]; then
             echo "No .glsl files changed"
             echo "files=" >> $GITHUB_OUTPUT
