@@ -1,13 +1,15 @@
 // Author: gre
 // License: MIT
-// Description: A line sweeps across the frame and stretches the outgoing image's pixels into long streaks behind it, then the streaks retract and reveal the incoming image
+// Description: A line sweeps across the frame and drags the outgoing image's pixels behind it as long streaks, which shorten as it goes and reveal the incoming image
 // Tags: smear, streaks, directional, chromatic
 
 // @param Direction in which the line sweeps
 uniform vec2 direction; // = vec2(1.0, 0.0)
+// @range(0, 1) Length of the streaks at the middle of the sweep, as a part of the frame
+uniform float stretch; // = 0.45
 // @range(0, 1) Amount of RGB split along the streaks
 uniform float chroma; // = 0.5
-// @range(0, 0.2) Softness of the line, as a part of the frame
+// @range(0, 0.2) Softness of the line and of the streaks' ends, as a part of the frame
 uniform float softness; // = 0.03
 // @range(0, 1) How much the streaks jitter, each row at its own length
 uniform float jitter; // = 0.5
@@ -44,43 +46,27 @@ vec4 transition(vec2 uv) {
 
   float p = progress;
   float k = softness + 1e-4;
-  // the lines rest just beyond the frame, past their soft edge
+  // the line starts and ends at rest just beyond the frame, past its soft edge, so both ends are exact;
+  // it enters at once and slows down a little toward the end
   float margin = k + 0.002;
-  // the leading line eats the outgoing image, the trailing one gives back the incoming image;
-  // they leave and arrive at rest beyond the frame so that both ends are exact
-  float ta = clamp(p / 0.6, 0.0, 1.0);
-  float tb = 1.0 - clamp((p - 0.4) / 0.6, 0.0, 1.0);
-  // the leading line enters at once with a slight ease in, the trailing one eases out
-  float ea = mix(ta, ta * ta * (2.2 - 1.2 * ta), 0.3);
-  float eb = 1.0 - mix(tb, tb * tb * (2.2 - 1.2 * tb), 0.7);
-  float a = mix(-margin, 1.0 + margin, ea);
-  float b = mix(-margin, 1.0 + margin, eb);
+  float a = mix(-margin, 1.0 + margin, mix(p, p * p * (3.0 - 2.0 * p), 0.5));
 
-  // the streaking is strongest at the middle of the sweep: 0 at both ends
-  float h = 1.0 - abs(2.0 * p - 1.0);
+  // the streaks are longest when the line crosses the middle and vanish as it reaches the edges,
+  // so they never repeat the frame's own border (often dark, or letterboxing)
+  float h = clamp(4.0 * a * (1.0 - a), 0.0, 1.0);
+  float len = stretch * h * (1.0 - 0.6 * jitter * rnd);
   float split = 0.02 * chroma * h;
-  // each row's streak starts a bit ahead of the line, ramping in from the line
-  float ja = 0.04 * jitter * h * rnd * clamp((a - s) / 0.1, 0.0, 1.0);
-  float jb = 0.04 * jitter * h * rnd * clamp((s - b) / 0.1, 0.0, 1.0);
 
-  // outgoing: behind the leading line, repeat the pixels at the line
-  vec4 fr = getFromColor(at(uv, s, smax(s, a + ja + split, k), d, ext));
-  vec4 fg = getFromColor(at(uv, s, smax(s, a + ja, k), d, ext));
-  vec4 fb = getFromColor(at(uv, s, smax(s, a + ja - split, k), d, ext));
-  // incoming: ahead of the trailing line, repeat its pixels forward
-  vec4 tr = getToColor(at(uv, s, -smax(-s, -b - jb - split, k), d, ext));
-  vec4 tg = getToColor(at(uv, s, -smax(-s, -b - jb, k), d, ext));
-  vec4 tbc = getToColor(at(uv, s, -smax(-s, -b - jb + split, k), d, ext));
-  vec4 outgoing = vec4(fr.r, fg.g, fb.b, fg.a);
-  vec4 incoming = vec4(tr.r, tg.g, tbc.b, tg.a);
-
-  // between the lines, the streaks switch from the outgoing to the incoming image,
-  // each row at its own place so that they look like streaks of different lengths
-  float f = (a - s) / max(a - b, 1e-4);
-  float w = s >= a ? 0.0 : s <= b ? 1.0
-    : smoothstep(0.0, 1.0, clamp((f - 0.5 + 0.5 * jitter * (rnd - 0.5)) / 0.25 + 0.5, 0.0, 1.0));
+  // ahead of the line the outgoing image is intact; behind it, each pixel repeats the pixel at the line
+  vec4 fr = getFromColor(at(uv, s, smax(s, a + split, k), d, ext));
+  vec4 fg = getFromColor(at(uv, s, smax(s, a, k), d, ext));
+  vec4 fb = getFromColor(at(uv, s, smax(s, a - split, k), d, ext));
+  vec4 streak = vec4(fr.r, fg.g, fb.b, fg.a);
   // a faint flicker along the streaks
-  float flick = 1.0 + 0.06 * jitter * h * (hash(row * 3.0 + 5.0) - 0.5) * step(b, s) * step(s, a);
-  vec4 c = mix(outgoing, incoming, w);
-  return vec4(c.rgb * flick, c.a);
+  float behind = step(s, a);
+  streak.rgb *= 1.0 + 0.06 * jitter * h * (hash(row * 3.0 + 5.0) - 0.5) * behind;
+
+  // past the end of its streak, each row shows the incoming image as it is
+  float w = smoothstep(len - k, len + k, a - s);
+  return mix(streak, getToColor(uv), w);
 }
