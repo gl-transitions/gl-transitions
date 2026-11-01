@@ -55,7 +55,7 @@ vec4 transition (vec2 uv) {
   float swirl = fbm(sq * 0.8 + 2.5 * w2) - 0.5; // marbled, curling pattern
   vec2 flow = w2 - 0.5;
   float amp = 0.05 + 0.35 * tendrils;
-  float n = max(1.0, floor(drops + 0.5));
+  float n = clamp(floor(drops + 0.5), 1.0, 8.0);
   float rimW = 0.1;
   float feather = 0.05; // soft, diluted ink around the front
   float margin = 1.2 * amp + rimW + 0.08; // how far the swirls can pull the front back
