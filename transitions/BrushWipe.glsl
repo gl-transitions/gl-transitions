@@ -94,6 +94,6 @@ vec4 transition (vec2 uv) {
   }
   vec4 from = getFromColor(uv);
   vec4 to = getToColor(uv);
-  to.rgb = min(to.rgb * (1.0 + 0.2 * shade), vec3(to.a)); // stays premultiplied
+  to.rgb = min(to.rgb * (1.0 + 0.2 * shade), 1.0);
   return mix(from, to, cover);
 }
