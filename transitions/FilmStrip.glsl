@@ -51,6 +51,8 @@ vec4 film(float x, float y, float base, float n, float aa, float holeX, vec2 hol
 }
 
 vec4 transition(vec2 uv) {
+  if (progress <= 0.0) return getFromColor(uv);
+  if (progress >= 1.0) return getToColor(uv);
   float n = max(float(frames), 1.0);
   float pitch = 1.0 + FRAME_LINE;
   float p = progress;
@@ -73,7 +75,7 @@ vec4 transition(vec2 uv) {
   float x = (uv.x - 0.5) / k + 0.5 + dx;
   float y = (uv.y - 0.5) / k + 0.5 + dy + (frameSlip - base) * pitch;
   // anti-aliasing width, in frame heights: none at rest or without margin
-  float aa = 0.002 * min(1.0, 10.0 * env) * min(1.0, 20.0 * shrink) + 1e-6;
+  float aa = 0.002 * min(1.0, 10.0 * env) * min(1.0, 20.0 * shrink) + 1e-4;
   // the holes sit in the middle of the margin the shrinking picture shows
   float margin = 0.5 * shrink / max(1.0 - shrink, 0.01);
   float holeX = 0.5 + 0.5 * margin;
@@ -86,12 +88,15 @@ vec4 transition(vec2 uv) {
   if (len < 1e-5) {
     color = film(x, y, base, n, aa, holeX, holeSize, holes);
   } else {
+    // averaged with premultiplied colors, so transparent parts don't darken the others
     float jitter = dither(floor(uv * vec2(ratio, 1.0) * 540.0));
     for (int i = 0; i < SAMPLES; i++) {
       float t = (float(i) + jitter) / float(SAMPLES) - 0.5;
-      color += film(x, y + t * len, base, n, aa, holeX, holeSize, holes);
+      vec4 c = film(x, y + t * len, base, n, aa, holeX, holeSize, holes);
+      color += vec4(c.rgb * c.a, c.a);
     }
     color /= float(SAMPLES);
+    color.rgb = color.a > 0.0 ? color.rgb / color.a : vec3(0.0);
   }
   // the projector's light flickers a little while the film runs
   color.rgb *= 1.0 - 0.08 * wob * (0.5 + 0.5 * sin(p * 157.0));
