@@ -32,7 +32,8 @@ vec4 pleated(float f, float c, float len, float b, float bLen, bool incoming, bo
   float m = 2.0 * float(pleats > 1 ? pleats : 1);
   float s = sqrt(max(1.0 - c * c, 0.0));
   float u = f * m;
-  float panel = floor(u);
+  // f = 1 is the end of the last panel, not the start of one more
+  float panel = min(floor(u), m - 1.0);
   float fu = u - panel;
   // the ridges (odd boundaries) stay in the frame's plane, the valleys (even ones) recede
   float tri = 1.0 - abs(mod(u, 2.0) - 1.0);
@@ -45,7 +46,7 @@ vec4 pleated(float f, float c, float len, float b, float bLen, bool incoming, bo
   float edge = EDGE * min(1.0, 20.0 * s * c) + 1e-6;
   float cover = clamp(min(bb, 1.0 - bb) * bLen * scale / edge, 0.0, 1.0);
   float a = flipA ? 1.0 - f : f;
-  vec2 st = vertical ? vec2(bb, a) : vec2(a, bb);
+  vec2 st = clamp(vertical ? vec2(bb, a) : vec2(a, bb), 0.0, 1.0);
   vec4 img = incoming ? getToColor(st) : getFromColor(st);
   // even panels face the light, odd ones turn away; blend across each fold over a pixel or so
   float facing = mod(panel, 2.0) < 0.5 ? 1.0 : -1.0;
