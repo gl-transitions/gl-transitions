@@ -3,7 +3,7 @@
 // Description: The image turns into text-mode characters, denser where it is brighter, the characters scramble into those of the incoming image, then resolve back into it
 // Tags: text, pattern, retro, digital
 
-// @range(0.01, 0.1) Height of a character at the peak, in frame heights
+// @range(0.01, 0.1) Height of a character, in frame heights
 uniform float cellSize; // = 0.04
 // @param Color the characters with the image (otherwise, with the ink color)
 uniform bool colored; // = true
@@ -83,9 +83,10 @@ vec4 cellColor(vec2 center, vec2 dims, bool incoming) {
   return c * 0.25;
 }
 
-// the frame in characters of height h, at the point fp (in frame heights from the center)
-vec4 characters(vec2 fp, float h) {
+vec4 transition(vec2 uv) {
   float p = progress;
+  float h = cellSize;
+  vec2 fp = (uv - 0.5) * vec2(ratio, 1.0);
   vec2 dims = vec2(ASPECT * h, h);
   vec2 cell = floor(fp / dims);
   vec2 center = (cell + 0.5) * dims;
@@ -110,24 +111,13 @@ vec4 characters(vec2 fp, float h) {
   // colored characters glow faintly over their cell, so the picture stays readable
   vec3 behind = colored ? mix(background.rgb, c.rgb, 0.3) : background.rgb;
   vec4 back = vec4(behind, background.a * c.a);
-  return mix(back, vec4(clamp(tint, 0.0, 1.0), alpha), cover);
-}
+  vec4 text = mix(back, vec4(clamp(tint, 0.0, 1.0), alpha), cover);
 
-vec4 transition(vec2 uv) {
-  float p = progress;
-  // the characters show up until 0.3 and fade back into the image from 0.7,
-  // growing to their full size before the switch (0.36 to 0.64), then shrinking back
-  float show = smoothstep(0.0, 0.3, p) * (1.0 - smoothstep(0.7, 1.0, p));
-  float grow = smoothstep(0.0, 0.36, p) * (1.0 - smoothstep(0.64, 1.0, p));
-  // in steps, like a terminal switching font sizes, with a quick blend from one to the next
-  float level = grow * 3.0;
-  float step0 = floor(level);
-  float blend = smoothstep(0.3, 0.7, level - step0);
-  vec2 fp = (uv - 0.5) * vec2(ratio, 1.0);
-  vec4 text = characters(fp, cellSize * mix(0.45, 1.0, step0 / 3.0));
-  if (blend > 0.0) {
-    text = mix(text, characters(fp, cellSize * mix(0.45, 1.0, min(step0 + 1.0, 3.0) / 3.0)), blend);
-  }
+  // each cell dissolves into its character at its own time, from 0.05 to 0.35,
+  // and back into the incoming image from 0.65 to 0.95
+  float into = 0.05 + 0.22 * hash12(cell + 200.0);
+  float outof = 0.95 - 0.22 * hash12(cell + 300.0);
+  float show = smoothstep(into, into + 0.08, p) * (1.0 - smoothstep(outof - 0.08, outof, p));
   vec4 image = p < 0.5 ? getFromColor(uv) : getToColor(uv);
   return mix(image, text, show);
 }
