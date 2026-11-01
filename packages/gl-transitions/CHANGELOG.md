@@ -1,5 +1,29 @@
 # gl-transitions
 
+## 2.3.0
+
+### Minor Changes
+
+- [#369](https://github.com/gl-transitions/gl-transitions/pull/369) [`98a294e`](https://github.com/gl-transitions/gl-transitions/commit/98a294eb827ff289bff9fb8595ef38d857e22e74) Thanks [@gre](https://github.com/gre)! - New transition: `Accordion` by gre.
+
+- [#373](https://github.com/gl-transitions/gl-transitions/pull/373) [`26a20c7`](https://github.com/gl-transitions/gl-transitions/commit/26a20c72249f04ca06b8538ac1e3bcfdc806e26f) Thanks [@gre](https://github.com/gre)! - New transition: `Ascii` by gre.
+
+- [#365](https://github.com/gl-transitions/gl-transitions/pull/365) [`cafea8c`](https://github.com/gl-transitions/gl-transitions/commit/cafea8c0136da7f724d9b3068a901d11da6df69e) Thanks [@gre](https://github.com/gre)! - New transition: `BrushWipe` by gre.
+
+- [#371](https://github.com/gl-transitions/gl-transitions/pull/371) [`e66f092`](https://github.com/gl-transitions/gl-transitions/commit/e66f09214a8b1d99679a43adeed9bb99179c1d04) Thanks [@gre](https://github.com/gre)! - New transition: `Disintegrate` by gre.
+
+- [#362](https://github.com/gl-transitions/gl-transitions/pull/362) [`f49aac7`](https://github.com/gl-transitions/gl-transitions/commit/f49aac7a63de3fa4038bf634a190ad01ed7f70fc) Thanks [@gre](https://github.com/gre)! - New transition: `FilmDissolve` by gre.
+
+- [#370](https://github.com/gl-transitions/gl-transitions/pull/370) [`1c1acac`](https://github.com/gl-transitions/gl-transitions/commit/1c1acacc013f384d78938366b1ab3d6a3bfa811f) Thanks [@gre](https://github.com/gre)! - New transition: `FilmStrip` by gre.
+
+- [#367](https://github.com/gl-transitions/gl-transitions/pull/367) [`1680133`](https://github.com/gl-transitions/gl-transitions/commit/16801337b284f148c493b396fa85f5af91186ea4) Thanks [@gre](https://github.com/gre)! - New transition: `GooeyWipe` by gre.
+
+- [#366](https://github.com/gl-transitions/gl-transitions/pull/366) [`1da9709`](https://github.com/gl-transitions/gl-transitions/commit/1da97098713f099845287ee58393b76ea2c6cfac) Thanks [@gre](https://github.com/gre)! - New transition: `InkBleed` by gre.
+
+- [#364](https://github.com/gl-transitions/gl-transitions/pull/364) [`03edd59`](https://github.com/gl-transitions/gl-transitions/commit/03edd599e6e1387b0d7d0a30f3f2e4ac31250a9b) Thanks [@gre](https://github.com/gre)! - New transition: `LensFlare` by gre.
+
+- [#363](https://github.com/gl-transitions/gl-transitions/pull/363) [`de71761`](https://github.com/gl-transitions/gl-transitions/commit/de71761b7c679fdcdae1629af42af296b5b0606a) Thanks [@gre](https://github.com/gre)! - New transition: `PhotoDevelop` by gre.
+
 ## 2.2.0
 
 ### Minor Changes
