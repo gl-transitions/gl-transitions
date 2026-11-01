@@ -1,6 +1,6 @@
 [package]
 name = "gl-transitions"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021"
 description = "The gl-transitions collection (GLSL transitions between two images) as SkSL, WGSL, GLSL ES 3.00 and Metal sources, with typed parameters and uniform layouts"
 license = "MIT AND BSD-2-Clause AND BSD-3-Clause"
