@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "prepare-images": "node scripts/write-images.mjs",
+    "prepare-promo": "node scripts/write-images.mjs && node scripts/write-promo-images.mjs",
     "studio": "node scripts/write-images.mjs && remotion studio src/index.ts",
     "check": "node scripts/write-images.mjs && node scripts/check.mjs",
     "typecheck": "tsc --noEmit"
