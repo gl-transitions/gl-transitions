@@ -1,5 +1,21 @@
 # gl-transitions
 
+## 2.2.0
+
+### Minor Changes
+
+- [#357](https://github.com/gl-transitions/gl-transitions/pull/357) [`88f5907`](https://github.com/gl-transitions/gl-transitions/commit/88f5907e43752243152d129f478e81337612d287) Thanks [@gre](https://github.com/gre)! - New transition: `CylinderRoll` by gre.
+
+- [#359](https://github.com/gl-transitions/gl-transitions/pull/359) [`3556c38`](https://github.com/gl-transitions/gl-transitions/commit/3556c388e7ad7aa94d9d46e36734da887e3172f6) Thanks [@gre](https://github.com/gre)! - New transition: `LightStreaks` by gre.
+
+- [#356](https://github.com/gl-transitions/gl-transitions/pull/356) [`89e3145`](https://github.com/gl-transitions/gl-transitions/commit/89e3145587c70ff987c0cf3eaecdb57b7c0f9f36) Thanks [@gre](https://github.com/gre)! - New transition: `PixelStretch` by gre.
+
+- [#358](https://github.com/gl-transitions/gl-transitions/pull/358) [`6928d02`](https://github.com/gl-transitions/gl-transitions/commit/6928d0272b46345c58baba5fa71fae89321eb4cf) Thanks [@gre](https://github.com/gre)! - New transition: `Refraction` by gre.
+
+- [#354](https://github.com/gl-transitions/gl-transitions/pull/354) [`bcb7fe9`](https://github.com/gl-transitions/gl-transitions/commit/bcb7fe9c356289185cae857ba2b53c6c7a075444) Thanks [@gre](https://github.com/gre)! - New transition: `WhipSpin` by gre.
+
+- [#355](https://github.com/gl-transitions/gl-transitions/pull/355) [`dbae79f`](https://github.com/gl-transitions/gl-transitions/commit/dbae79f2e2f3b26d1f622c27e55361877f8f390d) Thanks [@gre](https://github.com/gre)! - New transition: `WhipTilt` by gre.
+
 ## 2.1.0
 
 ### Minor Changes
