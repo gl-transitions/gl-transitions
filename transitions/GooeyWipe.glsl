@@ -88,9 +88,9 @@ vec4 transition (vec2 uv) {
   vec4 to = getToColor(fold(uv - grad * tilt * 0.01 * cellSize / vec2(ratio, 1.0)));
   float t2 = tilt * tilt;
   float gloss = 0.3 * t2 * t2; // a thin bright line right on the rim
-  to.rgb = mix(to.rgb * shade, highlight.rgb * to.a, clamp(spec + gloss, 0.0, 1.0) * highlight.a);
+  to.rgb = mix(to.rgb * shade, highlight.rgb, clamp(spec + gloss, 0.0, 1.0) * highlight.a);
   vec4 from = getFromColor(uv);
   float sh = shadow.a * (1.0 - smoothstep(0.0, 0.15, d + 0.03)) * smoothstep(0.0, 0.3, rNear);
-  from.rgb = mix(from.rgb, shadow.rgb * from.a, sh);
+  from.rgb = mix(from.rgb, shadow.rgb, sh);
   return mix(from, to, inside);
 }
