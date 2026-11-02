@@ -96,10 +96,10 @@ vec4 transition(vec2 uv) {
   // compressed, so that bright areas never flatten into white
   rays = 0.9 * (1.0 - exp(-rays));
 
-  // the image stays sharp, with a slight lift of the exposure at the peak; the rays are screened on top
+  // the image stays sharp, with a slight lift of the exposure at the peak; the rays are screened
+  // on top of its colors and add nothing to its alpha
   vec4 c = mix(vec4(fromColor.rgb * fromColor.a, fromColor.a), vec4(toColor.rgb * toColor.a, toColor.a), m);
-  vec3 base = min(c.rgb * (1.0 + 0.2 * peak), vec3(c.a));
-  vec3 color = base + rays - base * rays;
-  float a = c.a + max(rays.r, max(rays.g, rays.b)) * (1.0 - c.a);
-  return vec4(clamp(color / max(a, 1e-5), 0.0, 1.0), a);
+  if (c.a <= 0.0) return vec4(0.0);
+  vec3 base = min(c.rgb / c.a * (1.0 + 0.2 * peak), 1.0);
+  return vec4(base + rays - base * rays, c.a);
 }
