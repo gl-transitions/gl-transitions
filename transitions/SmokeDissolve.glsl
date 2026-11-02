@@ -4,7 +4,7 @@
 // Tags: smoke, fog, organic, noise, cover
 
 // @param Direction the smoke drifts toward (it comes in from the opposite side); its length is how far it drifts, in frame heights
-uniform vec2 direction; // = vec2(1.0, 0.2)
+uniform vec2 direction; // = vec2(0.5, 0.1)
 // @range(1, 8) Size of the billows: more, smaller ones with a larger value
 uniform float scale; // = 2.5
 // @range(0, 1) How much the smoke rolls in from one side rather than everywhere at once
@@ -52,35 +52,42 @@ vec4 transition(vec2 uv) {
   float ext = 0.5 * (abs(dir.x) * ratio + abs(dir.y)) + 1e-4;
   float along = len > 1e-4 ? 0.5 + 0.5 * dot(pos, dir) / ext : 0.5;
 
-  // the local phase of the smoke at this pixel: it gathers (0 to 0.4), covers (0.45 to 0.55)
+  // the local phase of the smoke at this pixel: it gathers (0 to 0.4), covers (0.4 to 0.55)
   // and thins out (0.55 to 1); out of 0..1 at both ends of the transition
   float lp = p * (1.0 + spread) - spread * along;
   float body = smoothstep(0.0, 0.4, lp) * (1.0 - smoothstep(0.55, 1.0, lp));
+  // the images switch while the smoke is fully dense everywhere (body = 1)
+  float m = smoothstep(0.48, 0.52, lp);
+  // no smoke here (yet, or any more): one image only
+  if (body <= 0.0) return m < 0.5 ? getFromColor(uv) : getToColor(uv);
 
   // billows: noise warped by itself, drifting with the smoke and slowly churning
-  vec2 q = (pos - direction * 0.5 * (p - 0.5)) * scale;
+  vec2 q = (pos - direction * (p - 0.5)) * scale;
   vec2 churn = vec2(0.5 * p, -0.35 * p);
   vec2 warp = vec2(fbm(q + vec2(3.1, 1.7) + churn), fbm(q + vec2(8.3, 2.8) - churn));
   vec2 w = q + 1.1 * (warp - 0.5);
   float n = fbm(w);
   // the billows catch the light from above: brighter where the smoke rises toward it
-  float lit = n - fbm(w + vec2(0.0, 0.2));
+  // (on the coarse octave only, which shapes them)
+  float lit = 0.53 * (vnoise(w) - vnoise(w + vec2(0.0, 0.2)));
   // finer curls that fray the edges into wisps
   float wisp = vnoise(w * 3.3 - 2.0 * churn) - 0.5;
 
   // density: the billows fill in first, the gaps between them last, and thin out first
-  float k = 1.0;
-  float edge = body * (1.0 + k) - k * (1.0 - smoothstep(0.1, 0.6, n)) + 1.6 * body * (1.0 - body) * wisp;
+  float edge = 2.0 * body - (1.0 - smoothstep(0.1, 0.6, n)) + 1.6 * body * (1.0 - body) * wisp;
   float d = smoothstep(0.0, softness, edge) * mix(0.5, 1.0, smoothstep(0.2, 0.9, body));
 
-  // the images switch while the smoke is fully dense everywhere (body = 1)
-  float m = smoothstep(0.48, 0.52, lp);
-  vec4 fromColor = getFromColor(uv);
-  vec4 toColor = getToColor(uv);
-  if (d <= 0.0) {
-    if (m <= 0.0) return fromColor;
-    if (m >= 1.0) return toColor;
+  // the image under the smoke: one image, or both mixed (premultiplied) during the switch
+  vec4 base;
+  if (m <= 0.0) base = getFromColor(uv);
+  else if (m >= 1.0) base = getToColor(uv);
+  else {
+    vec4 a = getFromColor(uv);
+    vec4 b = getToColor(uv);
+    base = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
+    base = base.a > 0.0 ? vec4(base.rgb / base.a, base.a) : vec4(0.0);
   }
+  if (d <= 0.0) return base;
 
   // soft volumetric shading: lit tops, darker folds deep in the smoke, lighter thin wisps
   float shade = 0.92 + 1.3 * lit;
@@ -88,9 +95,6 @@ vec4 transition(vec2 uv) {
   shade = mix(1.0, shade, 0.3 + 0.7 * d);
   vec3 smoke = clamp(color.rgb * shade, 0.0, 1.0);
 
-  // mixed in premultiplied space, returned as straight colors
-  vec4 base = mix(vec4(fromColor.rgb * fromColor.a, fromColor.a), vec4(toColor.rgb * toColor.a, toColor.a), m);
-  vec4 c = mix(base, vec4(smoke * color.a, color.a), d);
-  if (c.a <= 0.0) return vec4(0.0);
-  return vec4(c.rgb / c.a, c.a);
+  // the smoke color mixes as straight RGBA, like every fill color
+  return mix(base, vec4(smoke, color.a), d);
 }
