@@ -51,7 +51,7 @@ vec4 transition(vec2 uv) {
   float m = 1.0 - smoothstep(-s, s, d);
 
   // the light ignites as it enters and dies away as it leaves: exactly none at both ends
-  float env = smoothstep(0.0, 0.2, progress) * smoothstep(1.0, 0.8, progress);
+  float env = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
   // a hot core, a thinner glint trailing behind it, and a wide soft halo
   float core = exp(-d * d / (w * w));
   float g = (d + 2.2 * w) / (0.3 * w);
