@@ -52,12 +52,13 @@ vec4 transition(vec2 uv) {
   float ext = 0.5 * (abs(dir.x) * ratio + abs(dir.y)) + 1e-4;
   float along = len > 1e-4 ? 0.5 + 0.5 * dot(pos, dir) / ext : 0.5;
 
-  // the local phase of the smoke at this pixel: it gathers (0 to 0.4), covers (0.4 to 0.55)
-  // and thins out (0.55 to 1); out of 0..1 at both ends of the transition
-  float lp = p * (1.0 + spread) - spread * along;
-  float body = smoothstep(0.0, 0.4, lp) * (1.0 - smoothstep(0.55, 1.0, lp));
-  // the images switch while the smoke is fully dense everywhere (body = 1)
-  float m = smoothstep(0.48, 0.52, lp);
+  // the smoke rolls in (until 0.45), covers the whole frame, then thins out (from 0.55),
+  // each side of the frame in turn
+  float arrive = (p / 0.45) * (1.0 + spread) - spread * along;
+  float leave = ((p - 0.55) / 0.45) * (1.0 + spread) - spread * along;
+  float body = smoothstep(0.0, 1.0, arrive) * (1.0 - smoothstep(0.0, 1.0, leave));
+  // the images switch while the smoke is fully dense everywhere
+  float m = smoothstep(0.48, 0.52, p);
   // no smoke here (yet, or any more): one image only
   if (body <= 0.0) return m < 0.5 ? getFromColor(uv) : getToColor(uv);
 
