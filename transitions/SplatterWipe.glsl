@@ -19,9 +19,11 @@ uniform float seed; // = 3.0
 const float PI = 3.141592653589793;
 // number of spikes around a splat
 const float SPIKES = 14.0;
-// furthest reach of a splat from its center, in cells: splats are looked for in the 3x3 cells around a pixel,
-// and the center of a splat 2 cells away is more than 1.35 cells away
-const float REACH = 1.3;
+// furthest reach of the shapes of a splat from its center, in cells. Splats are looked for in the 3x3 cells
+// around a pixel, and the center of a splat 2 cells away is more than 1.35 cells away; on top of REACH, the
+// smooth unions add up to 0.02 and the antialiasing 0.025 (at 10 splats), which leaves a margin of 0.055
+// so that no splat is ever cut by the search
+const float REACH = 1.25;
 
 float hash12(vec2 v) {
   vec3 v3 = fract(vec3(v.xyx) * 0.1031);
@@ -52,6 +54,8 @@ float splat(vec2 q, vec2 cell, vec2 key) {
   vec2 c = cell + 0.5 + 0.3 * (vec2(hash12(key + vec2(5.0, 1.0)), hash12(key + vec2(9.0, 2.0))) - 0.5);
   vec2 d = q - c;
   float l = length(d);
+  // nothing of the splat reaches this far (its distance there would be below -0.08 anyway)
+  if (l > REACH + 0.1) return -1.0;
   // a fast pop-in, then the paint slowly spreads until it covers its whole cell
   float pop = clamp((progress - t0) / 0.08, 0.0, 1.0);
   pop = 1.0 - (1.0 - pop) * (1.0 - pop) * (1.0 - pop);
@@ -66,29 +70,41 @@ float splat(vec2 q, vec2 cell, vec2 key) {
   float lumps = mix(0.3, 0.06, grow) * (turnNoise(a, 5.0, key) - 0.5) + mix(0.18, 0.06, grow) * (turnNoise(a, 19.0, key + 3.0) - 0.5);
   float f = rc * (1.0 + lumps) - l;
 
-  // a spike in each slice of the turn: a ray that tapers from a wide base, the long ones ending in a bead
+  // a spike in each slice of the turn: a ray that tapers from a wide base, the long ones ending in a bead;
+  // the slices on both sides are looked at too, as their spikes can lean over the boundary
   float s = floor(a * SPIKES);
-  vec2 sk = key + vec2(s, 17.0);
-  float h = hash12(sk);
-  float ang = (s + 0.5 + 0.4 * (hash12(sk + 0.5) - 0.5)) / SPIKES * 2.0 * PI - PI;
-  vec2 dir = vec2(cos(ang), sin(ang));
-  float along = dot(d, dir);
-  float across = abs(d.x * dir.y - d.y * dir.x);
-  float w = (0.022 + 0.03 * hash12(sk + 1.5)) * pop;
-  float len = min(spikiness * (0.06 + 0.6 * h * h) * pop, REACH - 1.2 * w - rc);
-  float u = clamp((along - rc) / max(len, 1e-3), 0.0, 1.0);
-  float spike = min(w * (1.0 - 0.7 * u) - across, rc + len - along);
-  if (h > 0.5) spike = max(spike, w * 1.2 - length(d - dir * (rc + len)));
+  float spike = -1.0;
+  for (int k = -1; k <= 1; k++) {
+    float sl = s + float(k);
+    vec2 sk = key + vec2(mod(sl, SPIKES), 17.0);
+    float h = hash12(sk);
+    float w0 = (0.022 + 0.03 * hash12(sk + 1.5)) * pop;
+    float len = max(min(spikiness * (0.06 + 0.6 * h * h) * pop, REACH - 1.2 * w0 - rc), 0.0);
+    if (len > 0.0) {
+      // short spikes are thin too, so that no spikiness leaves a clean body
+      float w = w0 * min(len / 0.06, 1.0);
+      float ang = (sl + 0.5 + 0.4 * (hash12(sk + 0.5) - 0.5)) / SPIKES * 2.0 * PI - PI;
+      vec2 dir = vec2(cos(ang), sin(ang));
+      float along = dot(d, dir);
+      float across = abs(d.x * dir.y - d.y * dir.x);
+      float u = clamp((along - rc) / len, 0.0, 1.0);
+      float ray = min(w * (1.0 - 0.7 * u) - across, rc + len - along);
+      if (h > 0.5) ray = max(ray, w * 1.2 - length(d - dir * (rc + len)));
+      spike = max(spike, ray);
+    }
+  }
   f = smax(f, spike, 0.08);
 
   // droplets flung out around the splat
   for (int j = 0; j < 5; j++) {
     vec2 dk = key + vec2(float(j), 29.0);
-    float da = 2.0 * PI * hash12(dk);
     float hr = hash12(dk + 0.5);
-    float rad = (0.015 + 0.05 * hr * hr) * clamp(droplets * 5.0 - float(j), 0.0, 1.0);
-    float dist = min(r0 + 0.08 + 0.5 * hash12(dk + 1.5), REACH - rad) * mix(0.5, 1.0, pop);
-    f = max(f, rad * pop - length(d - dist * vec2(cos(da), sin(da))));
+    float rad = (0.015 + 0.05 * hr * hr) * clamp(droplets * 5.0 - float(j), 0.0, 1.0) * pop;
+    if (rad > 0.0) {
+      float da = 2.0 * PI * hash12(dk);
+      float dist = min(r0 + 0.08 + 0.5 * hash12(dk + 1.5), REACH - rad) * mix(0.5, 1.0, pop);
+      f = max(f, rad - length(d - dist * vec2(cos(da), sin(da))));
+    }
   }
 
   // drips running down from the bottom of the splat
@@ -100,7 +116,7 @@ float splat(vec2 q, vec2 cell, vec2 key) {
       float xo = (hash12(dk) - 0.5) * r0;
       float dw = (0.03 + 0.02 * hash12(dk + 0.5)) * pop;
       float top = sqrt(r0 * r0 - xo * xo) * pop;
-      float bottom = min(top + drips * (0.25 + 0.75 * hash12(dk + 1.5)) * run, sqrt(REACH * REACH - xo * xo) - 1.4 * dw);
+      float bottom = min(top + drips * (0.25 + 0.75 * hash12(dk + 1.5)) * run, sqrt(REACH * REACH - xo * xo) - 1.6 * dw);
       float dx = abs(d.x - xo);
       float drip = min(dw - dx, min(d.y + bottom, -d.y));
       float tip = dw * 1.4 - length(vec2(dx, d.y + bottom + 0.2 * dw));
@@ -115,7 +131,7 @@ vec4 transition(vec2 uv) {
   float cellSize = max(ratio, 1.0) / n;
   vec2 q = vec2(uv.x * ratio, uv.y) / cellSize; // in cells
   vec2 base = floor(q);
-  vec2 sd = floor(seed) * vec2(7.0, 13.0);
+  vec2 sd = seed * vec2(7.0, 13.0);
   float f = -1.0;
   for (int j = -1; j <= 1; j++) {
     for (int i = -1; i <= 1; i++) {
