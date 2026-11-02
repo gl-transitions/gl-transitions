@@ -30,6 +30,8 @@ float hash12(vec2 p) {
 // how much a pixel is a highlight: none below the threshold, full at white
 float highlight(vec4 c, float t) {
   float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+  // nothing is brighter than white, so a threshold of 1 makes no highlights
+  if (t >= 1.0) return 0.0;
   float h = smoothstep(t, 1.0, lum);
   return h * h * c.a;
 }
@@ -41,7 +43,6 @@ vec4 transition(vec2 uv) {
   // the incoming image takes over while everything is out of focus
   float w = smoothstep(0.35, 0.65, progress);
   float r = radius * k;
-  float th = min(threshold, 0.99);
   // the highlights weigh more as they swell, so they read as bright discs
   float boost = 12.0 * intensity * k;
 
@@ -68,7 +69,7 @@ vec4 transition(vec2 uv) {
   vec3 l1 = vec3(0.0);
   if (useFrom) {
     vec4 c = getFromColor(uv);
-    float h = highlight(c, th);
+    float h = highlight(c, threshold);
     float wt = 1.0 + boost * h;
     s0 = wt * vec4(c.rgb * c.a, c.a);
     t0 = wt;
@@ -76,7 +77,7 @@ vec4 transition(vec2 uv) {
   }
   if (useTo) {
     vec4 c = getToColor(uv);
-    float h = highlight(c, th);
+    float h = highlight(c, threshold);
     float wt = 1.0 + boost * h;
     s1 = wt * vec4(c.rgb * c.a, c.a);
     t1 = wt;
@@ -94,7 +95,7 @@ vec4 transition(vec2 uv) {
     vec2 st = mirror(uv + r * d * vec2(cos(a) / ratio, sin(a)));
     if (useFrom) {
       vec4 c = getFromColor(st);
-      float h = highlight(c, th);
+      float h = highlight(c, threshold);
       float wt = 1.0 + boost * h;
       s0 += wt * vec4(c.rgb * c.a, c.a);
       t0 += wt;
@@ -102,7 +103,7 @@ vec4 transition(vec2 uv) {
     }
     if (useTo) {
       vec4 c = getToColor(st);
-      float h = highlight(c, th);
+      float h = highlight(c, threshold);
       float wt = 1.0 + boost * h;
       s1 += wt * vec4(c.rgb * c.a, c.a);
       t1 += wt;
