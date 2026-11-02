@@ -27,17 +27,25 @@ vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
 
-// the light of a pixel (premultiplied): its color above the knee
-vec3 glow(vec4 c, float knee) {
-  float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
-  return c.rgb * c.a * smoothstep(knee, knee + 0.3, lum);
+// the image on screen at a point, premultiplied: one image, or both during the short switch
+vec4 image(vec2 st, float m) {
+  if (m <= 0.0) {
+    vec4 c = getFromColor(st);
+    return vec4(c.rgb * c.a, c.a);
+  }
+  if (m >= 1.0) {
+    vec4 c = getToColor(st);
+    return vec4(c.rgb * c.a, c.a);
+  }
+  vec4 a = getFromColor(st);
+  vec4 b = getToColor(st);
+  return mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
 }
 
-// the light at a tap: one image only; during the switch, every other tap reads each image
-vec3 light(vec2 st, float knee, float m, bool incoming) {
-  if (m <= 0.0) return glow(getFromColor(st), knee);
-  if (m >= 1.0) return glow(getToColor(st), knee);
-  return incoming ? 2.0 * m * glow(getToColor(st), knee) : 2.0 * (1.0 - m) * glow(getFromColor(st), knee);
+// the light of a pixel (premultiplied): its color above the knee, full well before white
+vec3 glow(vec4 c, float knee) {
+  float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
+  return c.rgb * smoothstep(knee, knee + max(0.3 * (1.0 - knee), 1e-3), lum);
 }
 
 vec4 transition(vec2 uv) {
@@ -52,16 +60,9 @@ vec4 transition(vec2 uv) {
   if (amount <= 0.0) return m < 0.5 ? getFromColor(uv) : getToColor(uv);
 
   // the image stays sharp underneath (premultiplied colors, only the images on screen are read)
-  vec4 c;
-  if (m <= 0.0) c = getFromColor(uv);
-  else if (m >= 1.0) c = getToColor(uv);
-  else {
-    vec4 a = getFromColor(uv);
-    vec4 b = getToColor(uv);
-    c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
-    c.rgb /= max(c.a, 1e-5);
-  }
+  vec4 c = image(uv, m);
   if (c.a <= 0.0) return vec4(0.0);
+  c.rgb /= c.a;
 
   // more and more of the image catches the light as the glow grows
   float knee = threshold * (1.0 - 0.3 * peak) * (1.0 - flood);
@@ -75,29 +76,29 @@ vec4 transition(vec2 uv) {
   // a golden-angle spiral, denser toward the center so the glow is bright at its core with a wide soft tail;
   // each tap is read with its opposite, which cancels most of the noise across smooth gradients
   vec3 bloom = vec3(0.0);
-  vec3 soft = vec3(0.0);
+  vec4 soft = vec4(0.0);
   float total = 0.0;
-  float softTotal = 0.0;
   for (int i = 0; i < PAIRS; i++) {
     float s = (float(i) + shift) / float(PAIRS);
     float r = s * s;
     float a = float(i) * GOLDEN_ANGLE + spin;
     vec2 offset = radius * r * vec2(cos(a) / ratio, sin(a));
-    bool incoming = mod(float(i), 2.0) > 0.5;
-    vec3 l = light(mirror(uv + offset), knee, m, incoming) + light(mirror(uv - offset), knee, m, incoming);
+    vec4 i0 = image(mirror(uv + offset), m);
+    vec4 i1 = image(mirror(uv - offset), m);
+    vec3 l = glow(i0, knee) + glow(i1, knee);
     // the sparse outer taps weigh less, so the tail of the glow stays smooth
     float w = 1.0 - 0.75 * s;
     // white at the core, tinted toward the edges
     bloom += w * mix(vec3(1.0), tint, smoothstep(0.0, 0.5, r)) * l;
     total += w;
-    // a closer blur of the light, to soften the image
+    // a closer blur of the image, to soften it
     float sw = (1.0 - s) * (1.0 - s);
-    soft += sw * l;
-    softTotal += sw;
+    soft += sw * (i0 + i1);
   }
   bloom /= 2.0 * total;
   // at the peak the light softens the image itself, which hides the switch
-  vec3 base = mix(c.rgb, min(soft / (2.0 * softTotal * c.a), 1.0), 0.7 * flood);
+  vec3 blurred = soft.a > 0.0 ? soft.rgb / soft.a : c.rgb;
+  vec3 base = mix(c.rgb, blurred, 0.7 * flood);
   bloom *= intensity * peak * (1.0 + 2.0 * flood);
   // compressed, so that the glow floods the frame without flattening into white
   bloom = 0.92 * (1.0 - exp(-bloom));
