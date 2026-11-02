@@ -27,24 +27,9 @@ vec4 transition (vec2 uv) {
   float w = 0.5 * (abs(dir.y) * ratio + abs(dir.x));
   vec2 across = vec2(-dir.y, dir.x);
   float d = dot(p, dir);
-  // where the pixel is on the visible chord of the frame across the direction, from -1 to 1
-  // (on a diagonal, the chord is off-center near the corners)
-  vec2 r = vec2(0.5 * ratio, 0.5);
-  vec2 lo = vec2(-1e4);
-  vec2 hi = vec2(1e4);
-  if (abs(across.x) > 1e-4) {
-    vec2 u = (vec2(-r.x, r.x) - d * dir.x) / across.x;
-    lo.x = min(u.x, u.y);
-    hi.x = max(u.x, u.y);
-  }
-  if (abs(across.y) > 1e-4) {
-    vec2 u = (vec2(-r.y, r.y) - d * dir.y) / across.y;
-    lo.y = min(u.x, u.y);
-    hi.y = max(u.x, u.y);
-  }
-  float u0 = max(lo.x, lo.y);
-  float u1 = min(hi.x, hi.y);
-  float x = clamp((dot(p, across) - 0.5 * (u0 + u1)) / max(0.5 * (u1 - u0), 1e-4), -1.0, 1.0);
+  // where the pixel is across the frame, from -1 to 1 (on a diagonal, these are the corners); it is the same
+  // all along the direction, so the edge is a single curve, centered on the middle of the frame
+  float x = clamp(dot(p, across) / w, -1.0, 1.0);
   float s = max(smoothness, 0.001);
   // each point of the edge runs on its own clock: the middle runs ahead and slows down at the far side,
   // where the sides catch up with it; the lead keeps the curve's shape alike on wide and narrow frames
@@ -57,9 +42,10 @@ vec4 transition (vec2 uv) {
   // the more the edge is lifted, the wider and softer the shadow it casts on the incoming image
   float lift = edge - side;
   float spread = 0.012 + 0.25 * lift;
-  // it falls behind the edge only, on the incoming image
-  float sh = shadow.a * sin(PI * progress) * exp(-max(edge - d, 0.0) / spread) * m;
+  // it falls behind the edge only, on the incoming image, cast by the outgoing image at the edge
   vec4 to = getToColor(uv);
+  vec2 caster = clamp((p + (edge - d) * dir) / vec2(ratio, 1.0) + 0.5, 0.0, 1.0);
+  float sh = shadow.a * sin(PI * progress) * exp(-max(edge - d, 0.0) / spread) * m * getFromColor(caster).a * to.a;
   to.rgb = mix(to.rgb, shadow.rgb, sh);
   return mix(getFromColor(uv), to, m);
 }
