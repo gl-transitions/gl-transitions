@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "@shopify/react-native-skia": ">=2.0.0",
-    "gl-transitions": "^2.2.0",
+    "gl-transitions": "^2.3.0",
     "react": ">=19.0.0",
     "react-native-reanimated": ">=4.0.0"
   },
