@@ -1,14 +1,19 @@
 // Author: gre
 // License: MIT
 // Description: Shimmering heat waves rise through the frame, strongest at the bottom, making the outgoing image wobble like the air over hot asphalt; the incoming image shows through the haze and settles as it calms
-// Tags: distortion, heat, shimmer, noise, organic, blend
+// Tags: distort, heat, shimmer, noise, organic, blend
 
-// @range(0, 0.1) How far the haze bends the image, in frame heights
+// @range(0, 0.1) How far the haze bends the image, in frame heights (the strongest waves bend it about 1.5 times as far)
 uniform float strength; // = 0.04
 // @range(1, 12) Size of the heat waves: more, smaller ones with a larger value
 uniform float scale; // = 6.0
 // @range(0, 6) How fast the heat waves rise
 uniform float speed; // = 2.0
+
+// reflects coordinates that leave the frame back into it, so the edges do not smear
+vec2 mirror(vec2 v) {
+  return 1.0 - abs(1.0 - mod(v, 2.0));
+}
 
 float hash12(vec2 v) {
   vec3 v3 = fract(vec3(v.xyx) * 0.1031);
@@ -27,7 +32,7 @@ float vnoise(vec2 v) {
   );
 }
 
-// centered on 0, mostly within [-1, 1]
+// centered on 0, within [-1.5, 1.5]
 float fbm(vec2 v) {
   float sum = 0.0;
   float amp = 0.5;
@@ -49,7 +54,7 @@ vec4 transition(vec2 uv) {
   float amount = sin(PI * p);
   // the waves scroll upward and slowly churn as they rise
   float t = p * speed;
-  // in square pixels, the waves squashed vertically into the thin bands of rising air
+  // in square pixels, then squashed vertically into the thin bands of rising air
   vec2 q = vec2(uv.x * ratio, uv.y * 2.5) * scale;
   q.y -= t * scale;
   // the bands are bent by a slower, larger turbulence so they do not stay straight
@@ -60,10 +65,13 @@ vec4 transition(vec2 uv) {
   float ground = mix(1.0, 0.3, uv.y);
   offset *= strength * amount * ground * vec2(1.0 / ratio, 1.0);
 
-  vec4 a = getFromColor(clamp(uv + offset, 0.0, 1.0));
-  vec4 b = getToColor(clamp(uv + offset, 0.0, 1.0));
+  vec2 d = mirror(uv + offset);
   // the images swap in the thick of the haze
   float m = smoothstep(0.3, 0.7, p);
+  if (m <= 0.0) return getFromColor(d);
+  if (m >= 1.0) return getToColor(d);
+  vec4 a = getFromColor(d);
+  vec4 b = getToColor(d);
   // mixed premultiplied, so transparent images do not bleed their color
   vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
   return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
