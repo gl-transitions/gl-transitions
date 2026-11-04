@@ -1,5 +1,17 @@
 # gl-transitions
 
+## 2.4.0
+
+### Minor Changes
+
+- [#397](https://github.com/gl-transitions/gl-transitions/pull/397) [`293cdb8`](https://github.com/gl-transitions/gl-transitions/commit/293cdb86d10f350f89bac8f40af7cab024c1883d) Thanks [@gre](https://github.com/gre)! - New transition: `ColorPanelWipe` by gre.
+
+- [#396](https://github.com/gl-transitions/gl-transitions/pull/396) [`7e3cef3`](https://github.com/gl-transitions/gl-transitions/commit/7e3cef3182d0f8c7f502683bbe1971c276e021f9) Thanks [@gre](https://github.com/gre)! - New transition: `EyeBlink` by gre.
+
+- [#394](https://github.com/gl-transitions/gl-transitions/pull/394) [`c7f5144`](https://github.com/gl-transitions/gl-transitions/commit/c7f5144251d06fd899050dfea18e7353e79bc39a) Thanks [@gre](https://github.com/gre)! - New transition: `Gallery` by gre.
+
+- [#393](https://github.com/gl-transitions/gl-transitions/pull/393) [`f57ceeb`](https://github.com/gl-transitions/gl-transitions/commit/f57ceebd28f8f78a11c321758150f24ce633312d) Thanks [@gre](https://github.com/gre)! - New transition: `VhsTracking` by gre.
+
 ## 2.3.0
 
 ### Minor Changes
