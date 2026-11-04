@@ -5,7 +5,7 @@
 
 // @param Number of blocks (columns, rows)
 uniform ivec2 grid; // = ivec2(8, 6)
-// @param Spiral from the border inward; false spirals from the center outward
+// @param Spiral from the top left corner inward; false spirals from the center outward, ending at the top left corner
 uniform bool inward; // = true
 // @param Turn clockwise; false turns counterclockwise
 uniform bool clockwise; // = true
@@ -31,26 +31,33 @@ float spiralIndex(vec2 c, vec2 n) {
 }
 
 vec4 transition(vec2 uv) {
-  vec4 a = getFromColor(uv);
-  vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
+  if (progress <= 0.0) return getFromColor(uv);
+  if (progress >= 1.0) return getToColor(uv);
 
   vec2 n = max(vec2(grid), vec2(1.0));
   // the cell, counted from the top left corner
   vec2 c = min(floor(vec2(uv.x, 1.0 - uv.y) * n), n - 1.0);
-  // the mirror image turns the other way; walking the spiral outward reverses it too
-  if (clockwise != inward) c.x = n.x - 1.0 - c.x;
+  // the transposed spiral turns the other way from the same corner; walking the spiral
+  // outward reverses it too
+  if (clockwise != inward) {
+    c = c.yx;
+    n = n.yx;
+  }
   float count = n.x * n.y;
   float i = spiralIndex(c, n);
   if (!inward) i = count - 1.0 - i;
 
-  // the blocks switch one after another, each one fading in over d blocks of time; the first
-  // starts at 0 and the last ends at 1
-  float d = max(smoothness, 0.0) * count;
-  float x = progress * (count + d) - i;
-  float m = d > 0.0 ? smoothstep(0.0, d, x) : step(0.0, x);
+  // the blocks switch one after another, each one fading in over w blocks of time, the first
+  // fade starting at 0 and the last ending at 1; without fade, block i switches at (i + 0.5) / count
+  float w = max(smoothness, 0.0) * count;
+  float o = max(0.5 * (1.0 - w), 0.0);
+  float x = progress * (count - 1.0 + 2.0 * o + w) - i - o;
+  float m = w > 0.0 ? smoothstep(0.0, w, x) : step(0.0, x);
 
+  if (m <= 0.0) return getFromColor(uv);
+  if (m >= 1.0) return getToColor(uv);
+  vec4 a = getFromColor(uv);
+  vec4 b = getToColor(uv);
   // mixed premultiplied, so transparent images do not bleed their color
   vec4 col = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
   return col.a > 0.0 ? vec4(col.rgb / col.a, col.a) : vec4(0.0);
