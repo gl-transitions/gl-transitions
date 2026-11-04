@@ -31,9 +31,9 @@ vec4 transition(vec2 uv) {
 
   float n = max(cells, 1.0);
   // measured in square pixels, so the cells are not stretched
-  vec2 x = uv * vec2(ratio, 1.0) * n;
-  vec2 i = floor(x);
-  vec2 f = x - i;
+  vec2 p = uv * vec2(ratio, 1.0) * n;
+  vec2 i = floor(p);
+  vec2 f = p - i;
   vec2 offset = vec2(17.31, 41.97) * seed;
 
   // nearest cell point
@@ -41,8 +41,8 @@ vec4 transition(vec2 uv) {
   vec2 mr = vec2(0.0);
   float md = 8.0;
   for (int y = -1; y <= 1; y++) {
-    for (int z = -1; z <= 1; z++) {
-      vec2 g = vec2(float(z), float(y));
+    for (int x = -1; x <= 1; x++) {
+      vec2 g = vec2(float(x), float(y));
       vec2 r = g + hash22(i + g + offset) - f;
       float d = dot(r, r);
       if (d < md) {
@@ -53,11 +53,12 @@ vec4 transition(vec2 uv) {
     }
   }
 
-  // distance to the nearest cell edge: the bisector with the closest neighbor point
+  // distance to the nearest cell edge: the bisector with the closest neighbor point,
+  // searched over 5x5 cells around the nearest one so that no edge is missed
   float edge = 8.0;
-  for (int y = -1; y <= 1; y++) {
-    for (int z = -1; z <= 1; z++) {
-      vec2 g = mg + vec2(float(z), float(y));
+  for (int y = -2; y <= 2; y++) {
+    for (int x = -2; x <= 2; x++) {
+      vec2 g = mg + vec2(float(x), float(y));
       vec2 r = g + hash22(i + g + offset) - f;
       vec2 dr = r - mr;
       if (dot(dr, dr) > 0.00001) {
@@ -78,7 +79,7 @@ vec4 transition(vec2 uv) {
   vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
 
   // the cracks open at the start and close at the end
-  float open = smoothstep(0.0, 0.2, progress) * smoothstep(1.0, 0.8, progress);
+  float open = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
   float bw = max(border, 0.0) * open;
   if (bw > 0.0) {
     float l = 1.0 - smoothstep(0.5 * bw - AA, 0.5 * bw + AA, edge);
