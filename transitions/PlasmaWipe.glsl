@@ -7,7 +7,7 @@
 uniform float scale; // = 3.0
 // @range(0, 0.5) Softness of the band edges
 uniform float smoothness; // = 0.1
-// @range(0, 4) How much the plasma flows during the transition
+// @range(0, 1) How much the plasma flows during the transition (at most 1, so a revealed area never goes back)
 uniform float flow; // = 1.0
 // @color Color of the glow along the edges
 uniform vec3 edgeColor; // = vec3(1.0, 0.45, 0.9)
@@ -24,14 +24,15 @@ vec4 transition(vec2 uv) {
 
   // measured in square pixels, so the waves are not stretched
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0) * max(scale, 0.0) * 2.0 * PI;
-  float t = flow * progress * 2.0 * PI;
-  // the classic plasma: sines of x, y, a diagonal and the distance to a wandering center
-  vec2 c = 0.5 * max(scale, 0.0) * 2.0 * PI * vec2(0.5 * sin(t * 0.7), 0.5 * cos(t * 0.5));
+  // the phase of the waves; the folded plasma below then changes by at most 0.9 * flow per
+  // unit of progress, slower than the threshold, so the reveal never goes back
+  float t = clamp(flow, 0.0, 1.0) * progress * 0.5;
+  // the classic plasma: sines of x, y, a diagonal and the distance to an off-center point
   float v = sin(p.x * 0.6 + t)
     + sin(p.y * 0.8 - t * 0.8)
     + sin((p.x * 0.5 + p.y * 0.7) * 0.7 + t * 0.6)
-    + sin(length(p - c) * 0.9 - t * 1.2);
-  // folded into bands, evenly spread over [0, 1]
+    + sin(length(p - vec2(0.15, -0.1) * max(scale, 0.0) * 2.0 * PI) * 0.9 - t * 1.2);
+  // folded into bands in [0, 1]
   v = abs(fract(v * 0.25 + 0.5) * 2.0 - 1.0);
 
   // the soft edge is fully below every band at the start and above every band at the end
