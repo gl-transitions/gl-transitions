@@ -1,17 +1,17 @@
 // Author: gre
 // License: MIT
-// Description: The outgoing image turns into a flickering blue hologram with scanlines and jittering rows, breaks up, and the hologram resolves into the incoming image in full color
+// Description: The outgoing image turns into a flickering hologram (blue by default) with scanlines and jittering rows, breaks up, and the hologram resolves into the incoming image in full color
 // Tags: hologram, sci-fi, scanlines, flicker, glitch
 
 // @color Color of the hologram
 uniform vec3 tint; // = vec3(0.2, 0.75, 1.0)
 // @color Color behind the hologram, seen between its scanlines and where it breaks up
 uniform vec4 background; // = vec4(0.0, 0.02, 0.05, 1.0)
-// @range(20, 400) Number of scanlines over the frame height
+// @range(20, 300) Number of scanlines over the frame height
 uniform float scanlines; // = 150.0
 // @range(0, 0.2) How far rows of the hologram jump sideways, relative to the frame width
 uniform float jitter; // = 0.04
-// @range(0, 1) Strength of the flicker and of the break up
+// @range(0, 1) Strength of the flicker and of the rows that drop out
 uniform float flicker; // = 0.6
 
 const float PI = 3.14159265;
@@ -59,11 +59,14 @@ vec4 transition(vec2 uv) {
   float m = step(hash(vec2(floor(uv.y * 24.0), 7.0)), (p - 0.35) / 0.3);
 
   // the hologram: the luma of the image in the tint, with colored fringes
-  vec4 c = source(q, m);
+  // (sampled inside the frame, the fringes weighted by the alpha of their texels)
+  vec4 c = source(clamp(q, 0.0, 1.0), m);
   vec2 dx = vec2(0.003 + 0.01 * b, 0.0);
   float l = luma(c.rgb);
-  float lr = luma(source(q + dx, m).rgb);
-  float lb = luma(source(q - dx, m).rgb);
+  vec4 cr = source(clamp(q + dx, 0.0, 1.0), m);
+  vec4 cb = source(clamp(q - dx, 0.0, 1.0), m);
+  float lr = luma(cr.rgb) * cr.a;
+  float lb = luma(cb.rgb) * cb.a;
   vec3 g = smoothstep(0.05, 0.9, vec3(lr, l, lb));
   // the brightest parts burn toward white
   vec3 holo = tint * (0.06 + 1.25 * g) + 0.45 * g * g * g;
@@ -81,9 +84,10 @@ vec4 transition(vec2 uv) {
   float gap = step(hash(vec2(floor(uv.y * 90.0), f + 0.71)), flicker * 0.45 * b);
   vis *= 1.0 - gap;
   vec4 layer = vec4(holo, c.a * vis * inside);
-  // the hologram over its background, transparent where the image is
+  // the hologram over its background, transparent where neither the image nor the
+  // hologram is
   vec4 plain = premultiplied(source(uv, m));
-  vec4 back = premultiplied(vec4(background.rgb, background.a * plain.a));
+  vec4 back = premultiplied(vec4(background.rgb, background.a * max(plain.a, layer.a)));
   vec4 holoColor = premultiplied(layer) + back * (1.0 - layer.a);
 
   // the images in full color, then the hologram over them
