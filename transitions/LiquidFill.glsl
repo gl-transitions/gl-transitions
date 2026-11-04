@@ -58,8 +58,8 @@ vec4 transition (vec2 uv) {
   float amp = max(amplitude, 0.0) * (0.35 + 0.65 * stir);
   // the surface starts fully below the frame and ends fully above it, waves and meniscus included
   float margin = max(amplitude, 0.0) + 2.0 * LINE + AA;
-  float level = mix(-e - margin, e + margin, mix(t, t * t * (3.0 - 2.0 * t), 0.5));
-  level += amp * surface(x / w, t);
+  float mean = mix(-e - margin, e + margin, mix(t, t * t * (3.0 - 2.0 * t), 0.5));
+  float level = mean + amp * surface(x / w, t);
   // > 0 below the surface, in the liquid
   float depth = level - d;
   float m = smoothstep(-AA, AA, depth);
@@ -69,24 +69,25 @@ vec4 transition (vec2 uv) {
   vec2 offset = bend * (dir * sin(18.0 * x - 7.0 * t) + across * cos(13.0 * x + 5.0 * t));
   vec4 b = getToColor(clamp(uv + offset / vec2(ratio, 1.0), 0.0, 1.0));
 
-  // bubbles rise in columns through the liquid, faster than it does, a few per column
+  // bubbles rise in columns through the liquid, carried up with it and rising faster still
   float glow = 0.0;
-  float rise = 0.6 * t;
+  float rise = mean + 0.5 * t;
   vec2 bq = vec2(x, d - rise) / CELL;
   vec2 cell = floor(bq);
   float hs = hash(cell + 7.1);
-  if (hs < bubbles * 0.6) {
-    float r = (0.12 + 0.18 * hash(cell + 3.7)) * stir;
-    vec2 c = cell + 0.5 + (0.5 - r) * (vec2(hash(cell + 1.3), hash(cell + 9.4)) * 2.0 - 1.0);
+  float r = (0.12 + 0.18 * hash(cell + 3.7)) * stir;
+  float px = AA / CELL;
+  if (hs < bubbles * 0.6 && r > px) {
+    // placed so that it stays inside its cell, wobble and soft edge included
+    vec2 c = cell + 0.5 + (0.42 - r - px) * (vec2(hash(cell + 1.3), hash(cell + 9.4)) * 2.0 - 1.0);
     // a slight wobble as it rises
     c.x += 0.08 * sin(6.0 * t + 6.28 * hs);
     float dist = length(bq - c);
-    float px = AA / CELL;
     // its rim, and a small glint near its top
-    float rim = smoothstep(r - 0.06 - px, r - 0.06 + px, dist) * (1.0 - smoothstep(r - px, r + px, dist));
+    float rim = smoothstep(0.7 * r - px, 0.7 * r + px, dist) * (1.0 - smoothstep(r - px, r + px, dist));
     float glint = 1.0 - smoothstep(0.25 * r - px, 0.25 * r + px, length(bq - c - 0.45 * r * vec2(-0.7, 0.7)));
     // only in the liquid, and fading out as it nears the surface
-    glow = max(rim * 0.6, glint) * smoothstep(0.0, 0.05, depth);
+    glow = max(rim * 0.6, glint) * smoothstep(0.0, 0.05, depth) * stir;
   }
   // the meniscus: a bright line along the surface, on the liquid side
   float line = 1.0 - smoothstep(LINE - AA, LINE + AA, abs(depth - LINE));
