@@ -1,6 +1,6 @@
 // Author: gre
 // License: MIT
-// Description: Blocks switch to the incoming image one at a time, row after row from the top, left to right then right to left, like a snake winding across the frame
+// Description: Blocks switch to the incoming image one at a time, row after row from the top (or column after column from the left), each line running the opposite way to the one before, like a snake winding across the frame
 // Tags: wipe, blocks, grid, zigzag
 
 // @param Number of blocks (columns, rows)
@@ -16,7 +16,7 @@ vec4 transition(vec2 uv) {
   if (progress <= 0.0) return a;
   if (progress >= 1.0) return b;
 
-  vec2 g = max(floor(vec2(grid)), 1.0);
+  vec2 g = max(vec2(grid), 1.0);
   // block coordinates from the top left corner
   vec2 cell = min(floor(vec2(uv.x, 1.0 - uv.y) * g), g - 1.0);
   // the snake runs along the rows, or along the columns when vertical
