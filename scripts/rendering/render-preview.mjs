@@ -114,7 +114,7 @@ function createTexture(rgba, w, h) {
 function loadImage(imgPath, w, h) {
   try {
     const raw = execSync(
-      `ffmpeg -v fatal -i "${imgPath}" -vf "scale=${w}:${h}:force_original_aspect_ratio=decrease,pad=${w}:${h}:(ow-iw)/2:(oh-ih)/2" -f rawvideo -pix_fmt rgba -`,
+      `ffmpeg -v fatal -i "${imgPath}" -vf "scale=${w}:${h}:force_original_aspect_ratio=increase,crop=${w}:${h}" -f rawvideo -pix_fmt rgba -`,
       { maxBuffer: w * h * 4 + 1024 },
     );
     return new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength);
