@@ -928,7 +928,7 @@ dependencies = [
 
 [[package]]
 name = "gl-transitions"
-version = "1.0.5"
+version = "2.0.0"
 
 [[package]]
 name = "gl-transitions-fframes-example"
