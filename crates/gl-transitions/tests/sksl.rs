@@ -2,6 +2,7 @@
 //! children and uniforms, and takes `ParamValues::sksl_uniforms` as its uniform data.
 #![cfg(feature = "sksl")]
 
+use gl_transitions::Value;
 use skia_safe::runtime_effect::ChildPtr;
 use skia_safe::{
     shaders, surfaces, AlphaType, Color, ColorType, Data, ImageInfo, Paint, Rect, RuntimeEffect,
@@ -66,14 +67,26 @@ fn check(t: &'static gl_transitions::Transition) -> Result<(), String> {
 }
 
 /// Draws `name` (a simple transition every target ships) at `progress` between two plain colors and returns the RGBA pixel at (x, y).
-fn render(name: &str, progress: f32, from: Color, to: Color, (x, y): (usize, usize)) -> [u8; 4] {
+fn render(name: &str, progress: f32, from: Color, to: Color, at: (usize, usize)) -> [u8; 4] {
+    render_with(name, &[], progress, from, to, at)
+}
+
+fn render_with(
+    name: &str,
+    params: &[(&str, Value)],
+    progress: f32,
+    from: Color,
+    to: Color,
+    (x, y): (usize, usize),
+) -> [u8; 4] {
     let t = gl_transitions::get(name).unwrap();
     let (w, h) = (8, 4);
     let effect = RuntimeEffect::make_for_shader(t.sksl().unwrap(), None).unwrap();
-    let data = Data::new_copy(
-        &t.default_params()
-            .sksl_uniforms(progress, w as f32, h as f32),
-    );
+    let mut values = t.default_params();
+    for &(k, v) in params {
+        values.set(k, v).unwrap();
+    }
+    let data = Data::new_copy(&values.sksl_uniforms(progress, w as f32, h as f32));
     let children = [
         ChildPtr::Shader(shaders::color(from)),
         ChildPtr::Shader(shaders::color(to)),
@@ -103,11 +116,16 @@ fn fade_mixes_the_two_images() {
 
 #[test]
 fn wipes_go_the_documented_way() {
-    // WipeLeft: the incoming image enters from the right edge (the GLSL reference).
+    // A hard-edged DirectionalWipe moving left: the incoming image enters from the right edge
+    // (the GLSL reference).
     let (from, to) = (Color::RED, Color::BLUE);
-    assert_eq!(render("WipeLeft", 0.25, from, to, (7, 1)), [0, 0, 255, 255]);
-    assert_eq!(render("WipeLeft", 0.25, from, to, (0, 1)), [255, 0, 0, 255]);
-    // WipeUp: the incoming image enters from the bottom edge, so uv has a bottom-left origin.
-    assert_eq!(render("WipeUp", 0.25, from, to, (4, 3)), [0, 0, 255, 255]);
-    assert_eq!(render("WipeUp", 0.25, from, to, (4, 0)), [255, 0, 0, 255]);
+    let wipe = |direction: [f32; 2], at| {
+        let params = [("direction", direction.into()), ("smoothness", 0.0.into())];
+        render_with("DirectionalWipe", &params, 0.25, from, to, at)
+    };
+    assert_eq!(wipe([-1.0, 0.0], (7, 1)), [0, 0, 255, 255]);
+    assert_eq!(wipe([-1.0, 0.0], (0, 1)), [255, 0, 0, 255]);
+    // Moving up, the incoming image enters from the bottom edge, so uv has a bottom-left origin.
+    assert_eq!(wipe([0.0, 1.0], (4, 3)), [0, 0, 255, 255]);
+    assert_eq!(wipe([0.0, 1.0], (4, 0)), [255, 0, 0, 255]);
 }

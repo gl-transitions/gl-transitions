@@ -8,7 +8,7 @@ import { nameErrors } from "./transition-names.mjs";
 import { lintTransitions } from "./lint-transitions.mjs";
 
 test("nameErrors: PascalCase names pass", () => {
-  for (const name of ["Fade", "CrossZoom", "WipeLeft", "HsvFade", "ZoomInCircles", "LeafWipe"])
+  for (const name of ["Fade", "CrossZoom", "StarWipe", "HsvFade", "ZoomInCircles", "LeafWipe"])
     assert.deepEqual(nameErrors(name), []);
 });
 

@@ -1,6 +1,6 @@
 // Author: KMojek
 // License: MIT
-// Description: A bow-tie wipe with an adjustable shape that can run in reverse
+// Description: Two triangles grow from the top and bottom edges into a bow tie that reveals the incoming image, with an adjustable shape, and can run in reverse
 // Tags: wipe, shape
 
 uniform float adjust; // = 0.5

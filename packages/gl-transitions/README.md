@@ -33,9 +33,24 @@ A Transition is an object with the following shape (TypeScript types are include
 }
 ```
 
+## Migrating from 2.x
+
+3.0 removes twelve transitions that duplicated another one. Use the replacement with these parameters, which renders the same or very close:
+
+| Removed | Replacement |
+|---|---|
+| `WipeLeft`, `WipeRight`, `WipeUp`, `WipeDown` | `DirectionalWipe`, `smoothness: 0`, `direction` `[-1, 0]`, `[1, 0]`, `[0, 1]` or `[0, -1]` |
+| `BowTieVertical` | `BowTie` |
+| `Box` | `InsetWipe`, `anchor` on the box's corner or at the center, `reverse: true` for `rectIn: 1` |
+| `LinearBlur` | `DefocusBlur` |
+| `MosaicBlend`, `MosaicFade` | `Pixelize` |
+| `ScaleIn` | `SimpleZoomOut`, `zoom_quickness: 1` |
+| `RotateFade` | `RotateScaleFade`, `scale: 1` |
+| `BlockDissolve` | `RandomSquares`, `smoothness: 0` |
+
 ## Migrating from 1.x
 
-2.0 gives every transition a PascalCase name: `crosswarp` is now `CrossWarp`, `wipeLeft` is `WipeLeft`. Names that were misleading or unclear got a better one at the same time (`burn` is now `FlashFade`, `fragment` is `Shatter`), and two near-duplicates were removed: `CircleCrop` (use `CircleIris`) and `PuzzleRight` (use `GridFlip`). The renamed transitions render as before, with the same parameters, except three fill colors that became a `vec4` in 2.0, so they can be transparent: `CircleIris`'s `backColor`, `FadeColor`'s `color` and `UndulatingBurnOut`'s `color` (add an alpha of 1 to your values). The two replacements look alike but differ: `CircleIris` closes into an ellipse that follows the image's shape, over a dark gray `backColor` instead of black `bgcolor`; `GridFlip` has thicker dividers, a `bgcolor` and a random order (`randomness`).
+2.0 gives every transition a PascalCase name: `crosswarp` is now `CrossWarp`, `lissajousTiles` is `LissajousTiles`. Names that were misleading or unclear got a better one at the same time (`burn` is now `FlashFade`, `fragment` is `Shatter`), and two near-duplicates were removed: `CircleCrop` (use `CircleIris`) and `PuzzleRight` (use `GridFlip`). The renamed transitions render as before, with the same parameters, except three fill colors that became a `vec4` in 2.0, so they can be transparent: `CircleIris`'s `backColor`, `FadeColor`'s `color` and `UndulatingBurnOut`'s `color` (add an alpha of 1 to your values). The two replacements look alike but differ: `CircleIris` closes into an ellipse that follows the image's shape, over a dark gray `backColor` instead of black `bgcolor`; `GridFlip` has thicker dividers, a `bgcolor` and a random order (`randomness`).
 
 The [changelog](CHANGELOG.md) of 2.0 lists every renamed transition.
 

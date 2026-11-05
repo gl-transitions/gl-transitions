@@ -20,15 +20,15 @@ Read its `// Description:` line too. Note the direction of any movement (the out
 
 ## 2. Draft names
 
-- **PascalCase**, letters and digits only: `CrossZoom`, `WipeLeft`.
+- **PascalCase**, letters and digits only: `CrossZoom`, `StarWipe`.
 - **Acronyms as words**, never three capitals in a row: `HsvFade`, `TvStatic`, `RgbSplit`.
 - **What a viewer sees**: `FlowerWipe` (a flower grows), not `PolarFunction` (how the code draws it). Someone scanning the catalog should guess the effect.
 - **The family's pattern**:
   - shape reveals end with `Wipe` (`StarWipe`, `HeartWipe`, `LeafWipe`)
   - glitches start with `Glitch` (`GlitchDisplace`, `GlitchFlicker`)
-  - dissolves end with `Dissolve` (`BlockDissolve`, `NoiseDissolve`)
+  - dissolves end with `Dissolve` (`CellDissolve`, `NoiseDissolve`)
   - fades end with `Fade` (`FlashFade`, `RotateScaleFade`)
-  - a direction comes last and names the movement: `WipeLeft` moves toward the left; `BowTieVertical`
+  - a direction comes last and names the movement: `ZoomWipeLeft` moves toward the left; `BowTieHorizontal`
   - leave a direction out when it is a parameter (`Revolve`, not `RevolveLeft`)
 - **No filler**: no `Transition`, `Effect`, `Simple`, `Advanced`, `WithParameter`, no version numbers (`SimpleZoom` and a few other older names predate this rule).
 - **Plain words**: describe the shape or motion, not a brand or a product.

@@ -1,6 +1,6 @@
 // Author: gre
 // License: MIT
-// Description: A soft-edged diagonal wipe
+// Description: A straight wipe in any direction, diagonal and soft-edged by default; a smoothness of 0 gives a hard edge
 // Tags: wipe, directional
 
 // @param Direction of the wipe
