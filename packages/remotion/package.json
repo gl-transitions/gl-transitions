@@ -1,6 +1,6 @@
 {
   "name": "@gl-transitions/remotion",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Use any of the gl-transitions as a Remotion presentation",
   "license": "MIT",
   "type": "module",
@@ -37,7 +37,7 @@
   },
   "peerDependencies": {
     "@remotion/transitions": ">=4.0.500",
-    "gl-transitions": "^2.5.0",
+    "gl-transitions": "^3.0.0",
     "remotion": ">=4.0.500"
   },
   "devDependencies": {

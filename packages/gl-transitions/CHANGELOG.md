@@ -1,5 +1,38 @@
 # gl-transitions
 
+## 3.0.0
+
+### Major Changes
+
+- [#419](https://github.com/gl-transitions/gl-transitions/pull/419) [`ca6ced2`](https://github.com/gl-transitions/gl-transitions/commit/ca6ced29250520362b0646abc38ad8b91354e169) Thanks [@gre](https://github.com/gre)! - Twelve transitions that duplicated another one are removed. Each renders the same as, or very close to, the transition that replaces it with the given parameters:
+
+  - `WipeLeft`, `WipeRight`, `WipeUp`, `WipeDown`: `DirectionalWipe` with `smoothness: 0` and `direction` `[-1, 0]`, `[1, 0]`, `[0, 1]` or `[0, -1]` (identical)
+  - `BowTieVertical`: `BowTie` with its defaults
+  - `Box`: `InsetWipe`, with `anchor` on the box's corner or at the center, and the new `reverse: true` for `rectIn: 1`
+  - `LinearBlur`: `DefocusBlur`
+  - `MosaicBlend`, `MosaicFade`: `Pixelize`
+  - `ScaleIn`: `SimpleZoomOut` with `zoom_quickness: 1`
+  - `RotateFade`: `RotateScaleFade` with `scale: 1`
+  - `BlockDissolve`: `RandomSquares` with `smoothness: 0`
+
+  `InsetWipe` gets a `reverse` parameter: the outgoing image shrinks into the rectangle, toward the anchor.
+
+### Minor Changes
+
+- [#416](https://github.com/gl-transitions/gl-transitions/pull/416) [`467b771`](https://github.com/gl-transitions/gl-transitions/commit/467b7718834d7bbd985b4c44ad49b00fc31aad52) Thanks [@gre](https://github.com/gre)! - New transition: `BandWipe` by gre.
+
+- [#421](https://github.com/gl-transitions/gl-transitions/pull/421) [`3f21354`](https://github.com/gl-transitions/gl-transitions/commit/3f21354946f28fe467ed5f90a5aa8912cc1fa86b) Thanks [@gre](https://github.com/gre)! - New transition: `GlintDissolve` by gre.
+
+- [#415](https://github.com/gl-transitions/gl-transitions/pull/415) [`1b4adac`](https://github.com/gl-transitions/gl-transitions/commit/1b4adacc046ce6e79922bc064a2e1ace87897d4e) Thanks [@gre](https://github.com/gre)! - New transition: `InsetWipe` by gre.
+
+- [#420](https://github.com/gl-transitions/gl-transitions/pull/420) [`30f5616`](https://github.com/gl-transitions/gl-transitions/commit/30f56163e6f7ad83a4b5c41144995154b17079eb) Thanks [@gre](https://github.com/gre)! - New transition: `LightningFlash` by gre.
+
+- [#417](https://github.com/gl-transitions/gl-transitions/pull/417) [`e5cdcb0`](https://github.com/gl-transitions/gl-transitions/commit/e5cdcb0bf5bf90f151b24bb13707a49e8d65d7b6) Thanks [@gre](https://github.com/gre)! - New transition: `WarpSpeed` by gre.
+
+- [#419](https://github.com/gl-transitions/gl-transitions/pull/419) [`ca6ced2`](https://github.com/gl-transitions/gl-transitions/commit/ca6ced29250520362b0646abc38ad8b91354e169) Thanks [@gre](https://github.com/gre)! - Removed 12 transitions.
+
+- [#419](https://github.com/gl-transitions/gl-transitions/pull/419) [`ca6ced2`](https://github.com/gl-transitions/gl-transitions/commit/ca6ced29250520362b0646abc38ad8b91354e169) Thanks [@gre](https://github.com/gre)! - Updated `BowTie`, `DirectionalWipe`.
+
 ## 2.5.0
 
 ### Minor Changes
