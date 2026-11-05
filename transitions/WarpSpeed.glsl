@@ -111,7 +111,8 @@ vec4 transition(vec2 uv) {
   s += stars(fract(a + 0.37), r, max(floor(n * 0.71), 1.0), 2.0, travel * 1.3, len, reach);
   // the flash, brightest at the center, where the incoming image emerges
   float core = r / (0.35 * reach);
-  float glow = flash * exp(-pow((p - 0.5) * 9.0, 2.0)) * speed * (0.35 + 0.9 * exp(-core * core));
+  float peak = (p - 0.5) * 9.0;
+  float glow = flash * exp(-peak * peak) * speed * (0.35 + 0.9 * exp(-core * core));
   vec3 light = streakColor.rgb * streakColor.a * (2.2 * s * speed + glow);
   // light is added to the image, but adds no opacity
   return c.a > 0.0 ? vec4(clamp(c.rgb / c.a + light, 0.0, 1.0), c.a) : vec4(0.0);
