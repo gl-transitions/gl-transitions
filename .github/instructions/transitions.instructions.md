@@ -6,11 +6,11 @@ applyTo: "transitions/**"
 
 A transition's file name, without `.glsl`, is its identifier in every package (npm, Rust, Swift, Android). For every file added or renamed in `transitions/`, check its name against these rules (CONTRIBUTING.md, "Naming"; the `transition-naming` skill in `.claude/skills/` has the details):
 
-1. PascalCase, letters and digits only: `CrossZoom`, `WipeLeft`. Flag `snake_case`, `kebab-case`, `camelCase`.
+1. PascalCase, letters and digits only: `CrossZoom`, `StarWipe`. Flag `snake_case`, `kebab-case`, `camelCase`.
 2. Acronyms as words, never three capitals in a row: `HsvFade`, not `HSVFade`.
 3. Unique ignoring case.
 4. Describes what a viewer sees, not the code: `FlowerWipe`, not `PolarFunction`.
-5. Follows its family: shape reveals end with `Wipe`, glitches start with `Glitch`, dissolves end with `Dissolve`, fades end with `Fade`; a direction comes last and names the movement (`WipeLeft`), and stays out of the name when it is a parameter.
+5. Follows its family: shape reveals end with `Wipe`, glitches start with `Glitch`, dissolves end with `Dissolve`, fades end with `Fade`; a direction comes last and names the movement (`ZoomWipeLeft`), and stays out of the name when it is a parameter.
 6. No filler: `Transition`, `Effect`, `Simple`, `Advanced`, `WithParameter`, version numbers (older names such as `SimpleZoom` predate this rule).
 7. Not a duplicate: compare its `// Description:` with existing transitions doing the same effect.
 

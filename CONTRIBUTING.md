@@ -83,12 +83,12 @@ See [Transition metadata](README.md#transition-metadata-optional) for the full s
 
 The file name, without `.glsl`, is the transition's identifier in every package (npm, Rust, Swift, Android). Changing it later breaks everyone who uses the transition, so choose it with care. `pnpm run lint` and CI check the rules marked *(checked)*. To try a name before creating the file, run `node scripts/checks/transition-names.mjs MyName`.
 
-- **PascalCase** *(checked)*: a capital letter, then letters and digits: `CrossZoom`, `WipeLeft`, `ZoomInCircles`. No `_`, `-` or spaces.
+- **PascalCase** *(checked)*: a capital letter, then letters and digits: `CrossZoom`, `StarWipe`, `ZoomInCircles`. No `_`, `-` or spaces.
 - **Acronyms are words** *(checked)*: never three capitals in a row. Write `HsvFade` and `TvStatic`, not `HSVFade` and `TVStatic`.
 - **Unique, ignoring case** *(checked)*: macOS and Windows file systems ignore case, so `Crosswarp` next to `CrossWarp` would break a checkout.
 - **No `Transition`** *(checked)*: everything in the collection is one. The same goes for filler words such as `Simple`, `Advanced` or `WithParameter` (a few older names, such as `SimpleZoom`, predate this rule).
 - **Name what you see, not the code**: `FlowerWipe`, not `PolarFunction`; `ColorWrap`, not `AddColor`. Someone browsing or searching the catalog should guess the effect from the name.
-- **Follow the family**: shape reveals end with `Wipe` (`StarWipe`, `HeartWipe`), glitches start with `Glitch` (`GlitchDisplace`), a direction comes last and names the movement (`WipeLeft` moves toward the left, `BowTieVertical`). A direction that is a parameter stays out of the name.
+- **Follow the family**: shape reveals end with `Wipe` (`StarWipe`, `HeartWipe`), glitches start with `Glitch` (`GlitchDisplace`), a direction comes last and names the movement (`ZoomWipeLeft` moves toward the left, `BowTieHorizontal`). A direction that is a parameter stays out of the name.
 - **Avoid generic names** such as `Fragment` or `Effect`.
 
 Reviewers, human and Copilot (`.github/instructions/transitions.instructions.md`), check these rules on every pull request that adds or renames a transition.

@@ -3,7 +3,7 @@
 // Usage: node scripts/checks/transition-names.mjs <Name> ...  (checks candidate names of new transitions)
 //
 // A transition's name is its file name without `.glsl`, and its identifier in every package:
-// - PascalCase: a capital letter, then letters and digits (`CrossZoom`, `WipeLeft`)
+// - PascalCase: a capital letter, then letters and digits (`CrossZoom`, `StarWipe`)
 // - acronyms written as words, so never three capitals in a row (`HsvFade`, not `HSVFade`)
 // - no `Transition` in the name: everything in the collection is one
 // - different from every other name, ignoring case (case-insensitive file systems)
