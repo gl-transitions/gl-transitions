@@ -225,17 +225,18 @@ jobs:
         if: steps.version.outputs.publish == 'true'
         run: mise install --locked rust
 
-      # From the published npm package (the sources of CATALOG_VERSION); npm may take a moment
-      # to serve a version just published.
+      # From the published npm package (the sources of CATALOG_VERSION); npm can take minutes
+      # to serve a version just published (3.0.0 took more than 100 s), and --prefer-online
+      # keeps a cached "no such version" from being reused.
       - name: Build the crate's sources from the npm package
         if: steps.version.outputs.publish == 'true'
         run: |
           npm_version=$(node -p 'require("./packages/gl-transitions/package.json").version')
           mkdir -p "$RUNNER_TEMP/npm"
-          for attempt in 1 2 3 4 5 6; do
-            if npm pack "gl-transitions@$npm_version" --pack-destination "$RUNNER_TEMP/npm"; then break; fi
-            if [ "$attempt" = 6 ]; then exit 1; fi
-            sleep 20
+          for attempt in $(seq 1 20); do
+            if npm pack "gl-transitions@$npm_version" --prefer-online --pack-destination "$RUNNER_TEMP/npm"; then break; fi
+            if [ "$attempt" = 20 ]; then exit 1; fi
+            sleep 30
           done
           tar -xzf "$RUNNER_TEMP/npm/gl-transitions-$npm_version.tgz" -C "$RUNNER_TEMP/npm"
           node scripts/rust-crate/build-crate.mjs --package "$RUNNER_TEMP/npm/package"
@@ -351,10 +352,10 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           mkdir -p "$RUNNER_TEMP/npm"
-          for attempt in 1 2 3 4 5 6; do
-            if npm pack "gl-transitions@$VERSION" --pack-destination "$RUNNER_TEMP/npm"; then break; fi
-            if [ "$attempt" = 6 ]; then exit 1; fi
-            sleep 20
+          for attempt in $(seq 1 20); do
+            if npm pack "gl-transitions@$VERSION" --prefer-online --pack-destination "$RUNNER_TEMP/npm"; then break; fi
+            if [ "$attempt" = 20 ]; then exit 1; fi
+            sleep 30
           done
           tar -xzf "$RUNNER_TEMP/npm/gl-transitions-$VERSION.tgz" -C "$RUNNER_TEMP/npm"
           node scripts/swift-package/build-mirror.mjs --package "$RUNNER_TEMP/npm/package" --out "$RUNNER_TEMP/gl-transitions-swift"
@@ -456,10 +457,10 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           mkdir -p "$RUNNER_TEMP/npm"
-          for attempt in 1 2 3 4 5 6; do
-            if npm pack "gl-transitions@$VERSION" --pack-destination "$RUNNER_TEMP/npm"; then break; fi
-            if [ "$attempt" = 6 ]; then exit 1; fi
-            sleep 20
+          for attempt in $(seq 1 20); do
+            if npm pack "gl-transitions@$VERSION" --prefer-online --pack-destination "$RUNNER_TEMP/npm"; then break; fi
+            if [ "$attempt" = 20 ]; then exit 1; fi
+            sleep 30
           done
           tar -xzf "$RUNNER_TEMP/npm/gl-transitions-$VERSION.tgz" -C "$RUNNER_TEMP/npm"
           node scripts/android-library/build-android-library.mjs --package "$RUNNER_TEMP/npm/package"
