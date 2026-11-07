@@ -207,7 +207,7 @@ for (const [fromIdx, toIdx] of segments) {
 const filters = "scale=320:-1:flags=lanczos";
 try {
   execSync(
-    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 -vf "${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -loop 0 -y "${outputPath}"`,
+    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 -vf "${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -gifflags -transdiff -loop 0 -y "${outputPath}"`,
     { input: allFrames, maxBuffer: 100 * 1024 * 1024 },
   );
   const size = fs.statSync(outputPath).size;
