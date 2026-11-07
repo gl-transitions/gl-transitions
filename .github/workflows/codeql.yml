@@ -35,12 +35,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           languages: ${{ matrix.language }}
           build-mode: none
 
-      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: /language:${{ matrix.language }}
 
@@ -52,7 +52,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: jdx/mise-action@6be3c7ed4c21d4f76b208d351d95aac273ebb76d # v5.2.4
+      - uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c # v5.2.6
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter gl-transitions-repository --filter gl-transitions
@@ -104,7 +104,7 @@ jobs:
           name: codeql-sources
 
       - if: matrix.language == 'java-kotlin'
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: zulu
           java-version: "17"
@@ -114,7 +114,7 @@ jobs:
         with:
           cache-read-only: ${{ github.ref != 'refs/heads/master' }}
 
-      - uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           languages: ${{ matrix.language }}
           build-mode: manual
@@ -129,6 +129,6 @@ jobs:
         working-directory: android
         run: ./gradlew :gl-transitions:assembleDebug :gl-transitions:assembleDebugUnitTest :gl-transitions:assembleDebugAndroidTest --no-daemon --console=plain
 
-      - uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: /language:${{ matrix.language }}
