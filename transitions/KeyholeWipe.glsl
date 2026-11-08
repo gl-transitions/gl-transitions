@@ -1,14 +1,10 @@
 // Author: gre
 // License: MIT
-// Description: A keyhole pops open at the center with a little springy settle, then the view pushes through it until the incoming image fills the frame, the keyhole's bevelled rim and inner shadow making it read as a hole cut in a plate
+// Description: A keyhole grows steadily from the center until the incoming image fills the frame, its bevelled rim and inner shadow making it read as a hole cut in a plate
 // Tags: shape, wipe, keyhole, iris, reveal
 
 // @param Center of the keyhole
 uniform vec2 center; // = vec2(0.5, 0.5)
-// @range(0.2, 0.8) Height of the keyhole when it has popped open, in frame heights
-uniform float size; // = 0.42
-// @range(0, 1) Springiness of the keyhole popping open (0 for a plain ease)
-uniform float bounce; // = 0.5
 // @range(0, 1) Strength of the bevelled rim around the keyhole and the shadow inside it (0 for a clean cut)
 uniform float rim; // = 0.6
 // @range(0, 0.05) Softness of the keyhole's edge
@@ -23,8 +19,6 @@ const float SLOT_HE = 0.23;
 const float SLOT_TOP = 0.085;
 const float SLOT_BOTTOM = 0.165;
 const float SLOT_ROUND = 0.025;
-const float KEYHOLE_H = 0.85;
-const float KEYHOLE_MID = 0.025;
 // height of the point the keyhole grows around, in its head
 const float GROW_Y = 0.1;
 // widths of the bevel and of the rim's shadows, in keyhole units
@@ -68,25 +62,16 @@ vec4 transition (vec2 uv) {
   vec2 c = center * asp;
   float sm = max(smoothness, 0.0005);
 
-  // The keyhole grows around a point of its head below its center, placed so that the whole keyhole
-  // is centered when it has popped open. It covers the frame (grown by a margin, so the soft edge
-  // is past it) once its head, a disk, reaches the frame's corners.
-  float peek = size / KEYHOLE_H;
-  vec2 o = c + vec2(0.0, (GROW_Y - KEYHOLE_MID) * peek);
+  // The keyhole grows around a point of its head, at the center. It covers the frame (grown by a
+  // margin, so the soft edge is past it) once its head, a disk, reaches the frame's corners.
+  vec2 o = c;
   vec2 lo = -o - 2.5 * sm;
   vec2 hi = asp - o + 2.5 * sm;
   float full = max(max(reach(lo), reach(hi)), max(reach(vec2(lo.x, hi.y)), reach(vec2(hi.x, lo.y))));
 
-  // The keyhole pops open to its peek size with a springy overshoot, then, as it settles,
-  // the view pushes in toward it at a smoothly rising rate (a zoom, so its scale grows
-  // geometrically) until it fills the frame
+  // The keyhole grows linearly until it fills the frame
   float p = progress;
-  float t = min(p / 0.32, 1.0);
-  float back = 2.6 * bounce;
-  float u = t - 1.0;
-  float pop = 1.0 + u * u * ((back + 1.0) * u + back);
-  float z = smoothstep(0.22, 1.0, p);
-  float s = peek * pop * pow(max(full, peek) / peek, z);
+  float s = full * p;
   if (s <= 0.0) return a;
 
   vec2 q = (uv * asp - o) / s + vec2(0.0, GROW_Y);
