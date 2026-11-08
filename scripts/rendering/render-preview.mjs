@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 // Renders a gl-transition to a GIF preview.
-// Usage: pnpm run render:preview --transition path/to/Fade.glsl --output preview.gif
+// Usage: pnpm run render:preview --transition path/to/Fade.glsl --output preview.gif [--output-black preview.black.gif]
+//
+// With --output-black, a transition that leaves parts of the frame transparent also gets a GIF
+// over black: GIF transparency is all or nothing, so soft shadows and reflections only show there.
 //
 // Requires: gl npm package, ffmpeg system binary
 
@@ -12,6 +15,7 @@ import { parseTransition } from "../catalog/parse-transition.mjs";
 const args = process.argv.slice(2);
 let transitionPath = null;
 let outputPath = "preview.gif";
+let blackOutputPath = null;
 let width = 400;
 let height = 300;
 let frames = 50;
@@ -20,6 +24,7 @@ const delay = 10;
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--transition" || args[i] === "-t") transitionPath = args[++i];
   else if (args[i] === "--output" || args[i] === "-o") outputPath = args[++i];
+  else if (args[i] === "--output-black") blackOutputPath = args[++i];
   else if (args[i] === "--width" || args[i] === "-w") width = parseInt(args[++i]);
   else if (args[i] === "--height") height = parseInt(args[++i]);
   else if (args[i] === "--frames" || args[i] === "-f") frames = parseInt(args[++i]);
@@ -205,13 +210,22 @@ for (const [fromIdx, toIdx] of segments) {
 }
 
 const filters = "scale=320:-1:flags=lanczos";
-try {
+const encode = (output, background) => {
+  const input = background
+    ? `-filter_complex "color=c=${background}:s=${width}x${height}:r=30[bg];[bg][0]overlay=shortest=1:format=auto,`
+    : `-vf "`;
   execSync(
-    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 -vf "${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -gifflags -offsetting-transdiff -loop 0 -y "${outputPath}"`,
+    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 ${input}${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -gifflags -offsetting-transdiff -loop 0 -y "${output}"`,
     { input: allFrames, maxBuffer: 100 * 1024 * 1024 },
   );
-  const size = fs.statSync(outputPath).size;
-  console.error(`Generated ${outputPath} (${(size / 1024).toFixed(0)} KB)`);
+  const size = fs.statSync(output).size;
+  console.error(`Generated ${output} (${(size / 1024).toFixed(0)} KB)`);
+};
+let transparent = false;
+for (let i = 3; i < allFrames.length && !transparent; i += 4) transparent = allFrames[i] < 255;
+try {
+  encode(outputPath);
+  if (blackOutputPath && transparent) encode(blackOutputPath, "black");
 } catch (e) {
   console.error("ffmpeg error:", e.stderr?.toString() || e.message);
   process.exit(1);
