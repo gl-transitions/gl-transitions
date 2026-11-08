@@ -210,12 +210,14 @@ for (const [fromIdx, toIdx] of segments) {
 }
 
 const filters = "scale=320:-1:flags=lanczos";
+// GIF transparency is all or nothing: the transparent GIF keeps only the opaque pixels, so soft
+// shadows and reflections don't break into specks (they show in the GIF over black)
 const encode = (output, background) => {
   const input = background
     ? `-filter_complex "color=c=${background}:s=${width}x${height}:r=30[bg];[bg][0]overlay=shortest=1:format=auto,`
     : `-vf "`;
   execSync(
-    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 ${input}${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -gifflags -offsetting-transdiff -loop 0 -y "${output}"`,
+    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 ${input}${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse=alpha_threshold=255" -gifflags -offsetting-transdiff -loop 0 -y "${output}"`,
     { input: allFrames, maxBuffer: 100 * 1024 * 1024 },
   );
   const size = fs.statSync(output).size;
