@@ -214,7 +214,7 @@ jobs:
               if (hasGif) {
                 const gifUrl = `${baseUrl}/${prefix}-${encodeURIComponent(name)}.gif`;
                 body += `![preview](${gifUrl})`;
-                // Transitions with transparency also get a GIF over black, where soft edges show
+                // Transitions with transparency: the first GIF is over white, this one over black
                 if (published.has(`${name}.black.gif`)) {
                   body += ` ![preview over black](${baseUrl}/${prefix}-${encodeURIComponent(name)}.black.gif)`;
                 }

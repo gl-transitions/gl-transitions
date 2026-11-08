@@ -2,8 +2,9 @@
 // Renders a gl-transition to a GIF preview.
 // Usage: pnpm run render:preview --transition path/to/Fade.glsl --output preview.gif [--output-black preview.black.gif]
 //
-// With --output-black, a transition that leaves parts of the frame transparent also gets a GIF
-// over black: GIF transparency is all or nothing, so soft shadows and reflections only show there.
+// GIF transparency is all or nothing, so soft shadows and reflections can't show in a transparent
+// GIF: a transition that leaves parts of the frame transparent is drawn over white in --output,
+// and over black in --output-black.
 //
 // Requires: gl npm package, ffmpeg system binary
 
@@ -210,14 +211,12 @@ for (const [fromIdx, toIdx] of segments) {
 }
 
 const filters = "scale=320:-1:flags=lanczos";
-// GIF transparency is all or nothing: the transparent GIF keeps only the opaque pixels, so soft
-// shadows and reflections don't break into specks (they show in the GIF over black)
 const encode = (output, background) => {
   const input = background
     ? `-filter_complex "color=c=${background}:s=${width}x${height}:r=30[bg];[bg][0]overlay=shortest=1:format=auto,`
     : `-vf "`;
   execSync(
-    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 ${input}${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse=alpha_threshold=255" -gifflags -offsetting-transdiff -loop 0 -y "${output}"`,
+    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 ${input}${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -gifflags -offsetting-transdiff -loop 0 -y "${output}"`,
     { input: allFrames, maxBuffer: 100 * 1024 * 1024 },
   );
   const size = fs.statSync(output).size;
@@ -226,7 +225,7 @@ const encode = (output, background) => {
 let transparent = false;
 for (let i = 3; i < allFrames.length && !transparent; i += 4) transparent = allFrames[i] < 255;
 try {
-  encode(outputPath);
+  encode(outputPath, transparent ? "white" : null);
   if (blackOutputPath && transparent) encode(blackOutputPath, "black");
 } catch (e) {
   console.error("ffmpeg error:", e.stderr?.toString() || e.message);
