@@ -76,7 +76,8 @@ jobs:
               echo "=== Rendering $name ==="
               node scripts/rendering/render-preview.mjs \
                 --transition "$file" \
-                --output "/tmp/previews/${name}.gif" 2>&1 || echo "Failed: $name"
+                --output "/tmp/previews/${name}.gif" \
+                --output-black "/tmp/previews/${name}.black.gif" 2>&1 || echo "Failed: $name"
             done
           '
 

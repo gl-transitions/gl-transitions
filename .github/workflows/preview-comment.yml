@@ -89,8 +89,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # Bounded: at most 20 GIFs and 100 MB per run, real GIFs only (the branch is served from
-          # raw.githubusercontent.com), and only the 200 most recent GIFs are kept.
+          # Bounded: at most 40 GIFs (20 transitions, with their GIFs over black) and 100 MB per run,
+          # real GIFs only (the branch is served from raw.githubusercontent.com), and only the 200
+          # most recent GIFs are kept.
           mkdir -p "$RUNNER_TEMP/gifs"
           COUNT=0
           TOTAL=0
@@ -103,7 +104,7 @@ jobs:
               continue
             fi
             size=$(stat -c %s -- "$gif")
-            if [ "$COUNT" -ge 20 ] || [ $((TOTAL + size)) -gt 100000000 ]; then
+            if [ "$COUNT" -ge 40 ] || [ $((TOTAL + size)) -gt 100000000 ]; then
               echo "::warning::Skipping $(basename -- "$gif"): over the per-run budget"
               continue
             fi
@@ -212,7 +213,12 @@ jobs:
 
               if (hasGif) {
                 const gifUrl = `${baseUrl}/${prefix}-${encodeURIComponent(name)}.gif`;
-                body += `![preview](${gifUrl})\n\n`;
+                body += `![preview](${gifUrl})`;
+                // Transitions with transparency: the first GIF is over white, this one over black
+                if (published.has(`${name}.black.gif`)) {
+                  body += ` ![preview over black](${baseUrl}/${prefix}-${encodeURIComponent(name)}.black.gif)`;
+                }
+                body += `\n\n`;
               } else {
                 body += `⚠️ Failed to render preview\n\n`;
               }
