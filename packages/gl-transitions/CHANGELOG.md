@@ -1,5 +1,69 @@
 # gl-transitions
 
+## 3.1.0
+
+### Minor Changes
+
+- [#436](https://github.com/gl-transitions/gl-transitions/pull/436) [`54bfbe6`](https://github.com/gl-transitions/gl-transitions/commit/54bfbe6a1f49e73100159bbd0a26380848a5ec9a) Thanks [@gre](https://github.com/gre)! - New transition: `Clothesline` by gre.
+
+- [#455](https://github.com/gl-transitions/gl-transitions/pull/455) [`0e165e9`](https://github.com/gl-transitions/gl-transitions/commit/0e165e95203b58c091918c9abfed66315f8cd22f) Thanks [@gre](https://github.com/gre)! - New transition: `ComicPanels` by gre.
+
+- [#429](https://github.com/gl-transitions/gl-transitions/pull/429) [`f71647a`](https://github.com/gl-transitions/gl-transitions/commit/f71647a4aa885eaae9c7834eb1fe1ca547114ce6) Thanks [@gre](https://github.com/gre)! - New transition: `DominoFall` by gre.
+
+- [#435](https://github.com/gl-transitions/gl-transitions/pull/435) [`0dc07da`](https://github.com/gl-transitions/gl-transitions/commit/0dc07da39a3cfb51aa51ccac7c19d4fd2690c866) Thanks [@gre](https://github.com/gre)! - New transition: `Drape` by gre.
+
+- [#457](https://github.com/gl-transitions/gl-transitions/pull/457) [`02df56b`](https://github.com/gl-transitions/gl-transitions/commit/02df56b15dd6ce08619f59e09d445b579ac2cfd2) Thanks [@gre](https://github.com/gre)! - New transition: `DuotoneFade` by gre.
+
+- [#432](https://github.com/gl-transitions/gl-transitions/pull/432) [`c8be447`](https://github.com/gl-transitions/gl-transitions/commit/c8be4477ecdd9bc12fdf6cd94aaadc233f48bbb7) Thanks [@gre](https://github.com/gre)! - New transition: `FacetedGlass` by gre.
+
+- [#424](https://github.com/gl-transitions/gl-transitions/pull/424) [`bb4c58b`](https://github.com/gl-transitions/gl-transitions/commit/bb4c58bfa842808cfb531a68af236f6481be66d1) Thanks [@gre](https://github.com/gre)! - New transition: `FrostWipe` by gre.
+
+- [#438](https://github.com/gl-transitions/gl-transitions/pull/438) [`6bdeaf5`](https://github.com/gl-transitions/gl-transitions/commit/6bdeaf5716ce4ed1a9d7a61d50441b72dcb4ad9d) Thanks [@gre](https://github.com/gre)! - New transition: `Funnel` by gre.
+
+- [#434](https://github.com/gl-transitions/gl-transitions/pull/434) [`d43b2f0`](https://github.com/gl-transitions/gl-transitions/commit/d43b2f010c513bcc99b4bcdbd7deb0ba9d66d278) Thanks [@gre](https://github.com/gre)! - New transition: `GlitterDissolve` by gre.
+
+- [#437](https://github.com/gl-transitions/gl-transitions/pull/437) [`fe7ce92`](https://github.com/gl-transitions/gl-transitions/commit/fe7ce92e917f17bc10da63980166a31ed4358bc7) Thanks [@gre](https://github.com/gre)! - New transition: `InsideCube` by gre.
+
+- [#458](https://github.com/gl-transitions/gl-transitions/pull/458) [`81c50d8`](https://github.com/gl-transitions/gl-transitions/commit/81c50d80310847fca68a4a3ff6ff91c4afc95249) Thanks [@gre](https://github.com/gre)! - New transition: `KeyholeWipe` by gre.
+
+- [#430](https://github.com/gl-transitions/gl-transitions/pull/430) [`da63139`](https://github.com/gl-transitions/gl-transitions/commit/da6313942a1f022a07a1bafac2eedc22477826b6) Thanks [@gre](https://github.com/gre)! - New transition: `LedWall` by gre.
+
+- [#462](https://github.com/gl-transitions/gl-transitions/pull/462) [`0cdbc7e`](https://github.com/gl-transitions/gl-transitions/commit/0cdbc7e47f5f0a622d90d1a28ae2ad697a556164) Thanks [@gre](https://github.com/gre)! - New transition: `MoireWipe` by gre.
+
+- [#463](https://github.com/gl-transitions/gl-transitions/pull/463) [`50f2b9b`](https://github.com/gl-transitions/gl-transitions/commit/50f2b9b2fec14a8ee068e49e007fa56fce6afbc0) Thanks [@gre](https://github.com/gre)! - New transition: `PaperFold` by gre.
+
+- [#442](https://github.com/gl-transitions/gl-transitions/pull/442) [`de2f631`](https://github.com/gl-transitions/gl-transitions/commit/de2f63166e05764272f0e947a7df8a6d9041bb6e) Thanks [@gre](https://github.com/gre)! - New transition: `PuzzleCube` by gre.
+
+- [#425](https://github.com/gl-transitions/gl-transitions/pull/425) [`91aefac`](https://github.com/gl-transitions/gl-transitions/commit/91aefac8ea4b5eb603070eca6e552b0b1fec5b63) Thanks [@gre](https://github.com/gre)! - New transition: `RibbonTwist` by gre.
+
+- [#433](https://github.com/gl-transitions/gl-transitions/pull/433) [`d3d1331`](https://github.com/gl-transitions/gl-transitions/commit/d3d1331d151a59551c50259f0387c661c2583e24) Thanks [@gre](https://github.com/gre)! - New transition: `SketchDissolve` by gre.
+
+- [#454](https://github.com/gl-transitions/gl-transitions/pull/454) [`ec62769`](https://github.com/gl-transitions/gl-transitions/commit/ec6276992e130c31641fcb1b1c122f3eaf582725) Thanks [@gre](https://github.com/gre)! - New transition: `SlotReels` by gre.
+
+- [#428](https://github.com/gl-transitions/gl-transitions/pull/428) [`c040bdd`](https://github.com/gl-transitions/gl-transitions/commit/c040bddd7abf5195c0c61942982508ca9ee39287) Thanks [@gre](https://github.com/gre)! - New transition: `SplitFlap` by gre.
+
+- [#459](https://github.com/gl-transitions/gl-transitions/pull/459) [`20b9478`](https://github.com/gl-transitions/gl-transitions/commit/20b9478b8c1d913b8824a61f828a2e21fd09efff) Thanks [@gre](https://github.com/gre)! - New transition: `TruchetWipe` by gre.
+
+- [#461](https://github.com/gl-transitions/gl-transitions/pull/461) [`b7681c8`](https://github.com/gl-transitions/gl-transitions/commit/b7681c8040193ec778dd3a6b1df9952a22f6a4fd) Thanks [@gre](https://github.com/gre)! - New transition: `Tumble` by gre.
+
+- [#431](https://github.com/gl-transitions/gl-transitions/pull/431) [`866f492`](https://github.com/gl-transitions/gl-transitions/commit/866f49261c9dfdf2adbb5a3ff69b059995c0b0fa) Thanks [@gre](https://github.com/gre)! - New transition: `WaveWipe` by gre.
+
+- [#441](https://github.com/gl-transitions/gl-transitions/pull/441) [`0dc19a7`](https://github.com/gl-transitions/gl-transitions/commit/0dc19a7db8068c3ab8afe6639ea085787cd1f998) Thanks [@gre](https://github.com/gre)! - Updated `HeartWipe`.
+
+- [#439](https://github.com/gl-transitions/gl-transitions/pull/439) [`12b0ad5`](https://github.com/gl-transitions/gl-transitions/commit/12b0ad5bd02e9822999a8cbd9abb14ea0a6a98c7) Thanks [@gre](https://github.com/gre)! - Updated `Doorway`.
+
+- [#444](https://github.com/gl-transitions/gl-transitions/pull/444) [`4d6a523`](https://github.com/gl-transitions/gl-transitions/commit/4d6a523e1ca8448af3732743e9e22d06a134fc24) Thanks [@gre](https://github.com/gre)! - Updated `WaterDrop`.
+
+- [#440](https://github.com/gl-transitions/gl-transitions/pull/440) [`52fd1e7`](https://github.com/gl-transitions/gl-transitions/commit/52fd1e716b31cfe1de883fff2dc0abba2dd4a1eb) Thanks [@gre](https://github.com/gre)! - Updated `Cube`.
+
+- [#443](https://github.com/gl-transitions/gl-transitions/pull/443) [`6483840`](https://github.com/gl-transitions/gl-transitions/commit/6483840e858b9c7d2f9938fd292d72481d6d4cf8) Thanks [@gre](https://github.com/gre)! - Updated `Shatter`.
+
+- [#445](https://github.com/gl-transitions/gl-transitions/pull/445) [`6930656`](https://github.com/gl-transitions/gl-transitions/commit/69306563166776b452cc0f5861e5cb36e2c6baa5) Thanks [@gre](https://github.com/gre)! - Updated `Swirl`.
+
+- [#446](https://github.com/gl-transitions/gl-transitions/pull/446) [`a87984c`](https://github.com/gl-transitions/gl-transitions/commit/a87984c6e7f598d031506436035dfc3e0257a2e3) Thanks [@gre](https://github.com/gre)! - Updated `GridFlip`.
+
+- [#447](https://github.com/gl-transitions/gl-transitions/pull/447) [`eefd3cb`](https://github.com/gl-transitions/gl-transitions/commit/eefd3cb44a2bf4b9c2ff46a4eb383757419846b1) Thanks [@gre](https://github.com/gre)! - Updated `BookFlip`.
+
 ## 3.0.0
 
 ### Major Changes
