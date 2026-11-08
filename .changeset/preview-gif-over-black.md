@@ -1,4 +1,4 @@
 ---
 ---
 
-Add a preview GIF over black for transitions with transparency (CI tooling only).
+Draw preview GIFs of transitions with transparency over white and over black (CI tooling only).
