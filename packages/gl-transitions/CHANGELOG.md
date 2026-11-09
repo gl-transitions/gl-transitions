@@ -1,5 +1,21 @@
 # gl-transitions
 
+## 3.2.0
+
+### Minor Changes
+
+- [#468](https://github.com/gl-transitions/gl-transitions/pull/468) [`412606d`](https://github.com/gl-transitions/gl-transitions/commit/412606d278d4d364288a51c0515c100b20c2560c) Thanks [@gre](https://github.com/gre)! - New transition: `CircleBurst` by gre.
+
+- [#466](https://github.com/gl-transitions/gl-transitions/pull/466) [`2b72a87`](https://github.com/gl-transitions/gl-transitions/commit/2b72a8720a744dfe5d18d821c8256096b9e0fc24) Thanks [@gre](https://github.com/gre)! - New transition: `CodeRain` by gre.
+
+- [#470](https://github.com/gl-transitions/gl-transitions/pull/470) [`edaa377`](https://github.com/gl-transitions/gl-transitions/commit/edaa3773678515095ef857d0e1aef7e9ceb0895d) Thanks [@gre](https://github.com/gre)! - New transition: `CurtainRise` by gre.
+
+- [#464](https://github.com/gl-transitions/gl-transitions/pull/464) [`7a3cea3`](https://github.com/gl-transitions/gl-transitions/commit/7a3cea39627f7be470c844243185d2e7c529de0f) Thanks [@gre](https://github.com/gre)! - New transition: `GravityLens` by gre.
+
+- [#469](https://github.com/gl-transitions/gl-transitions/pull/469) [`ec62d0e`](https://github.com/gl-transitions/gl-transitions/commit/ec62d0e08147446e064c9c1e0c67ad5b94db92ff) Thanks [@gre](https://github.com/gre)! - New transition: `RingSpin` by gre.
+
+- [#465](https://github.com/gl-transitions/gl-transitions/pull/465) [`e84faf9`](https://github.com/gl-transitions/gl-transitions/commit/e84faf9cc1dd54616471298218e5d22469ab63bc) Thanks [@gre](https://github.com/gre)! - New transition: `SpotlightWipe` by gre.
+
 ## 3.1.0
 
 ### Minor Changes
