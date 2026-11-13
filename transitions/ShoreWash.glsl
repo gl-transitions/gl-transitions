@@ -1,6 +1,6 @@
 // Author: gre
 // License: MIT
-// Description: A thin sheet of water runs up over the outgoing image like the last of a wave on a beach, its lobed front edged with bubbly foam; it slows, stops just past the far edge and drains back, leaving the incoming image wet and glossy, with a lace of foam that thins out as it dries
+// Description: A thin sheet of water runs up over the outgoing image like the last of a wave on a beach, its lobed front edged with bubbly foam; it slows, stops just past the far edge and drains back, leaving the incoming image wet and glossy as it dries
 // Tags: water, foam, beach, liquid, directional, reveal
 
 // @param Direction the water runs up toward
@@ -123,7 +123,7 @@ vec4 transition(vec2 uv) {
   c.rgb += 0.1 * wet * smoothstep(0.4, 0.9, vnoise(vec2(a * 30.0, b * 6.0)));
 
   // foam: thick and bubbly right behind the running front, a lace trailing behind it,
-  // a thin line on the draining front, and lace stranded on the wet image that thins out
+  // and a thin line on the draining front; none is left on the image the water has drained off
   // the foam drifts with the water as it runs up, then stays where it is
   vec2 lp = vec2(a - 0.4 * (progress < RUNUP ? front : stop), b) / CELL;
   // the lace gathers in streaks along the front, broken into patches
@@ -132,7 +132,7 @@ vec4 transition(vec2 uv) {
   float density = (1.0 - smoothstep(0.0, bandW, behind)) * (1.0 - smoothstep(RUNUP - 0.05, RUNUP + 0.12, progress));
   density = max(density, 0.55 * patches * (1.0 - smoothstep(0.0, LACE, behind)) * (1.0 - 0.5 * back));
   density = max(density, 0.9 * (1.0 - smoothstep(0.0, 0.012 + 0.02 * vnoise(vec2(b * 40.0, 1.0)), behind)));
-  density = mix(0.5 * patches * wet, density, sheet);
+  density *= sheet;
   // bubbles of two sizes, over a milky haze where the foam is dense
   float f = 0.0;
   if (density > 0.0) {
