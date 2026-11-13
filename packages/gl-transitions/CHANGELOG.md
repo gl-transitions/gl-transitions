@@ -1,5 +1,35 @@
 # gl-transitions
 
+## 3.3.0
+
+### Minor Changes
+
+- [#479](https://github.com/gl-transitions/gl-transitions/pull/479) [`8d550aa`](https://github.com/gl-transitions/gl-transitions/commit/8d550aaa57adf10e2667536528e25dd229d75d1d) Thanks [@gre](https://github.com/gre)! - New transition: `CardDeal` by gre.
+
+- [#483](https://github.com/gl-transitions/gl-transitions/pull/483) [`cdef752`](https://github.com/gl-transitions/gl-transitions/commit/cdef75247805df0f34598860de2ba84b12ec3413) Thanks [@gre](https://github.com/gre)! - New transition: `EchoSlide` by gre.
+
+- [#478](https://github.com/gl-transitions/gl-transitions/pull/478) [`133e608`](https://github.com/gl-transitions/gl-transitions/commit/133e608cbd02eb5c6d9eefa2022d0c5dc4637a73) Thanks [@gre](https://github.com/gre)! - New transition: `GeometricCollage` by gre.
+
+- [#474](https://github.com/gl-transitions/gl-transitions/pull/474) [`486313a`](https://github.com/gl-transitions/gl-transitions/commit/486313a7a0c748a8fc84773405d52e6f4c3e2587) Thanks [@gre](https://github.com/gre)! - New transition: `HingedSquares` by gre.
+
+- [#472](https://github.com/gl-transitions/gl-transitions/pull/472) [`4969bbf`](https://github.com/gl-transitions/gl-transitions/commit/4969bbfaed99d0625ab1d9efb7e8fdebe22f2fd6) Thanks [@gre](https://github.com/gre)! - New transition: `HorizontalHold` by gre.
+
+- [#477](https://github.com/gl-transitions/gl-transitions/pull/477) [`1a19084`](https://github.com/gl-transitions/gl-transitions/commit/1a19084d26670bd7df9f7d8d1d730c9538f45477) Thanks [@gre](https://github.com/gre)! - New transition: `LayoutGrid` by gre.
+
+- [#475](https://github.com/gl-transitions/gl-transitions/pull/475) [`d2f250e`](https://github.com/gl-transitions/gl-transitions/commit/d2f250e5cee85d9cfb225b584aeabecfbf8dea42) Thanks [@gre](https://github.com/gre)! - New transition: `ProjectorThrow` by gre.
+
+- [#480](https://github.com/gl-transitions/gl-transitions/pull/480) [`9d7107a`](https://github.com/gl-transitions/gl-transitions/commit/9d7107a6a09ba777fa4f06dc488760875012292a) Thanks [@gre](https://github.com/gre)! - New transition: `Reassemble` by gre.
+
+- [#481](https://github.com/gl-transitions/gl-transitions/pull/481) [`d4c1234`](https://github.com/gl-transitions/gl-transitions/commit/d4c12349a35cf219a1c4c19569a6659d1cd13f1f) Thanks [@Giladx](https://github.com/Giladx)! - New transition: `Shockwave` by Gilad Levi, github @Giladx.
+
+- [#473](https://github.com/gl-transitions/gl-transitions/pull/473) [`22f67b2`](https://github.com/gl-transitions/gl-transitions/commit/22f67b2bf6ee531253b71ae6c7bf29c2f31c21a7) Thanks [@gre](https://github.com/gre)! - New transition: `ShoreWash` by gre.
+
+- [#471](https://github.com/gl-transitions/gl-transitions/pull/471) [`ee63ae4`](https://github.com/gl-transitions/gl-transitions/commit/ee63ae4e39d3c0ed65e80b247de48cbdc6f063b8) Thanks [@gre](https://github.com/gre)! - New transition: `ShutterWipe` by gre.
+
+- [#482](https://github.com/gl-transitions/gl-transitions/pull/482) [`bff2e7b`](https://github.com/gl-transitions/gl-transitions/commit/bff2e7bdd8ba7552533de9d4c463105c85a7083c) Thanks [@gre](https://github.com/gre)! - New transition: `StopMotion` by gre.
+
+- [#485](https://github.com/gl-transitions/gl-transitions/pull/485) [`040e2e0`](https://github.com/gl-transitions/gl-transitions/commit/040e2e083515f30c272d889fbd5f8014a8fa7c0f) Thanks [@gre](https://github.com/gre)! - New transition: `Vaporize` by gre.
+
 ## 3.2.0
 
 ### Minor Changes
