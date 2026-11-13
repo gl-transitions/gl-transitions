@@ -1,4 +1,3 @@
-
  // Author: Gilad Levi, github @Giladx
  // License: MIT
  // Description: A diagonal shockwave breaks the outgoing image into tiny falling glass tiles. Each tile slips away with a brief chromatic split and neon edge glow, revealing the incoming image beneath it.
