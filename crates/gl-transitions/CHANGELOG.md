@@ -1,5 +1,12 @@
 # gl-transitions-crate
 
+## 2.0.4
+
+### Patch Changes
+
+- Updated dependencies []:
+  - gl-transitions@3.4.0
+
 ## 2.0.3
 
 ### Patch Changes

@@ -1,5 +1,25 @@
 # gl-transitions
 
+## 3.4.0
+
+### Minor Changes
+
+- [#490](https://github.com/gl-transitions/gl-transitions/pull/490) [`0709a36`](https://github.com/gl-transitions/gl-transitions/commit/0709a364a32b06976df2041b82d96209542992f3) Thanks [@gre](https://github.com/gre)! - New transition: `BeadUp` by gre.
+
+- [#487](https://github.com/gl-transitions/gl-transitions/pull/487) [`c4ee910`](https://github.com/gl-transitions/gl-transitions/commit/c4ee910d8adfaea6c043034c9a956b63ef6b3f95) Thanks [@gre](https://github.com/gre)! - New transition: `Faint` by gre.
+
+- [#493](https://github.com/gl-transitions/gl-transitions/pull/493) [`d924b9e`](https://github.com/gl-transitions/gl-transitions/commit/d924b9e2db2917bd2d8d60df7bdbc8e98239f42d) Thanks [@gre](https://github.com/gre)! - New transition: `InterlaceWipe` by gre.
+
+- [#488](https://github.com/gl-transitions/gl-transitions/pull/488) [`dee204e`](https://github.com/gl-transitions/gl-transitions/commit/dee204ebcb7d33d3e8efbdf36dcda1ffc426aadc) Thanks [@gre](https://github.com/gre)! - New transition: `LensPush` by gre.
+
+- [#491](https://github.com/gl-transitions/gl-transitions/pull/491) [`e7ad9b5`](https://github.com/gl-transitions/gl-transitions/commit/e7ad9b5a0d094ce294207f11d8afae93647996b9) Thanks [@gre](https://github.com/gre)! - New transition: `OutlineCrumble` by gre.
+
+- [#494](https://github.com/gl-transitions/gl-transitions/pull/494) [`9fb6bc5`](https://github.com/gl-transitions/gl-transitions/commit/9fb6bc5c227011ec97afb26b3bd91af2bd512188) Thanks [@gre](https://github.com/gre)! - New transition: `PaperLayers` by gre.
+
+- [#489](https://github.com/gl-transitions/gl-transitions/pull/489) [`e7fbc33`](https://github.com/gl-transitions/gl-transitions/commit/e7fbc3395ec0997b3d28c0568751ac808b5445bc) Thanks [@gre](https://github.com/gre)! - New transition: `SlitStretch` by gre.
+
+- [#496](https://github.com/gl-transitions/gl-transitions/pull/496) [`020c099`](https://github.com/gl-transitions/gl-transitions/commit/020c0990f77dd6103da1a140d3d3440bf4ae982b) Thanks [@gre](https://github.com/gre)! - New transition: `TileShuffle` by gre.
+
 ## 3.3.0
 
 ### Minor Changes
