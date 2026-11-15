@@ -18,7 +18,6 @@ vec4 transition (vec2 uv) {
   float a = radians(angle);
   // Local frame: y along the starting direction, x across it (the wedge is symmetric)
   vec2 p = vec2(abs(q.x * cos(a) - q.y * sin(a)), q.x * sin(a) + q.y * cos(a));
-  // Each hand has turned by half a turn at the end
   float spread = PI * progress;
   // (float PI rounds above pi, so sin(spread) would turn slightly negative at the end)
   vec2 hand = vec2(max(sin(spread), 0.0), cos(spread));

@@ -35,9 +35,7 @@ vec4 image(vec2 uv, bool incoming) {
 
 vec4 transition(vec2 uv) {
   bool two = blinks > 1;
-  // the moment the eyes are fully closed, when the images are swapped
   float cut = two ? 0.3 : 0.42;
-  // how closed the eyes are: 0 open, 1 closed
   float closed = two
     ? max(lidBlink(progress, cut, 0.26, 0.26, 0.015), lidBlink(progress, 0.7, 0.14, 0.24, 0.01))
     : lidBlink(progress, cut, 0.36, 0.5, 0.02);
@@ -47,15 +45,12 @@ vec4 transition(vec2 uv) {
   float soft = clamp(softness, 0.001, 0.3);
   float x = 2.0 * uv.x - 1.0;
   float rim = (1.0 - closed) * (1.31 + CURVE) - CURVE * x * x;
-  // distance inside the opening from the nearest lid, as a share of that lid's travel
   float y = uv.y - MEET;
   float d = rim - max(y / (1.0 - MEET), -y / MEET);
-  // the lid fills beyond its rim, with a soft shadow falling inside the opening
   float s = 1.0 - smoothstep(0.0, soft, d);
   float lid = s * s;
   if (lid >= 1.0) return color;
 
-  // how out of focus and dim the view is: it peaks at the cut, follows the lids, and clears at both ends
   float f = progress < cut ? progress / cut : (1.0 - progress) / (1.0 - cut);
   f = clamp(f, 0.0, 1.0);
   f = max(f * (2.0 - f), closed) * blur;
@@ -64,7 +59,6 @@ vec4 transition(vec2 uv) {
   if (f <= 0.0) {
     c = incoming ? getToColor(uv) : getFromColor(uv);
   } else {
-    // a disc of taps along a golden-angle spiral, premultiplied
     float r = 0.025 * f;
     c = vec4(0.0);
     for (int i = 0; i < TAPS; i++) {
@@ -75,7 +69,6 @@ vec4 transition(vec2 uv) {
     }
     c /= float(TAPS);
     c = c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
-    // less light reaches the eye as it closes
     c.rgb *= 1.0 - 0.35 * f;
   }
   return mix(c, color, lid);

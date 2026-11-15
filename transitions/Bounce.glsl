@@ -26,7 +26,7 @@ vec4 transition (vec2 uv) {
       step(d, shadow_height) * (1. - mix(
         ((d / shadow_height) * shadow_colour.a) + (1.0 - shadow_colour.a),
         1.0,
-        smoothstep(0.95, 1., progress) // fade-out the shadow at the end
+        smoothstep(0.95, 1., progress)
       )) * to.a // cast on the incoming image, not on its transparent areas
     ),
     getFromColor(vec2(uv.x, uv.y + (1.0 - y))),

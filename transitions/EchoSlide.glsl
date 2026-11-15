@@ -12,16 +12,13 @@ uniform float trail; // = 0.25
 // @range(0, 1) How fast the echoes of the outgoing image fade out into those of the incoming one
 uniform float decay; // = 0.5
 
-// width of the anti-aliased edges, along the slide
 const float EDGE = 0.002;
-// the most echoes, the bound of the loop
 const int MAX_ECHOES = 7;
 
 float easeInOut(float t) {
   return t * t * (3.0 - 2.0 * t);
 }
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -31,7 +28,6 @@ float past(float s, float x) {
   return x <= 0.0 ? 1.0 : x >= 1.0 ? 0.0 : clamp((s - x) / EDGE + 0.5, 0.0, 1.0);
 }
 
-// the edge between the copies at the time t of the slide
 float edgeAt(float t) {
   return easeInOut(clamp(t, 0.0, 1.0));
 }
@@ -45,7 +41,6 @@ vec4 echoStep(vec2 uv, float s, vec2 shift, float j, float t0, float lag, float 
   vec4 a = getFromColor(mirror(uv - shift * e0));
   vec4 b = getToColor(mirror(uv - shift * (e1 - 1.0)));
   vec4 c = mix(b, a, pow((j + 0.5) / n, 0.5 + 2.0 * clamp(decay, 0.0, 1.0)));
-  // each copy casts a soft shadow behind it onto the older ones
   c.rgb *= 1.0 - 0.25 * exp(-max(e1 - s, 0.0) / 0.02) * min((e1 - e0) / 0.02, 1.0);
   return c;
 }
@@ -73,7 +68,6 @@ vec4 transition(vec2 uv) {
   float wGap = max(1.0 - wIn - wOut, 0.0);
   vec4 c = vec4(0.0);
   if (wGap > 0.0) {
-    // the step of this point, and how far it is past the next edge, to anti-alias it
     float jf = 0.0;
     for (int k = 1; k < MAX_ECHOES; k++) {
       float m = float(k);
@@ -85,7 +79,6 @@ vec4 transition(vec2 uv) {
     if (jf > j) c = mix(c, echoStep(uv, s, shift, j + 1.0, t0, lag, n), jf - j);
     c *= wGap;
   }
-  // the two images on both sides of their echoes
   if (wIn > 0.0) c += wIn * getToColor(mirror(uv - shift * (eIn - 1.0)));
   if (wOut > 0.0) c += wOut * getFromColor(mirror(uv - shift * eOut));
   return c;

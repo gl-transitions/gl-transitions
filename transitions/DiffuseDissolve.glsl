@@ -19,25 +19,20 @@ vec4 hash42(vec2 p) {
   return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
 
-// fold the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
 
 vec4 transition(vec2 uv) {
-  // the scatter grows then shrinks back, easing in and out: 0 at both ends, 1 at the peak
   float a = 1.0 - abs(2.0 * progress - 1.0);
   float amount = a * a * (3.0 - 2.0 * a);
   vec2 cell = floor(uv * vec2(ratio, 1.0) / max(grainSize, 1e-4));
   vec4 h = hash42(cell);
-  // each grain flies off in its own direction, most of them about half the radius away and
-  // few of them as far as the radius, and swirls around while it is away
   float angle = 2.0 * PI * (h.x + shimmer * (2.0 * h.w - 1.0) * progress);
   float dist = radius * amount * 0.5 * (h.y + h.z);
   vec2 offset = dist * vec2(cos(angle) / ratio, sin(angle));
   vec2 suv = mirror(uv + offset);
-  // each grain turns to the incoming image at its own moment, around the peak of the scatter
-  // (hashed off the cell corners, independently of the scatter)
+  // each grain switches at its own moment around the peak (hashed off the cell corners, independently of the scatter)
   float when = 0.3 + 0.4 * hash42(cell + vec2(0.5, 0.25)).x;
   float m = smoothstep(when - 0.1, when + 0.1, progress);
   // each image is only read while it shows

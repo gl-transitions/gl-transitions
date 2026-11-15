@@ -25,9 +25,8 @@ vec2 fold (vec2 p) {
 // signed distance to the blob of a grid cell (in cells), its center returned in .yz
 vec3 blob (vec2 cell, float rStart, float rEnd) {
   vec2 c = cell + 0.5 + 0.7 * (vec2(hash(cell + 0.5), hash(cell + 41.3)) - 0.5);
-  float t0 = 0.02 + 0.43 * hash(cell + 17.9); // when it pops up
+  float t0 = 0.02 + 0.43 * hash(cell + 17.9);
   float s = clamp((progress - t0) / (1.0 - t0), 0.0, 1.0);
-  // it pops up fast with a little wobble, then swells slowly
   float pop = clamp((progress - t0) / 0.12, 0.0, 1.0);
   pop = 1.0 - (1.0 - pop) * (1.0 - pop) * (1.0 - pop);
   float r = mix(rStart, 0.18, pop) + (rEnd - 0.18) * s * sqrt(s);
@@ -51,7 +50,7 @@ vec4 transition (vec2 uv) {
   float m = 1e3; // distance to the nearest blob
   float sum = 0.0;
   vec2 grad = vec2(0.0);
-  float rNear = 0.0; // radius of the nearest blob
+  float rNear = 0.0;
   for (int j = -3; j <= 3; j++) {
     for (int i = -3; i <= 3; i++) {
       vec3 b = blob(base + vec2(float(i), float(j)), rStart, rEnd);
@@ -76,18 +75,16 @@ vec4 transition (vec2 uv) {
   grad /= sum;
   float aa = 0.012 * n / 5.0;
   float inside = 1.0 - smoothstep(-aa, aa, d);
-  // a rounded, glossy surface near the edge, flat further inside; the goo settles flat at the end
   float h = clamp(-d / w, 0.0, 1.0);
   float settle = 1.0 - smoothstep(0.45, 0.85, progress);
   float tilt = (1.0 - h) * (1.0 - h) * settle;
   vec3 nrm = normalize(vec3(grad * tilt * 3.0, 1.0));
   vec3 halfway = normalize(vec3(-0.35, 0.45, 1.0) + vec3(0.0, 0.0, 1.0));
   float spec = pow(max(dot(nrm, halfway), 0.0), 200.0) * settle;
-  // thick, opaque goo: darker toward its edge, more so on the side away from the light
   float shade = 1.0 - tilt * (0.25 + 0.3 * clamp(dot(grad, vec2(0.6, -0.8)) + 0.3, 0.0, 1.0));
   vec4 to = getToColor(fold(uv - grad * tilt * 0.01 * cellSize / vec2(ratio, 1.0)));
   float t2 = tilt * tilt;
-  float gloss = 0.3 * t2 * t2; // a thin bright line right on the rim
+  float gloss = 0.3 * t2 * t2;
   to.rgb = mix(to.rgb * shade, highlight.rgb, clamp(spec + gloss, 0.0, 1.0) * highlight.a);
   vec4 from = getFromColor(uv);
   float sh = shadow.a * (1.0 - smoothstep(0.0, 0.15, d + 0.03)) * smoothstep(0.0, 0.3, rNear);

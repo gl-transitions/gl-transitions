@@ -17,10 +17,8 @@ float dotRadius(vec4 c) {
 }
 
 vec4 transition(vec2 uv) {
-  // the image turns into dots until 0.3, the dots reshape from left to right, then merge back from 0.7
   float h = smoothstep(0.0, 0.3, progress) * (1.0 - smoothstep(0.7, 1.0, progress));
   float t = (progress - 0.3) / 0.4;
-  // rotated square grid, in cells
   float a = radians(angle);
   mat2 rot = mat2(cos(a), sin(a), -sin(a), cos(a));
   vec2 scale = vec2(ratio, 1.0) * dots / min(ratio, 1.0);
@@ -32,7 +30,7 @@ vec4 transition(vec2 uv) {
   vec4 ink = pixel;
   for (int i = 0; i < 4; i++) {
     vec2 center = base + vec2(mod(float(i), 2.0), floor(float(i) / 2.0));
-    vec2 cuv = (center * rot) / scale + 0.5; // inverse rotation
+    vec2 cuv = (center * rot) / scale + 0.5;
     vec4 cf = getFromColor(cuv);
     vec4 ct = getToColor(cuv);
     float m = smoothstep(0.0, 1.0, clamp(2.5 * t - 1.5 * cuv.x, 0.0, 1.0));

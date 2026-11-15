@@ -46,6 +46,7 @@ vec4 transition(vec2 uv) {
 5. Use the contextual **`progress`** variable (0.0 to 1.0)
 6. **Keep transparency** (see [Transparency](README.md#transparency)): keep the images' alpha, return `vec4(0.0)` where no image is drawn, and make a fill color a `vec4` parameter with `@color`. `pnpm run validate` checks it.
 7. **Be continuous in `progress`**: the frame starts on exactly the outgoing image at 0, moves away from it smoothly, and lands on exactly the incoming image at 1. Get there through the math itself (eased envelopes that are 0 at both ends, thresholds that start below and end above every value), never with an early return such as `if (progress <= 0.0) return getFromColor(uv);`: such a guard only fixes the frames at exactly 0 and 1 and hides a jump on the next ones, which is what viewers see, and it branches every pixel. `pnpm run validate` rejects these guards and renders progress 0.00001 and 0.99999 to catch jumps.
+8. **Comment only what the code cannot say**: why, not what. Keep a short comment for a math trick, the reason behind a constant, a precision or portability workaround, or an ordering subtlety; leave out comments that restate the next line (`// mix the colors`), section banners and `// ----` dividers, numbered step-by-step narration, and commented-out code. The header lines, the `@param`/`@range`/`@color` hints and the `// = default` comments are metadata, not comments: keep them.
 
 ### Transition parameters
 

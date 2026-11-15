@@ -28,7 +28,6 @@ float tear (float y) {
   return meander(y) + roughness * (0.1 * sin(y * 29.0 + 0.7) + 0.35 * tri(y * 19.0 + sin(y * 7.0)) + 0.12 * tri(y * 47.0 + 0.6 * sin(y * 13.0)));
 }
 
-// width of the torn edge along it, so that the fibers look uneven
 float fibers (float y, float seed) {
   return rim * (0.7 + 0.3 * sin(y * 37.0 + seed) + 0.4 * tri(y * 83.0 + seed));
 }
@@ -39,8 +38,7 @@ vec2 unfold (vec2 q, float away, float lean) {
   return vec2(q.x + away + lean * q.y, q.y);
 }
 
-// a torn half over the background, with its fibers and an anti-aliased edge
-// e: distance past the torn edge, limit: how far the fibers reach, aa: edge softness
+// a torn half over bg; e: distance past the torn edge, limit: how far the fibers reach, aa: edge softness
 vec4 torn (vec4 bg, vec4 col, float e, float limit, float aa) {
   vec4 c = vec4(mix(col.rgb, paper.rgb, clamp(0.5 + e / aa, 0.0, 1.0) * paper.a), col.a);
   return mix(bg, c, clamp(0.5 - (e - limit) / aa, 0.0, 1.0));
@@ -57,14 +55,12 @@ vec4 transition (vec2 uv) {
   vec2 r = unfold(vec2(ratio - q.x, q.y), away, lean);
   float el = l.x - tear(l.y); // > 0 right of the left half's torn edge
   float er = r.x - (ratio - tear(r.y)); // > 0 left of the right half's torn edge
-  // soft shadow of the two halves on the incoming image, cast toward the right
   vec2 sq = q - vec2(0.01, 0.0);
   float dl = unfold(sq, away, lean).x - meander(sq.y);
   float dr = unfold(vec2(ratio - sq.x, sq.y), away, lean).x - (ratio - meander(sq.y));
   vec4 to = getToColor(uv);
   float sh = shadow.a * (1.0 - smoothstep(-0.02, 0.08, min(dl, dr)));
   vec4 c = vec4(mix(to.rgb, shadow.rgb, sh), to.a);
-  // the image stops at the tear; the bare paper fibers stick out a little beyond it
   if (r.x >= 0.0) {
     c = torn(c, getFromColor(vec2(1.0 - r.x / ratio, r.y)), er, fibers(r.y, 2.0) * 1.5 * fiber, aa);
   }

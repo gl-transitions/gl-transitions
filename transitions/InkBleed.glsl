@@ -47,17 +47,16 @@ vec2 fold (vec2 p) {
 vec4 transition (vec2 uv) {
   float p = progress;
   vec2 q = vec2(uv.x * ratio, uv.y);
-  // swirls: noise warped twice by itself, drifting as the ink spreads
   vec2 o = vec2(seed * 3.1, seed * 1.7);
   vec2 sq = q * 2.2 + o;
   vec2 w1 = vec2(fbm(sq + vec2(0.0, 0.6 * p)), fbm(sq + vec2(5.2, 1.3) - vec2(0.5 * p, 0.0)));
   vec2 w2 = vec2(fbm(sq + 3.0 * w1 + vec2(1.7, 9.2)), fbm(sq + 3.0 * w1 + vec2(8.3, 2.8)));
-  float swirl = fbm(sq * 0.8 + 2.5 * w2) - 0.5; // marbled, curling pattern
+  float swirl = fbm(sq * 0.8 + 2.5 * w2) - 0.5;
   vec2 flow = w2 - 0.5;
   float amp = 0.05 + 0.35 * tendrils;
   float n = clamp(floor(drops + 0.5), 1.0, 8.0);
   float rimW = 0.1;
-  float feather = 0.05; // soft, diluted ink around the front
+  float feather = 0.05;
   float margin = 1.2 * amp + rimW + 0.08; // how far the swirls can pull the front back
   float f = -1e3; // > 0 inside the ink
   float fs = -1e3; // the same, only for the drops already fallen, which fades their haze in
@@ -73,7 +72,6 @@ vec4 transition (vec2 uv) {
       float far = length(m) + margin;
       float s3 = s * s * s;
       float r = (far + 0.02) * s * (0.35 + 0.65 * s3 * s3) - 0.02;
-      // a drop starts round, then its front curls more and more as it spreads
       float reach = amp * min(1.0, max(r, 0.0) * 5.0);
       float g = r - length(q - c + 1.3 * reach * flow) + reach * 0.9 * swirl;
       f = max(f, g);
@@ -82,12 +80,10 @@ vec4 transition (vec2 uv) {
   }
   float aa = 0.003;
   float inside = smoothstep(-aa, aa, f);
-  // feathered wisps of diluted ink, streaked along the swirls, ahead of the front
   float wisp = 1.0 - smoothstep(0.0, 0.08, abs(fbm(sq * 2.0 + 5.0 * w2) - 0.5));
   float soft = smoothstep(-feather, 0.0, fs) * (0.35 + 0.4 * wisp);
   float haze = 0.35 * wisp * (1.0 - smoothstep(0.0, 0.1, -fs));
   float cover = max(inside, max(soft, haze));
-  // the ink is denser, and still moving, close to its front
   float edge = 1.0 - smoothstep(0.0, rimW, f);
   vec4 to = getToColor(fold(uv - 0.015 * edge * flow / vec2(ratio, 1.0)));
   to.rgb = mix(to.rgb, to.rgb * to.rgb * 0.7, rim * edge);

@@ -37,15 +37,12 @@ vec4 transition(vec2 uv) {
   bool incoming = p >= 0.5;
   // how far gone the viewer is: 0 at both ends, 1 at the cut
   float a = incoming ? 2.0 - 2.0 * p : 2.0 * p;
-  // the view closes steadily, and clears quickly once it starts to come back
   float g = incoming ? a * sqrt(a) : a;
   // the view closes in steps, two heartbeat throbs: fast, pause, fast
   float closing = g - sin(12.566371 * g) / 12.566371;
-  // the two copies drift apart and sway, one up and one down
   float sway = sin(9.0 * p + 1.3);
   vec2 off = separation * smoothstep(0.0, 0.5, a) * vec2(1.0, 0.25 * sway) * vec2(1.0 / ratio, 1.0);
   float r = 0.03 * blur * a;
-  // tunnel vision: a dark, wide soft rim closes in from the edges toward the center
   vec2 q = (uv - 0.5) * vec2(ratio, 1.0);
   float d = length(q) / (0.5 * length(vec2(ratio, 1.0)));
   // (its soft rim narrows with it, so the middle stays clear until the very end,
@@ -65,7 +62,6 @@ vec4 transition(vec2 uv) {
     }
   }
   c = c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
-  // the colors drain and the light goes as the viewer fades
   float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
   c.rgb = mix(c.rgb, vec3(lum), 0.5 * a) * (1.0 - 0.3 * a);
   return mix(c, color, v);

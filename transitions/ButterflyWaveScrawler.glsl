@@ -8,7 +8,6 @@ uniform float colorSeparation; // = 0.3
 const float PI = 3.14159265358979323846264;
 float compute(vec2 p, float progress, vec2 center) {
 vec2 o = p*sin(progress * amplitude)-center;
-// horizontal vector
 vec2 h = vec2(1., 0.);
 // butterfly polar function (don't ask me why this one :))
 float theta = acos(dot(o, h)) * waves;

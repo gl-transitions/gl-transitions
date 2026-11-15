@@ -59,10 +59,8 @@ vec4 transition(vec2 uv) {
   float body = smoothstep(0.0, 1.0, arrive) * (1.0 - smoothstep(0.0, 1.0, leave));
   // the images switch while the smoke is fully dense everywhere
   float m = smoothstep(0.48, 0.52, p);
-  // no smoke here (yet, or any more): one image only
   if (body <= 0.0) return m < 0.5 ? getFromColor(uv) : getToColor(uv);
 
-  // billows: noise warped by itself, drifting with the smoke and slowly churning
   vec2 q = (pos - direction * (p - 0.5)) * scale;
   vec2 churn = vec2(0.5 * p, -0.35 * p);
   vec2 warp = vec2(fbm(q + vec2(3.1, 1.7) + churn), fbm(q + vec2(8.3, 2.8) - churn));
@@ -71,14 +69,11 @@ vec4 transition(vec2 uv) {
   // the billows catch the light from above: brighter where the smoke rises toward it
   // (on the coarse octave only, which shapes them)
   float lit = 0.53 * (vnoise(w) - vnoise(w + vec2(0.0, 0.2)));
-  // finer curls that fray the edges into wisps
   float wisp = vnoise(w * 3.3 - 2.0 * churn) - 0.5;
 
-  // density: the billows fill in first, the gaps between them last, and thin out first
   float edge = 2.0 * body - (1.0 - smoothstep(0.1, 0.6, n)) + 1.6 * body * (1.0 - body) * wisp;
   float d = smoothstep(0.0, softness, edge) * mix(0.5, 1.0, smoothstep(0.2, 0.9, body));
 
-  // the image under the smoke: one image, or both mixed (premultiplied) during the switch
   vec4 base;
   if (m <= 0.0) base = getFromColor(uv);
   else if (m >= 1.0) base = getToColor(uv);
@@ -90,7 +85,6 @@ vec4 transition(vec2 uv) {
   }
   if (d <= 0.0) return base;
 
-  // soft volumetric shading: lit tops, darker folds deep in the smoke, lighter thin wisps
   float shade = 0.92 + 1.3 * lit;
   shade *= mix(0.76, 1.04, smoothstep(0.25, 0.75, n));
   shade = mix(1.0, shade, 0.3 + 0.7 * d);

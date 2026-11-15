@@ -71,16 +71,12 @@ vec4 transition(vec2 uv) {
   vec2 px = vec2(1.0 / ratio, 1.0);
   vec4 from = getFromColor(uv);
 
-  // texture of the paper, and where its tooth catches the edges of the washes
-  // (turned, so that the cells of the noise do not line up with the frame)
+  // paper texture, turned so that the cells of the noise do not line up with the frame
   vec2 gq = mat2(0.8, 0.6, -0.6, 0.8) * q;
   float grain = 0.55 * wcNoise(gq * 120.0) + 0.45 * wcNoise(gq * 50.0 + 3.1);
   float tooth = 0.03 * (grain - 0.5);
-  // a domain-warped field per wash: where the paint runs first
   vec2 w = vec2(wcNoise(q * 2.5 + 1.3), wcNoise(q * 2.5 + 8.1)) - 0.5;
 
-  // clear water first: it lifts the outgoing image off the paper, leaving a tide line
-  // (the old picture runs a little as it gets wet)
   vec4 run = vec4(from.rgb * from.a, from.a);
   for (int i = 0; i < 4; i++) {
     float a = float(i) * 1.570796 + 0.8;
@@ -93,7 +89,6 @@ vec4 transition(vec2 uv) {
   vec3 stain = mix(paper.rgb, paper.rgb * fromRun, 0.12);
   vec3 c = mix(from.rgb, mix(fromRun, stain, smoothstep(0.0, 0.1, d0)), lift);
   c *= 1.0 - 0.18 * wcRim(d0, 0.05) * (1.0 - wcLuma(fromRun)) * lift;
-  // the wet paper is a little darker until it dries, and shows its grain until the last glaze
   c *= (1.0 - 0.06 * lift * (1.0 - smoothstep(0.05, 0.4, d0)) * (1.0 - smoothstep(0.35, 0.6, progress))) * (1.0 - 0.05 * (grain - 0.5) * lift);
   float alpha = mix(from.a, paper.a, lift);
   // no wash has started yet (see d1 below)
@@ -116,16 +111,12 @@ vec4 transition(vec2 uv) {
   vec3 fineC = fine.rgb / max(fine.a, 1e-3);
   broad.a /= 8.0;
   fine.a /= 8.0;
-  // the pigment pools unevenly in each wash
   float pool = wcNoise(q * 4.0 + w * 2.0 + 31.0);
 
-  // first wash: pale, wet in wet, with soft feathered edges
-  // (the washes only go on paper the water has cleared)
   float d1 = wcFront(0.07, 0.43, 0.12) - wcFbm(q * 3.0 + 1.2 * w + 2.0);
   float cov1 = smoothstep(-0.05, 0.03, d1) * lift;
   float k1 = 0.55 * broad.a;
   vec3 g1 = mix(vec3(1.0), broadC, (0.4 + 0.3 * pool) * broad.a);
-  // blooms: water running back into the still-wet wash pushes the pigment out into a frilly ring
   vec2 bq = q / 0.3;
   vec2 bc = floor(bq);
   float frill = 0.5 * wcNoise(q * 14.0) + 0.3 * wcNoise(q * 33.0 + 4.0) + 0.2 * wcNoise(q * 80.0 + 9.0);
@@ -136,7 +127,6 @@ vec4 transition(vec2 uv) {
       vec2 cell = bc + vec2(float(i), float(j));
       if (wcHash(cell + vec2(17.0, 53.0)) < blooms) {
         vec2 ctr = cell + 0.3 + 0.4 * vec2(wcHash(cell + vec2(3.0, 71.0)), wcHash(cell + vec2(89.0, 9.0)));
-        // it spreads a while after the wash has reached it, while the wash is still wet
         float g = clamp((d1 - 0.08 - 0.2 * wcHash(cell + vec2(5.0, 37.0))) / 0.3, 0.0, 1.0);
         g = 1.0 - (1.0 - g) * (1.0 - g) * (1.0 - g);
         // at most 0.32 * 1.55 < 0.5 cells: a bloom never reaches past the cells next to its own
@@ -152,14 +142,12 @@ vec4 transition(vec2 uv) {
   g1 *= mix(vec3(1.0), g1 * g1 * 0.9, bloomRim);
   g1 *= mix(vec3(1.0), g1, edges * 0.8 * wcRim(d1, 0.06));
 
-  // second wash: the middle tones, on drier paper, with crisp darker edges, darkest first
   float t2 = clamp(mix(wcFbm(q * 3.2 - 1.0 * w + 7.0), mix(1.0, wcLuma(fineC), fine.a), 0.55) + tooth, 0.0, 1.0);
   float d2 = wcFront(0.25, 0.42, 0.1) - t2;
   float cov2 = smoothstep(-0.006, 0.004, d2) * cov1;
   vec3 g2 = clamp(mix(vec3(1.0), fineC, (0.75 + 0.2 * (1.0 - pool)) * fine.a) / mix(vec3(1.0), broadC, 0.55 * broad.a), 0.0, 1.0);
   g2 *= mix(vec3(1.0), g2 * g2 * 0.92, edges * wcRim(d2, 0.07));
 
-  // the pigment of the washes settles into the hollows of the paper, and flocculates in patches
   vec3 wash = mix(vec3(1.0), g1, cov1) * mix(vec3(1.0), g2, cov2);
   float settle = clamp((grain - 0.5) * 2.0 + 0.5 * (wcNoise(q * 18.0 + 9.0) - 0.5), -0.4, 1.0);
   wash = min(wash * (1.0 - granulation * 0.45 * settle * (1.0 - wcLuma(wash))), 1.0);
@@ -168,7 +156,6 @@ vec4 transition(vec2 uv) {
   c = mix(c * wash, wash, (a1 - alpha) / max(a1, 1e-3));
   alpha = a1;
 
-  // last glaze: the darkest tones and the detail of the incoming image, darkest first
   vec4 to = getToColor(uv);
   float t3 = clamp(mix(wcFbm(q * 3.6 + 0.8 * w + 19.0), mix(1.0, wcLuma(fineC), fine.a), 0.45) + tooth, 0.0, 1.0);
   float d3 = wcFront(0.45, 0.53, 0.1) - t3;

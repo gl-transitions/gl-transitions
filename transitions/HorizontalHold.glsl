@@ -25,7 +25,6 @@ vec4 stream(float x, float y, float unsync) {
   vec4 c = n >= floor(0.5 * slipCount() + 0.5) ? getToColor(q) : getFromColor(q);
   // distance to the nearest bar, negative inside it
   float d = min(xm, 1.0 - xm);
-  // the picture overshoots to white next to the bar
   float g = max(1.0 - d / 0.05, 0.0);
   c.rgb += 0.3 * unsync * g * g * c.a;
   float soft = min(0.012 * unsync, 0.5 * barWidth) + 1e-5;
@@ -38,15 +37,12 @@ vec4 transition(vec2 uv) {
   float t = min(progress / 0.88, 1.0);
   float err = 16.0 * t * t * (1.0 - t) * (1.0 - t);
   float slip = t * t * t * (t * (t * 6.0 - 15.0) + 10.0);
-  // the hold overshoots and wobbles before it locks
   float u = clamp((progress - 0.74) / 0.26, 0.0, 1.0);
   float lock = u * (1.0 - u) * (1.0 - u);
   float tilt = -0.5 * max(shear, 0.5) * lock * sin(9.42478 * u);
   float unsync = min(err + 3.0 * lock, 1.0);
-  // lines lower in the frame lag behind, and ripple a little
   float ripple = 0.012 * sin(uv.y * 9.0 + progress * 40.0) + 0.005 * sin(uv.y * 31.0 - progress * 70.0);
   float x = uv.x + period * (slipCount() * slip + shear * err * (1.0 - uv.y) + tilt * (1.0 - uv.y)) + err * ripple;
-  // the slip smears the picture sideways
   float blur = 0.002 * err * slipCount();
   vec4 c = stream(x, uv.y, unsync);
   if (blur > 0.0) {
@@ -55,7 +51,6 @@ vec4 transition(vec2 uv) {
     }
     c /= 5.0;
   }
-  // the unsynced picture dims and shows its scanlines
   c.rgb *= 1.0 - unsync * (0.1 + 0.08 * sin(uv.y * 480.0));
   return c;
 }

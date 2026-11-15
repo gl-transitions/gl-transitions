@@ -14,7 +14,6 @@ uniform float shadow; // = 0.5
 // @param The columns pour from right to left instead of left to right
 uniform bool reverse; // = false
 
-// blocks per column, at most
 const int MAX_ROWS = 48;
 // time between two blocks of a column, as a part of the time it takes a block to fall its own height
 const float SPACING = 1.15;
@@ -22,12 +21,9 @@ const float SPACING = 1.15;
 const float SETTLE = 0.15;
 // speed the blocks are thrown in with, as a part of the speed they reach after a fall of the frame's height
 const float THROW = 0.25;
-// how much a falling block grows, as it is seen closer to the camera
 const float GROW = 0.06;
-// width of the anti-aliased edges, in frame heights
 const float EDGE = 0.0015;
 
-// signed distance to a box of half size b, negative inside
 float boxDist(vec2 p, vec2 b) {
   vec2 d = abs(p) - b;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
@@ -40,7 +36,6 @@ vec2 mirror(vec2 v) {
 vec4 transition(vec2 uv) {
   float nc = clamp(float(columns), 1.0, 40.0);
   float nr = clamp(floor(nc / ratio + 0.5), 1.0, float(MAX_ROWS));
-  // a cell, and this point, in frame heights
   vec2 cell = vec2(ratio / nc, 1.0 / nr);
   vec2 x = uv * vec2(ratio, 1.0);
   float here = clamp(floor(uv.x * nc), 0.0, nc - 1.0);
@@ -75,7 +70,6 @@ vec4 transition(vec2 uv) {
       float r = float(j);
       if (r >= nr) break;
       float slot = r * cell.y;
-      // it falls freely to its slot and bounces back up a little
       float s = progress - t0 - r * d;
       // this block and the ones above it have not set off yet: they are all still above the frame
       if (s <= 0.0) break;
@@ -100,12 +94,10 @@ vec4 transition(vec2 uv) {
         if (c != here || x.y < slot || x.y >= slot + cell.y || z2 >= 0.0) continue;
         z = 0.0; cov = 1.0; a = 0.0; src = uv;
       } else {
-        // how much of it has come into the frame
         float inFrame = clamp((1.0 - y) / cell.y, 0.0, 1.0);
         vec2 center = vec2((c + 0.5) * cell.x, y + 0.5 * cell.y);
         float sc = 1.0 + GROW * air;
         vec2 q = (x - center) / sc;
-        // its shadow on what lies below it, further away and softer the higher it is
         float blur = 0.002 + 0.3 * air * cell.y;
         float sd = boxDist(x - center - light * air, 0.5 * cell * sc);
         shade = max(shade, (1.0 - smoothstep(-blur, blur, sd)) * air * inFrame);
@@ -116,7 +108,6 @@ vec4 transition(vec2 uv) {
         z = air + 0.001 * r;
         if (cov <= 0.0 || z <= z2) continue;
         src = (vec2(c, r) * cell + q + 0.5 * cell) / vec2(ratio, 1.0);
-        // its bevel: lit along its top and left edges, darker along its bottom and right ones
         vec2 lq = q / (0.5 * cell);
         float bev = 1.0 - smoothstep(0.0, 0.12, -dist / min(cell.x, cell.y));
         a = air * bev * 0.5 * (lq.y - lq.x);

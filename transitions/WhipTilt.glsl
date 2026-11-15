@@ -37,7 +37,6 @@ float tilt(float t) {
 vec4 transition(vec2 uv) {
   float p = progress;
   float h = 1.0 - abs(2.0 * p - 1.0); // 0 at both ends, 1 in the middle
-  // the shutter is open longer as the tilt speeds up, and closed at both ends
   float shutter = blur * 0.25 * h * h;
   // the images are two faces of a drum around the camera, each filling the frame from the
   // middle: they meet edge to edge at the angle of the field of view, which the camera turns by
@@ -55,7 +54,6 @@ vec4 transition(vec2 uv) {
     float a = 2.0 * halfFov * tilt(t);
     // zoom in just enough that the faces always cover the frame, wherever their edge is
     vec2 r = q * cos(halfFov) / cos(halfFov - a);
-    // the ray in the frame of the outgoing face, then of the incoming one
     float c0 = cos(a), s0 = sin(a);
     vec2 d0 = vec2(r.y * c0 + dist * s0, dist * c0 - r.y * s0);
     float b = a - 2.0 * halfFov;

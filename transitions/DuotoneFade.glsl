@@ -31,7 +31,6 @@ vec4 transition(vec2 uv) {
   vec2 q = uv * 360.0 * vec2(max(ratio, 1.0), max(1.0 / ratio, 1.0));
   float g = dfHash(floor(q)) - 0.5;
 
-  // the inks land on the outgoing image (shadows first), then lift off the incoming one (highlights first)
   float inks = smoothstep(0.0, 0.35, progress);
   float lift = smoothstep(0.65, 1.0, progress);
   float amount = min(
@@ -40,12 +39,10 @@ vec4 transition(vec2 uv) {
   );
   amount = amount * amount * (3.0 - 2.0 * amount);
 
-  // the incoming image is printed over the outgoing one, darkest tones first, along a grainy edge
   float x = smoothstep(0.25, 0.75, progress) * 1.6 - 0.3;
   float t = lb + 0.2 * grain * g;
   float s = smoothstep(t - 0.15, t + 0.15, x);
 
-  // gradient map on luminance, with the tones pushed toward the two inks
   float c = 0.4 * contrast;
   float tone = smoothstep(c + 0.03, 1.03 - c, mix(la, lb, s) + 0.08 * grain * g);
   vec4 ink = mix(shadowInk, highlightInk, tone);

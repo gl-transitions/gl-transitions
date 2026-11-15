@@ -13,14 +13,12 @@ uniform float shading; // = 0.6
 uniform vec4 background; // = vec4(0.09, 0.09, 0.1, 1.0)
 
 const float PI = 3.141592653589793;
-// width of the anti-aliased edges, in frame heights
 const float EDGE = 0.002;
 
 vec4 premultiply(vec4 c) {
   return vec4(c.rgb * c.a, c.a);
 }
 
-// shadow of a concave edge of the cube, at a distance dist from it
 float cornerShadow(float dist, float size) {
   float k = 1.0 - smoothstep(0.0, size, dist);
   return k * k;
@@ -43,7 +41,6 @@ vec4 transition(vec2 uv) {
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
   vec2 q = vertical ? p.yx : p;
   q.x *= s;
-  // half sizes of a wall along and across the turn
   float A = vertical ? 0.5 : 0.5 * ratio;
   float B = vertical ? 0.5 * ratio : 0.5;
   // focal length: a wall exactly fills the frame when seen square from that distance
@@ -64,20 +61,16 @@ vec4 transition(vec2 uv) {
   vec2 cam = (A - F) * e * vec2(1.0, -1.0);
   vec2 d = vec2(q.x * c + F * sn, F * c - q.x * sn);
 
-  // the inner corner between the two walls projects to a line across the frame
   vec2 P = vec2(A, F) - cam;
   float sc = F * (P.x * c - P.y * sn) / max(P.x * sn + P.y * c, 1e-6);
 
-  // outgoing wall
   float tf = d.y > 1e-6 ? (F - cam.y) / d.y : 1e6;
   float af = cam.x + tf * d.x;
   vec2 lf = vec2(af, q.y * tf);
-  // incoming wall
   float ti = d.x > 1e-6 ? (A - cam.x) / d.x : 1e6;
   float ai = (F - A) - (cam.y + ti * d.y);
   vec2 li = vec2(ai, q.y * ti);
 
-  // each wall darkens as it turns away from the view, and toward the concave edges
   float size = 0.8 * min(A, B);
   float edgeF = cornerShadow(A - af, size) + 0.5 * cornerShadow(B - abs(lf.y), size);
   float edgeI = cornerShadow(ai + A, size) + 0.5 * cornerShadow(B - abs(li.y), size);
@@ -92,17 +85,14 @@ vec4 transition(vec2 uv) {
     * clamp(0.5 + (af + A) * d.y / (tf * F * aa), 0.0, 1.0);
   float covI = (1.0 - wF) * clamp(0.5 + (B / ti - abs(q.y)) / aa, 0.0, 1.0)
     * clamp(0.5 + (A - ai) * d.x / (ti * F * aa), 0.0, 1.0);
-  // only sample the walls that show in this pixel
   vec4 colF = covF > 0.0 ? wallColor(lf, false, vertical, s) : vec4(0.0);
   vec4 colI = covI > 0.0 ? wallColor(li, true, vertical, s) : vec4(0.0);
   colF.rgb *= shadeF;
   colI.rgb *= shadeI;
 
-  // the other faces of the cube, with the same shadow along their edges with the two walls
   vec4 bg = premultiply(background);
   float cov = covF + covI;
   if (cov < 1.0) {
-    // where the ray meets the floor or the ceiling, never beyond the walls
     float tb = min(B / max(abs(q.y), 1e-6), min(tf, ti));
     vec2 fl = cam + tb * d;
     float edgeB = cornerShadow(F - fl.y, size) + cornerShadow(A - fl.x, size);

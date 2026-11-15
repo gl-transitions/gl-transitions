@@ -10,7 +10,6 @@ uniform float keystone; // = 0.45
 // @range(0, 0.05) How out of focus the projected picture is when it lands, in frame heights
 uniform float blur; // = 0.015
 
-// folds coordinates back into the frame, so the picture never shows its clamped edges
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -32,10 +31,8 @@ vec4 transition(vec2 uv) {
   float p = progress;
   vec4 from = getFromColor(uv);
 
-  // the lamp warms up as the room lights go down
   float on = smoothstep(0.06, 0.26, p);
   float ambient = 1.0 - darkness * smoothstep(0.0, 0.2, p);
-  // the picture grows and squares up, while it comes into focus
   float g = smoothstep(0.02, 1.0, p);
   float focus = 1.0 - smoothstep(0.15, 0.85, p);
   float size = mix(0.32, 1.0, g * (0.6 + 0.4 * g));
@@ -51,10 +48,8 @@ vec4 transition(vec2 uv) {
   float e = min((0.5 * size * wy - abs(uv.x - 0.5)) * ratio, size * min(y, 1.0 - y));
   float soft = 0.0015 + 0.035 * focus;
   float cov = mix(smoothstep(-soft, soft, e), 1.0, smoothstep(0.9, 1.0, p));
-  // stray light spilling around the beam
   float halo = 0.15 * focus * on * exp(-24.0 * max(-e, 0.0)) * (1.0 - cov);
 
-  // the light of the picture: brighter while concentrated on a small area, with a lamp vignette
   vec2 d = q - 0.5;
   float gain = on * mix(1.25, 1.0, g) * (1.0 + focus * (0.15 - 1.2 * dot(d, d)));
   // the blur is round on the frame: picture coordinates stretch with the keystone
@@ -62,8 +57,6 @@ vec4 transition(vec2 uv) {
   vec4 pic = projected(q, r);
   vec3 light = pic.rgb * gain * cov + halo;
 
-  // light lands on the dimmed scene and is tinted by its colors; under the picture, the scene
-  // fades to a plain screen
   float screen = smoothstep(0.35, 0.95, p);
   vec3 surface = mix(from.rgb, vec3(1.0), 0.35 + 0.65 * screen);
   vec3 col = from.rgb * ambient * (1.0 - cov * screen) + surface * light;

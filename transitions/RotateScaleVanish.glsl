@@ -37,5 +37,5 @@ if ((uv2.x >= 0.0) && (uv2.x <= iResolution.x) && (uv2.y >= 0.0) && (uv2.y <= iR
 	col3 = ReverseEffect ? getToColor(uv2) : getFromColor(uv2);
 	}
 else { col3 = FadeInSecond ? vec4(0.0) : ColorTo; } // transparent around the shrinking image
-return((1.0 - t) * col3 + t * ColorTo); // could have used mix
+return((1.0 - t) * col3 + t * ColorTo);
 }

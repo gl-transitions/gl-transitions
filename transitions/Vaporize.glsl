@@ -15,7 +15,6 @@ uniform vec4 color; // = vec4(0.92, 0.92, 0.94, 1.0)
 // raggedness of the line where the image turns to vapour, and the width over which it dissolves
 const float RAGGED = 0.09;
 const float BAND = 0.12;
-// how long the vapour lives, as a part of the transition
 const float LIFE = 0.16;
 const int TAPS = 6;
 
@@ -67,14 +66,11 @@ vec4 transition(vec2 uv) {
   float across = dot(q, side);
   float ext = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
 
-  // the line where the image turns to vapour sweeps across the frame, ragged
   float ragged = RAGGED * (2.0 * fbm(q * 2.5 + 1.3) - 1.0);
   float start = -ext - RAGGED;
   float travel = 2.0 * ext + 2.0 * RAGGED + BAND;
   float front = start + travel * sweep(progress) + ragged;
 
-  // under the vapour: the outgoing image where it is still intact, dissolving into the
-  // incoming one just behind the line
   float gone = smoothstep(0.0, BAND, front - along);
   vec4 base = mix(getFromColor(uv), getToColor(uv), gone);
 
@@ -88,11 +84,9 @@ vec4 transition(vec2 uv) {
   float origin = start + travel * sweep(released) + ragged;
   vec2 org = q - dir * (along - origin);
 
-  // it swirls and curls as it rises
   vec2 sw = curl(org * 3.0 + dir * progress * 1.5) * (swirl * 0.08 * sqrt(age));
   vec2 src = org - sw;
 
-  // and spreads out sideways, blurring as it rises
   vec2 spreadOut = (side * 0.07 + dir * 0.02) * sqrt(age);
   vec4 c = vec4(0.0);
   for (int i = 0; i < TAPS; i++) {
@@ -102,7 +96,6 @@ vec4 transition(vec2 uv) {
   }
   c = c.a > 0.0 ? vec4(c.rgb / c.a, c.a / float(TAPS)) : vec4(0.0);
 
-  // it breaks up into wisps that rise with it and thin out: thin parts go first
   vec2 wq = (q - 0.6 * sw - dir * (progress * 2.5)) * 4.0;
   float w = fbm(vec2(dot(wq, side), dot(wq, dir) * 0.6) + 2.0);
   float density = smoothstep(1.2 * age - 0.2, 1.2 * age + 0.1, w);
@@ -110,13 +103,10 @@ vec4 transition(vec2 uv) {
   // (only the image turns to vapour, not what lies beyond its edge)
   density *= smoothstep(-ext, -ext + 0.05, origin);
 
-  // it pales and loses its colour as it thins
   float pale = smoothstep(0.0, 0.5, age);
   float l = dot(c.rgb, vec3(0.299, 0.587, 0.114));
   c = mix(c, vec4(mix(vec3(l), color.rgb, 0.7), c.a * color.a), pale * 0.85);
-  // the edges of the wisps catch the light
   c.rgb = min(c.rgb + 0.12 * pale * density * (1.0 - density), vec3(1.0));
-  // laid over what is under it
   float a = density * c.a;
   float outA = a + base.a * (1.0 - a);
   if (outA <= 0.0) return vec4(0.0);

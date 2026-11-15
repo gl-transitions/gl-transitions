@@ -30,12 +30,10 @@ vec4 transition (vec2 uv) {
       float d = dot(q, vec2(cos(angle), sin(angle))) - r;
       float next = dot(q, vec2(cos(angle + sector), sin(angle + sector))) - r;
       dist = max(dist, d);
-      // Past its corner, the edge of a blade lies over the next blade and casts a shadow on it
       float s = 1.0 - smoothstep(0.0, 0.12, -d);
       seam = max(seam, (1.0 - smoothstep(0.0, AA, d)) * s * s * smoothstep(0.0, AA, next));
     }
   }
-  // The blades are also shaded along the opening; the shading fades in as the aperture starts to open
   float rim = 1.0 - smoothstep(0.0, 0.08, dist);
   float shade = shadow * max(rim * rim, seam) * smoothstep(0.0, 0.1, progress);
   vec4 from = getFromColor(uv);

@@ -15,14 +15,11 @@ vec4 transition(vec2 uv) {
   vec4 b = getToColor(uv);
 
   vec2 g = max(vec2(grid), 1.0);
-  // block coordinates from the top left corner
   vec2 cell = min(floor(vec2(uv.x, 1.0 - uv.y) * g), g - 1.0);
-  // the snake runs along the rows, or along the columns when vertical
   float lines = vertical ? g.x : g.y;
   float len = vertical ? g.y : g.x;
   float line = vertical ? cell.x : cell.y;
   float pos = vertical ? cell.y : cell.x;
-  // every other line runs backward
   if (mod(line, 2.0) > 0.5) pos = len - 1.0 - pos;
   float order = line * len + pos;
 

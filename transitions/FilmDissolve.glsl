@@ -15,7 +15,6 @@ vec3 toLinear(vec3 c) {
   return mix(lo, hi, vec3(greaterThan(c, vec3(0.04045))));
 }
 
-// linear light back to sRGB
 vec3 toSrgb(vec3 c) {
   vec3 lo = c * 12.92;
   vec3 hi = 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055;
@@ -28,7 +27,6 @@ vec4 transition(vec2 uv) {
 
   float t = mix(progress, smoothstep(0.0, 1.0, progress), smoothness);
 
-  // premultiplied linear light
   vec3 la = toLinear(clamp(a.rgb, 0.0, 1.0)) * a.a;
   vec3 lb = toLinear(clamp(b.rgb, 0.0, 1.0)) * b.a;
   vec3 base = mix(la, lb, t);

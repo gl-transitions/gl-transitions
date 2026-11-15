@@ -13,9 +13,7 @@ uniform float flicker; // = 0.5
 uniform vec4 lampColor; // = vec4(1.0, 0.95, 0.84, 1.0)
 
 const float PI = 3.14159265;
-// height of the slide mount above and below the picture, in frame heights
 const float MOUNT = 0.07;
-// how far a slide travels to clear the gate
 const float CLEAR = 1.0 + MOUNT;
 const int TAPS = 16;
 
@@ -55,7 +53,6 @@ float blurAmount(float p) {
   return smoothstep(0.04, 0.3, p) * (p < 0.56 ? 1.0 : hunt);
 }
 
-// coverage of a band [a, b] on y, antialiased over aa
 float band(float y, float a, float b, float aa) {
   return clamp((min(y - a, b - y)) / aa + 0.5, 0.0, 1.0);
 }
@@ -68,7 +65,6 @@ vec4 gate(vec2 q, float yf, float yt, float light, float shade) {
   float af = 0.0015 * min(abs(yf) * 400.0, 1.0) + 1e-6;
   float at = 0.0015 * min(abs(yt) * 400.0, 1.0) + 1e-6;
   vec4 c = vec4(lampColor.rgb * lampColor.a * light, lampColor.a);
-  // the slide mounts stop nearly all the light
   float mf = band(q.y, yf - MOUNT, yf + 1.0 + MOUNT, af);
   float mt = band(q.y, yt - MOUNT, yt + 1.0 + MOUNT, at);
   c.rgb *= 1.0 - 0.96 * max(mf, mt);
@@ -98,11 +94,9 @@ vec4 transition(vec2 uv) {
 
   float b = blurAmount(p);
   float radius = defocus * 0.02 * b;
-  // the picture breathes slightly as the focus moves
   float zoom = 1.0 + 0.025 * defocus * b;
   vec2 c0 = (uv - 0.5) / zoom + 0.5;
 
-  // lamp: a hot spot in the middle and a flicker that fades in and out with the change
   float env = smoothstep(0.0, 0.12, p) * (1.0 - smoothstep(0.72, 1.0, p));
   float fc = p * 30.0;
   float fl = mix(hash(floor(fc)), hash(floor(fc) + 1.0), smoothstep(0.3, 0.7, fract(fc)));
@@ -115,7 +109,6 @@ vec4 transition(vec2 uv) {
     c = gate(c0, yf, yt, light, shade);
     return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
   }
-  // disc of defocus stretched along the motion
   c = vec4(0.0);
   for (int i = 0; i < TAPS; i++) {
     float fi = float(i);

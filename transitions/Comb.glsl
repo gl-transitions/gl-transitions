@@ -12,7 +12,6 @@ vec4 transition (vec2 uv) {
   // a: the axis along which the strips slide, b: the axis across them
   float a = vertical ? uv.y : uv.x;
   float b = vertical ? uv.x : uv.y;
-  // alternate strips slide in opposite directions
   float dir = mod(floor(b * float(strips)), 2.0) < 0.5 ? 1.0 : -1.0;
   // ease in and out, but keep moving from the first frame
   float t = mix(progress, progress * progress * (3.0 - 2.0 * progress), 0.6);

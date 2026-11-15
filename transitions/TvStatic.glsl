@@ -5,7 +5,6 @@
 // @param Part of the transition, at each end, that shows the images instead of static
 uniform float offset; // = 0.05
 
-// Pseudo-random noise function
 // http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/
 highp float noise(vec2 co)
 {

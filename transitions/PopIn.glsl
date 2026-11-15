@@ -14,7 +14,6 @@ uniform float shadow; // = 0.5
 
 const float PI = 3.141592653589793;
 
-// signed distance to a rounded box of half size b and corner radius r
 float roundedBox(vec2 p, vec2 b, float r) {
   vec2 q = abs(p) - b + r;
   return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
@@ -27,7 +26,6 @@ vec4 transition(vec2 uv) {
   float spring = 1.0 - exp(-1.5 * t) * cos(2.5 * PI * t) * (1.0 - t);
   float s = mix(easeOut, spring, bounce);
 
-  // the card is the incoming frame scaled by s around the center, in aspect-corrected space
   vec2 asp = vec2(ratio, 1.0);
   float side = min(ratio, 1.0);
   vec2 cardCenter = center + (0.5 - center) * s;
@@ -38,7 +36,6 @@ vec4 transition(vec2 uv) {
   float d = roundedBox((uv - cardCenter) * asp, halfSize, r) - aa;
   float cover = clamp(0.5 - d / aa, 0.0, 1.0) * smoothstep(0.0, 0.08, t);
 
-  // drop shadow on the outgoing image, offset down and blurred, growing with the card
   float k = min(s, 1.0) * side;
   float blur = 0.05 * k + 1e-4;
   vec2 offset = vec2(0.0, -0.03 * k);
@@ -50,7 +47,6 @@ vec4 transition(vec2 uv) {
   a.rgb *= 1.0 - shade;
   // clamped: only the antialiased rim, one pixel or two outside the card, reads past the edge
   vec4 b = getToColor(clamp((uv - center) / max(s, 1e-4) + center, 0.0, 1.0));
-  // blend premultiplied, then back to straight alpha
   vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), cover);
   return c.a > 0.0 ? vec4(c.rgb / c.a, c.a) : vec4(0.0);
 }

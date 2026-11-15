@@ -35,7 +35,6 @@ vec2 liquid(vec2 x, float p) {
       vec2 n = cell + vec2(float(i), float(j));
       vec3 h = hash3(n + 17.0);
       vec2 c = (n + 0.5 + 0.75 * (h.xy - 0.5)) * cs;
-      // each hole opens at its own time and grows at a steady speed
       float age = p - 0.28 * h.z;
       if (age <= 0.0) continue;
       float d = length(x - c) - 2.3 * cs * age - 0.6 * smoothstep(0.6, 1.0, p);
@@ -46,17 +45,14 @@ vec2 liquid(vec2 x, float p) {
       else if (d < d2) { d2 = d; c2 = c; s2 = h.x; }
     }
   }
-  // the rims stand on the film only; between holes that already meet, the ridge takes over
   hRim *= step(0.0, d1);
   if (d2 > 1e2) return vec2(d1, hRim);
-  // where two holes meet, their rims merge into a ridge along the line between them
   float e = 0.5 * (d2 - d1);
   float meet = clamp(1.0 - 0.5 * (d1 + d2) / (2.0 * w), 0.0, 1.0);
   vec2 axis = normalize(c2 - c1);
   // the same way for both holes, so the beads line up across the ridge
   axis *= axis.x < 0.0 ? -1.0 : 1.0;
   float along = dot(x - 0.5 * (c1 + c2), vec2(-axis.y, axis.x));
-  // the ridge pinches into a row of round beads, which then dry up
   float lambda = 6.5 * w;
   float k = along / lambda + s1 + s2;
   float db = length(vec2(e, (fract(k) - 0.5) * lambda));
@@ -78,7 +74,6 @@ vec4 transition(vec2 uv) {
   float px = 0.0015;
   float cover = clamp(L.x / px + 0.5, 0.0, 1.0);
   vec4 to = getToColor(uv);
-  // the dry glass: a faint damp halo just outside the liquid
   to.rgb *= 1.0 - 0.18 * gloss * (1.0 - smoothstep(0.8, 0.98, p)) * (1.0 - smoothstep(0.0, 0.012, -L.x)) * step(L.x, 0.0);
   if (cover <= 0.0) return to;
 
@@ -86,17 +81,14 @@ vec4 transition(vec2 uv) {
   vec2 g = vec2(liquid(x + vec2(eps, 0.0), p).y - L.y, liquid(x + vec2(0.0, eps), p).y - L.y) / eps;
   g = clamp(g, -6.0, 6.0);
   vec3 n = normalize(vec3(-g, 1.0));
-  // magnified through the liquid: the picture is pulled toward the top of each bump
   vec2 off = g * L.y * 0.5 * gloss;
   vec4 img = getFromColor(fold((x + off) / asp));
   vec3 light = normalize(vec3(-0.45, 0.55, 0.7));
   vec3 hv = normalize(light + vec3(0.0, 0.0, 1.0));
   float diffuse = dot(n, light) - light.z;
   float spec = max(pow(max(dot(n, hv), 0.0), 60.0) - pow(hv.z, 60.0), 0.0);
-  // the steep sides of the liquid look darker, the tops catch the light
   float side = pow(1.0 - n.z, 3.0);
   vec3 c = img.rgb * (1.0 + 0.45 * gloss * diffuse) * (1.0 - 0.5 * gloss * side) + gloss * spec;
-  // a thin dark line where the liquid meets the glass
   c *= 1.0 - 0.35 * gloss * (1.0 - smoothstep(0.0, 0.004, L.x));
   vec4 wet = vec4(c, img.a);
   return mix(to, wet, cover);

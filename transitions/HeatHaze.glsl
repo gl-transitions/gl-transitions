@@ -10,7 +10,6 @@ uniform float scale; // = 6.0
 // @range(0, 6) How fast the heat waves rise
 uniform float speed; // = 2.0
 
-// reflects coordinates that leave the frame back into it, so the edges do not smear
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -47,23 +46,17 @@ float fbm(vec2 v) {
 vec4 transition(vec2 uv) {
   const float PI = 3.141592653589793;
   float p = progress;
-  // the haze builds up then calms down
   float amount = sin(PI * p);
-  // the waves scroll upward and slowly churn as they rise
   float t = p * speed;
-  // in square pixels, then squashed vertically into the thin bands of rising air
   vec2 q = vec2(uv.x * ratio, uv.y * 2.5) * scale;
   q.y -= t * scale;
-  // the bands are bent by a slower, larger turbulence so they do not stay straight
   vec2 w = vec2(fbm(q * 0.35 + vec2(0.0, t)), fbm(q * 0.35 + vec2(7.1, -t)));
   q += 1.5 * w;
   vec2 offset = vec2(fbm(q), 0.5 * fbm(q + vec2(3.7, 1.9)));
-  // the hot air is near the ground: strongest at the bottom, fainter at the top
   float ground = mix(1.0, 0.3, uv.y);
   offset *= strength * amount * ground * vec2(1.0 / ratio, 1.0);
 
   vec2 d = mirror(uv + offset);
-  // the images swap in the thick of the haze
   float m = smoothstep(0.3, 0.7, p);
   if (m <= 0.0) return getFromColor(d);
   if (m >= 1.0) return getToColor(d);

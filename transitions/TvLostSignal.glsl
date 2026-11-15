@@ -19,14 +19,12 @@ vec4 transition(vec2 uv) {
 
     vec4 color = mix(fromColor, toColor, p);
 
-    // horizontal tracking lines (key effect)
     float lineY = floor(tv.y * 120.0);
 
     float noise = hash(vec2(lineY, p * 20.0));
 
     float line = step(0.92, noise);
 
-    // make lines drift during transition
     float drift =
         sin(tv.y * 30.0 + p * 10.0)
         * 0.02
@@ -37,10 +35,8 @@ vec4 transition(vec2 uv) {
 
     vec4 lineColor = mix(shiftedFrom, shiftedTo, p);
 
-    // apply tearing only on selected scanlines
     color = mix(color, lineColor, line * strength);
 
-    // mild scanline darkening (CRT feel)
     float scan =
         sin(tv.y * 900.0) * 0.03;
 

@@ -45,7 +45,6 @@ float ringTime(float i, float n) {
   return progress >= 1.0 ? 1.0 : clamp((progress - d * i) / (1.0 - d * (n - 1.0)), 0.0, 1.0);
 }
 
-// how much a ring is moving, which opens the gaps around it
 float activity(float i, float n) {
   float t = ringTime(i, n);
   return smoothstep(0.0, 0.08, t) * (1.0 - smoothstep(0.88, 1.0, t));
@@ -97,8 +96,6 @@ vec4 transition(vec2 uv) {
     col /= ws;
   }
 
-  // the nearest boundary between two rings, open while one of them moves: a dark gap
-  // with a bevelled rim on each side, lit from the top left
   float bj = clamp(floor(f + 0.5), 1.0, max(n - 1.0, 1.0));
   float act = n > 1.5 ? max(activity(bj - 1.0, n), activity(bj, n)) : 0.0;
   float d = (f - bj) * w;

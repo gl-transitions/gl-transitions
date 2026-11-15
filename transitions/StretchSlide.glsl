@@ -12,7 +12,6 @@ uniform float bounce; // = 0.6
 
 const float PI = 3.14159265;
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -41,14 +40,11 @@ vec4 transition(vec2 uv) {
   float len = e + max(osc, 0.0);
   float bulge = 1.0 - e + 3.0 * max(-osc, 0.0);
 
-  // the incoming image is pinned at the trailing side and spans up to the seam
   float g = 1.0 + 0.6 * stretch * bulge;
   vec2 pt = q + d * (s / max(len, 1e-4) - s) * ext;
   pt -= n * dot(pt, n) * (1.0 - 1.0 / g);
   vec4 b = getToColor(mirror(pt + 0.5));
 
-  // the outgoing image hangs from the seam and stretches out long ahead of it,
-  // the most near the seam, where it is pulled
   float l = 1.0 + 4.0 * stretch * e;
   float k = clamp(1.6 * stretch * e, 0.0, 0.8);
   float y = max(s - e, 0.0) / l;
@@ -56,6 +52,5 @@ vec4 transition(vec2 uv) {
   float v = 2.0 * y / ((1.0 + k) + sqrt((1.0 + k) * (1.0 + k) - 4.0 * k * y));
   vec4 a = getFromColor(mirror(q + d * (v - s) * ext + 0.5));
 
-  // past the landing, only the incoming image is left
   return (s < len || t >= land) ? b : a;
 }

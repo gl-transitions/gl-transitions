@@ -19,7 +19,6 @@ uniform vec4 borderColor; // = vec4(1.0, 1.0, 1.0, 1.0)
 uniform float smoothness; // = 0.004
 
 const float PI = 3.141592653589793;
-// half width of the antialiased edge, in frame heights
 const float AA = 0.0015;
 
 // progress of ring i, from 0 (not started) to 1 (done), each ring lasting d and starting
@@ -62,7 +61,6 @@ vec4 transition(vec2 uv) {
   float n = float(count < 1 ? 1 : count);
   // measured in square pixels, so the rings are round
   vec2 p = (uv - center) * vec2(ratio, 1.0);
-  // the rings reach the farthest corner
   vec2 far = max(center, 1.0 - center) * vec2(ratio, 1.0);
   float R = length(far) + AA;
   float w = R / n;

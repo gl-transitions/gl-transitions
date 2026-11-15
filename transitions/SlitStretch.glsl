@@ -16,14 +16,12 @@ uniform bool horizontal; // = false
 
 vec4 transition(vec2 uv) {
   float t = progress;
-  // one eased pull
   float q = t * t * (3.0 - 2.0 * t);
   if (q <= 0.0) return getFromColor(uv);
   vec2 asp = vec2(ratio, 1.0);
   // work with the slits along x and the pull along y
   vec2 p = (uv - 0.5) * asp;
   if (horizontal) p = p.yx;
-  // the sheet lengthens from its middle and narrows at its waist, held full width at both ends
   float Sy = 1.0 + stretch * q;
   // (ys: -0.5 to 0.5 along the sheet's length)
   float ys = clamp(p.y / (Sy * (horizontal ? ratio : 1.0)), -0.5, 0.5);
@@ -33,9 +31,7 @@ vec4 transition(vec2 uv) {
   float side = (hw * wf - abs(p.x)) / (0.003 * min(1.0, 200.0 * q) + 1e-7);
   p.x /= wf;
   float a = 0.5 * size;
-  // the rows of slits spread apart as the sheet lengthens
   float b = 0.22 * size * Sy;
-  // cell of the diamond lattice (staggered rows)
   float j = floor(p.y / b + 0.5);
   float xo = mod(j, 2.0) * a;
   float i = floor((p.x - xo) / (2.0 * a) + 0.5);
@@ -58,19 +54,16 @@ vec4 transition(vec2 uv) {
 
   vec4 img = vec4(0.0);
   if (hole < 1.0) {
-    // the strands carry the image, lengthened with the sheet
     vec2 sp = vec2(p.x, p.y / Sy);
     if (horizontal) sp = sp.yx;
     img = getFromColor(clamp(sp / asp + 0.5, 0.0, 1.0));
-    // the strands twist out of the sheet: the ones rising to the right face the light, the others turn away
     float facet = clamp(d.x * d.y / (0.25 * a * b + 1e-6), -1.0, 1.0);
     float rim = clamp(1.0 - dist / (0.25 * b + 1e-5), 0.0, 1.0);
     img.rgb *= 1.0 + shading * q * (0.35 * facet - 0.25 * rim);
     if (hole <= 0.0) return img;
   }
   vec4 bg = getToColor(uv);
-  // the mesh casts a soft shadow next to the strands
-  // (only within the sheet, not beside its waist)
+  // soft shadow of the mesh (only within the sheet, not beside its waist)
   float sh = (1.0 - smoothstep(0.0, 0.25 * b + e, -dist)) * clamp(0.5 + side, 0.0, 1.0);
   bg.rgb *= 1.0 - 0.45 * shading * sh * (1.0 - q);
   return mix(img, bg, hole);

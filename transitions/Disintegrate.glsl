@@ -15,7 +15,6 @@ uniform float spread; // = 0.75
 // so the dust thins out as it flies): 35 candidates, without unrolling a long loop
 const int NEAR = 17;
 const int CANDIDATES = 35;
-// part of the transition during which a grain flies, from its release to its fade-out
 const float LIFE = 0.45;
 
 float hash12(vec2 p) {
@@ -24,7 +23,6 @@ float hash12(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// smooth value noise, between -1 and 1
 float noise(vec2 p) {
   vec2 i = floor(p);
   vec2 f = fract(p);
@@ -45,8 +43,7 @@ float gust(float x) {
   return 2.0 * mix(hash12(vec2(i, 7.0)), hash12(vec2(i + 1.0, 7.0)), f) - 1.0;
 }
 
-// when the grain at this center (in cells) is released, from the downwind side first,
-// along a ragged front
+// when the grain at center (in cells) is released: downwind side first, along a ragged front
 float release(vec2 center, float h, float halfLength, float s) {
   float front = 1.0 - (center.x + halfLength) / (2.0 * halfLength) + 0.14 * noise(center * s * 6.0) + 0.08 * (h - 0.5);
   return clamp((front + 0.12) / 1.24, 0.0, 1.0) * (1.0 - LIFE);
@@ -55,7 +52,6 @@ float release(vec2 center, float h, float halfLength, float s) {
 vec4 transition(vec2 uv) {
   vec2 d = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
   vec2 n = vec2(-d.y, d.x);
-  // grid of grains aligned with the wind: x along it, y across it, in cells
   vec2 fp = (uv - 0.5) * vec2(ratio, 1.0);
   float s = particleSize;
   vec2 g = vec2(dot(fp, d), dot(fp, n)) / s;
@@ -64,13 +60,11 @@ vec4 transition(vec2 uv) {
   float reach = min(spread * 0.45 / s, 60.0);
   float px = floor(g.x);
 
-  // this pixel's own grain: once it has left, the incoming image shows through
   vec2 own = floor(g);
   vec4 under = progress > release(own + 0.5, hash12(own), halfLength, s) ? getToColor(uv) : getFromColor(uv);
   vec2 grainUV = vec2(0.5);
   float cover = 0.0;
   for (int i = 0; i < CANDIDATES; i++) {
-    // the column of the candidate grain
     float fi = float(i);
     float cx = px - fi;
     if (i >= NEAR + 9) {
@@ -92,9 +86,7 @@ vec4 transition(vec2 uv) {
     float t = (progress - release(center, h, halfLength, s)) / LIFE;
     if (t <= 0.0 || t >= 1.0) continue;
     float r2 = fract(h * 13.7);
-    // the grain speeds up, drifts sideways, shrinks and fades out
     float travel = reach * (0.4 + 0.6 * r2) * t * (0.2 + 0.8 * t);
-    // it first fills its cell, then crumbles to a smaller speck
     float crumble = smoothstep(0.0, 0.25, t);
     vec2 pos = center + vec2(travel + (fract(h * 71.1) - 0.5) * 0.3 * crumble, drift * travel);
     vec2 local = abs(g - pos);

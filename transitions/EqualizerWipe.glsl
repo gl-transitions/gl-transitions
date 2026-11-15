@@ -13,9 +13,7 @@ uniform int segments; // = 24
 uniform vec4 capColor; // = vec4(1.0, 1.0, 1.0, 1.0)
 
 const float PI = 3.141592653589793;
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0015;
-// thickness of a peak cap and its gap above the bar, in frame heights
 const float CAP = 0.012;
 const float CAP_GAP = 0.008;
 
@@ -35,8 +33,6 @@ float level(float i, vec4 k, float lead, float t, float amp) {
   float ramp = t * t * (3.0 - 2.0 * t);
   float base = mix(-0.03, 1.04, mix(t, ramp, 0.3));
   float w = 2.0 * PI * t;
-  // two sines of its own, plus a slow swell across the bars so neighbors move together a
-  // little, like a spectrum
   float osc = 0.5 * sin(w * k.x + k.y) + 0.3 * sin(w * k.z + k.w) + 0.2 * sin(w * 2.2 - 0.55 * i);
   return base + amp * env * (osc + lead);
 }
@@ -47,7 +43,6 @@ vec4 transition(vec2 uv) {
   float x = uv.x * n;
   float i = min(floor(x), n - 1.0);
   float fx = x - i;
-  // antialiasing across a column, in column widths
   float aaX = AA * n / ratio;
 
   vec4 k = vec4(
@@ -65,21 +60,17 @@ vec4 transition(vec2 uv) {
   }
   float capY = peak + CAP_GAP;
 
-  // the bars stand apart in their columns, the gaps closing as the last bars reach the top. A
-  // gap thinner than the antialiasing fades out instead of blurring the sides of the bar
+  // a gap thinner than the antialiasing fades out instead of blurring the sides of the bar
   float open = 1.0 - smoothstep(0.72, 0.97, progress);
   float gap = 0.09 * open;
   float side = min(fx, 1.0 - fx);
   float inGap = clamp((gap - side) / (2.0 * aaX) + 0.5, 0.0, 1.0) * min(gap / aaX, 1.0);
   float barX = 1.0 - inGap;
 
-  // incoming image in the bar
   vec4 b = getToColor(uv);
   float fill;
   float lit;
   if (segments > 0) {
-    // lit segment by segment, the top one brightening as the level enters it, with dark
-    // seams between them
     float segs = float(segments);
     float above = h * segs - floor(uv.y * segs);
     fill = clamp(above, 0.0, 1.0);
@@ -92,12 +83,10 @@ vec4 transition(vec2 uv) {
     lit = 1.0 - smoothstep(0.0, 0.04, h - uv.y);
   }
   b.rgb += 0.2 * open * lit * (1.0 - b.rgb);
-  // a little rounded shading across the bar
   float across = 2.0 * fx - 1.0;
   b.rgb *= 1.0 - 0.15 * open * across * across;
   float m = barX * fill;
 
-  // outgoing image, shaded in the gaps beside the bar and just under its cap
   vec4 a = getFromColor(uv);
   float beside = (1.0 - smoothstep(0.0, gap, gap - side)) * (1.0 - smoothstep(h - 0.01, h + 0.01, uv.y));
   float under = barX * smoothstep(capY - 0.025, capY, uv.y) * (1.0 - smoothstep(capY - AA, capY + AA, uv.y));
@@ -106,7 +95,6 @@ vec4 transition(vec2 uv) {
   // mixed premultiplied, so transparent images do not bleed their color
   vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
 
-  // the peak cap, faded in and out at both ends of the transition
   float cap = barX * smoothstep(capY - AA, capY + AA, uv.y) * (1.0 - smoothstep(capY + CAP - AA, capY + CAP + AA, uv.y));
   cap *= capColor.a * smoothstep(0.0, 0.05, progress) * (1.0 - smoothstep(0.95, 1.0, progress));
   c = mix(c, vec4(capColor.rgb, 1.0), cap);

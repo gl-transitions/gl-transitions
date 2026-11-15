@@ -24,7 +24,6 @@ vec4 hash42(vec2 p) {
   return fract((p4.xxyz + p4.yzzw) * p4.zywx);
 }
 
-// 1 inside a stroke, fading out from 0.3 to 0.6 dot of distance
 vec4 band(vec4 d) {
   return 1.0 - smoothstep(0.3, 0.6, d);
 }
@@ -56,7 +55,6 @@ float glyph(vec2 cell, float t, vec2 local) {
 vec4 transition(vec2 uv) {
   float h = max(cellSize, 0.005);
   vec2 dims = vec2(0.75 * h, h);
-  // frame coordinates from the top left, in frame heights
   vec2 fp = vec2(uv.x * ratio, 1.0 - uv.y);
   // (shifted by odd fractions of a cell, so that pixel centers don't fall on its lines at usual sizes)
   vec2 grid = fp / dims + vec2(0.389, 0.278);
@@ -64,23 +62,18 @@ vec4 transition(vec2 uv) {
   vec2 local = grid - cell;
   float rc = hash12(cell + vec2(97.0, 131.0));
 
-  // each column has its own stream: its start, speed and tail length
   float r1 = hash12(vec2(cell.x, 11.0));
   float r2 = hash12(vec2(cell.x, 23.0));
   float r3 = hash12(vec2(cell.x, 37.0));
   float T = mix(progress, progress * progress * (3.0 - 2.0 * progress), 0.5);
   float len = max(trail, 0.01) * (0.5 + r3);
   float u = clamp((T - 0.03 - 0.5 * r1) / (0.3 + 0.12 * r2), 0.0, 1.0);
-  // the head falls from above the frame, speeding up a little, until its tail has left the frame
   float head = mix(-0.2, 1.0 + h + len, u * (0.7 + 0.3 * u));
-  // how far the head has gone past the cell's top
   float dy = head - (cell.y - 0.278) * h;
 
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
 
-  // ahead of the stream: the outgoing image darkens into characters tinted by its cell's color,
-  // over time and as the head comes near
   vec2 cuv = clamp(vec2((cell.x + 0.111) * dims.x / ratio, 1.0 - (cell.y + 0.222) * h), 0.0, 1.0);
   vec4 ca = getFromColor(cuv);
   float lum = dot(ca.rgb, vec3(0.299, 0.587, 0.114));
@@ -90,24 +83,19 @@ vec4 transition(vec2 uv) {
   float dim = max(smoothstep(0.0, 0.3, T), near);
   float g = max(smoothstep(0.0, 0.2, T - 0.12 * rc), near);
   float passed = step(0.0, dy);
-  // the characters change slowly ahead of the stream and fast in it
   float slow = mod(floor(T * 12.0 + rc * 7.0), 32.0);
   float fast = 32.0 + mod(floor(T * 40.0 + rc * 13.0), 32.0);
   float chr = glyph(cell, mix(slow, fast, passed), local);
   vec3 code = a.rgb * (1.0 - 0.8 * dim) + ink * chr * g;
 
-  // behind the head: bright characters changing fast, fading along the tail, over a shadow that
-  // clears in the tail's last two thirds to leave the incoming image
   float fade = clamp(1.0 - dy / len, 0.0, 1.0);
   float shade = 1.0 - smoothstep(0.3 * len, len, dy);
   float hot = 1.0 - smoothstep(h, 3.0 * h, dy);
   vec3 col = mix(glow.rgb * 1.2, vec3(1.0), 0.8 * hot) * glow.a;
   vec3 stream = b.rgb * (1.0 - 0.8 * shade) + col * chr * (fade * (2.0 - fade) + hot * fade);
 
-  // a soft glow around the head, within its column
   float yy = (head - fp.y) / (1.5 * h);
   float halo = 1.6 * u * (1.0 - u) * exp(-yy * yy) * (1.0 - smoothstep(0.25, 0.5, abs(local.x - 0.5)));
   vec3 rgb = mix(code, stream, passed) + glow.rgb * glow.a * halo;
-  // the outgoing image's opacity stays under the tail's shadow, then gives way to the incoming one's
   return vec4(clamp(rgb, 0.0, 1.0), mix(a.a, mix(b.a, a.a, shade), passed));
 }
