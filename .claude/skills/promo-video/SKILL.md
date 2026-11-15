@@ -5,7 +5,7 @@ description: Makes a short promotional video of gl-transitions for social media 
 
 # Making a promo video
 
-The video is the Promo composition of `examples/remotion` (`src/Promo.tsx`, `src/promo-timing.ts`), rendered with Remotion and the repository's own `@gl-transitions/remotion`: every cut in it is a real transition of the package. It comes in two cuts, `PromoVertical` (1080x1920, Reels/TikTok/Shorts) and `PromoSquare` (1080x1080, X and feeds), about 30 s at 30 fps, silent.
+The video is the Promo composition of `examples/remotion` (`src/Promo.tsx`, `src/promo-timing.ts`), rendered with Remotion and the repository's own `@gl-transitions/remotion`: every cut in it is a real transition of the package. It comes in two cuts, `PromoVertical` (1080x1920, Reels/TikTok/Shorts) and `PromoSquare` (1080x1080, X and feeds), about 45 s at 30 fps, silent.
 
 ## 1. Choose what it shows
 
@@ -13,7 +13,7 @@ Edit `examples/remotion/src/promo-timing.ts`:
 
 - `PROMO_ORDER`: the transitions to show, in order. The count on the intro card, the header and the `07 / 18` labels follow its length. Alternate the kinds of effects (a wipe, then a 3D one, then a stylized one…) so that two similar transitions never play back to back, and end on one with a strong finish.
 - `PROMO_GRID_NAMES`: nine of them for the 3x3 grid, the most graphic ones (they play at tile size).
-- The durations: each transition takes `PROMO_TRANSITION` frames (24) and its photo holds `PROMO_HOLD` frames (14), about 1.3 s per transition. Keep the total under ~35 s: past 18–20 transitions, shorten the hold rather than the transition.
+- The durations: each transition takes `PROMO_TRANSITION` frames (45, 1.5 s) and its photo holds `PROMO_HOLD` frames (15), so each transition is seen in full. Favor a readable pace over a short video: never speed the transitions up to fit more of them. When a video would go well past ~45 s (more than ~19 transitions), split it into two videos of ~10 transitions, each with its intro and outro, and keep the grid in one of them.
 
 The outro lists the platforms (`TARGETS` in `Promo.tsx`): check them against README.md and `packages/` before rendering, and only claim what is published.
 
