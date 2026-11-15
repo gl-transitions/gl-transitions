@@ -96,8 +96,6 @@ vec3 leaderFrame(vec2 q, float n, float px) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   vec4 from = getFromColor(uv);
   vec4 to = getToColor(uv);
 

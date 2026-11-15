@@ -25,8 +25,6 @@ vec2 mirror(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   float p = progress;
   vec2 aspect = vec2(ratio, 1.0);
   float sh = clamp(shading, 0.0, 1.0);

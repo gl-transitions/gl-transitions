@@ -17,8 +17,6 @@ float s2 = s * s;
 return (exp(cos(theta)) - 2.*cos(4.*theta) + s2 * s2 * s) / 10.;
 }
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   vec2 p = uv;
   float inv = 1. - progress;
   float disp = compute(p, progress, vec2(0.5, 0.5));

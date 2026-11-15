@@ -21,3 +21,5 @@ Renaming an existing transition breaks users: accept it only in a major version,
 Transparency (README.md, "Transparency"): the images' alpha must be kept (flag `vec4(color.rgb, 1.0)` and similar), areas where no image is drawn return `vec4(0.0)`, not opaque black, and a fill color is a `vec4` parameter with `@color`.
 
 Also check that the file sits directly in `transitions/` (not `transitions/Name.glsl/Name.glsl`), starts with `// Author:` and `// License:`, and that progress 0 renders the outgoing image and progress 1 the incoming one.
+
+Continuity (CONTRIBUTING.md, "Required elements"): the transition must be a continuous function of `progress` that leaves the outgoing image and converges to the incoming one by itself. Flag any early return on the ends, such as `if (progress <= 0.0) return getFromColor(uv);` or `if (progress >= 1.0) return getToColor(uv);`: it only makes the frames at exactly 0 and 1 right and hides a jump on the first and last frames (watch the preview GIF's first frames for one). Ask for the effect itself to fade out at the ends instead, for example by scaling it with an envelope that is 0 at both ends.

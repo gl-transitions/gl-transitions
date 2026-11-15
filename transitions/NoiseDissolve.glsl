@@ -9,6 +9,6 @@ float random (vec2 st) {
 vec4 transition (vec2 uv) {
   vec4 leftSide = getFromColor(uv);
   vec4 rightSide = getToColor(uv);
-  float uvz = floor(random(uv)+progress);
+  float uvz = step(0.001 + 0.998 * random(uv), progress);
   return mix(leftSide,rightSide,uvz);
 }

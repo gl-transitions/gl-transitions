@@ -106,8 +106,6 @@ vec4 tileColor(vec2 p, vec2 center) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   // in units where the tiles are one unit tall
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0) * tiles + SHIFT;

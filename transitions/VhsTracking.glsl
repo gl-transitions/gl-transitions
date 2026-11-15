@@ -115,11 +115,12 @@ vec4 transition(vec2 uv) {
   float g = hash12(vec2(floor(uv.x * LINES * ratio), line) + frame * vec2(13.0, 29.0));
   snow = max(snow, amount > 0.0 ? 0.7 * smoothstep(1.0 - 0.4 * amount, 1.0, g) : 0.0);
   // and a few dark specks
-  float dark = g < 0.1 * amount ? 1.0 : 0.0;
+  float dark = g < 0.1 * amount ? min(10.0 * amount, 1.0) : 0.0;
   // the dropout: whole stretches of a few lines go white
   float group = floor(uv.y * LINES / 3.0);
   float drop = step(1.0 - 0.15 * flash, hash12(vec2(group, floor(uv.x * 6.0 + 5.0 * hash12(vec2(group, frame))) + frame * 7.0)));
   rgb *= 1.0 - 0.5 * dark;
+  snow *= min(10.0 * amount, 1.0);
   rgb += (clamp(snow + drop + 0.12 * flash, 0.0, 1.0)) * (c.a - rgb);
 
   return vec4(clamp(rgb / c.a, 0.0, 1.0), c.a);

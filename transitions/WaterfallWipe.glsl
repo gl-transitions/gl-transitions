@@ -38,8 +38,6 @@ vec2 mirror(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   float nc = clamp(float(columns), 1.0, 40.0);
   float nr = clamp(floor(nc / ratio + 0.5), 1.0, float(MAX_ROWS));

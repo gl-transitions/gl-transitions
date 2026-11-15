@@ -14,7 +14,6 @@ uniform vec2 center; // = vec2(0.5)
 
 vec4 transition (vec2 uv) {
   // At the end, float PI rounds above pi and sin(spread) can turn slightly negative
-  if (progress >= 1.0) return getToColor(uv);
   // Measured in square pixels, so the angles are not stretched
   vec2 q = (uv - center) * vec2(ratio, 1.0);
   float a = radians(angle);

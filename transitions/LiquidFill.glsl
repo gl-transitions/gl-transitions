@@ -40,8 +40,6 @@ float surface (float x, float t) {
 
 vec4 transition (vec2 uv) {
   vec4 a = getFromColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return getToColor(uv);
 
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(0.0, 1.0);
   vec2 across = vec2(-dir.y, dir.x);

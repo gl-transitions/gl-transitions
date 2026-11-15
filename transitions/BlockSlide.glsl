@@ -24,8 +24,6 @@ float hash(vec2 p) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   bool vertical = abs(direction.y) > abs(direction.x);
   bool backward = vertical ? direction.y < 0.0 : direction.x < 0.0;

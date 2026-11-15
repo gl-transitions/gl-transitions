@@ -25,8 +25,6 @@ vec3 toSrgb(vec3 c) {
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   float t = mix(progress, smoothstep(0.0, 1.0, progress), smoothness);
 

@@ -31,8 +31,6 @@ float spiralIndex(vec2 c, vec2 n) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   vec2 n = max(vec2(grid), vec2(1.0));
   // the cell, counted from the top left corner

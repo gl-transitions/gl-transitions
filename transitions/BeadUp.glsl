@@ -71,8 +71,6 @@ vec2 liquid(vec2 x, float p) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   float p = progress;
   vec2 asp = vec2(ratio, 1.0);
   vec2 x = uv * asp;

@@ -31,8 +31,6 @@ float bandMask(float i, float n, float a, float l, float s) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   float n = float(bands < 1 ? 1 : bands);
   // along: position along the bands, in frame heights; across: position across them (0..1)

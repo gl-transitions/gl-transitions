@@ -36,8 +36,6 @@ float hash12(vec2 p) {
 // ------------------------------------------------------------
 vec4 transition(vec2 uv) {
   // Exact source/target at the boundaries
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   // ----------------------------------------------------------
   // 1) Build a dense square grid that stays visually square

@@ -43,12 +43,11 @@ float fbm (in vec2 st) {
 }
 
 vec4 transition (vec2 uv) {
-    if (progress <= 0.0) return getFromColor(uv);
-    if (progress >= 1.0) return getToColor(uv);
     vec4 from = getFromColor(uv);
     vec4 to = getToColor(uv);
     float n = fbm(uv * 4.);
-    float l = smoothstep(progress, progress + 0.05, n);
+    float e = progress * 1.05 - 0.05;
+    float l = smoothstep(e, e + 0.05, n);
     float edge = (1.0 - l) * l * 5.0;
     return mix(to, from, l) + vec4(burnColor, 0.0) * edge;
 }

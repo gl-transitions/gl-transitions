@@ -34,8 +34,6 @@ vec4 strip(vec2 q, vec2 d) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   // snap to the nearest of the 8 directions: drop a component under tan(22.5deg) of the other
   vec2 ad = abs(direction);
   vec2 d = sign(direction) * step(0.4142 * max(ad.x, ad.y), ad);

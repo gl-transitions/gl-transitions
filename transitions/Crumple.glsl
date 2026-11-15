@@ -79,9 +79,7 @@ void fold(vec2 x, float seed, int n, vec2 span, float len, float c, float px, fl
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress >= 1.0) return b;
 
   // crumpling (c), balling up (k), then tossing (t)
   float c = smoothstep(0.0, 0.6, progress);

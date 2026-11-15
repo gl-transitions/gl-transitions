@@ -87,6 +87,8 @@ vec4 transition(vec2 uv) {
     }
     // lift, then fall away: shrink, spin, drift down and darken
     float lift = smoothstep(0.0, 0.25, t);
+    // the hole it leaves opens as it lifts
+    boardSum += w * (1.0 - smoothstep(0.0, 0.1, t));
     float fall = clamp((t - 0.2) / 0.8, 0.0, 1.0);
     fall *= fall;
     float s = max(1.0 - fall, 0.001);

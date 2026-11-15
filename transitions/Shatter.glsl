@@ -119,8 +119,6 @@ float flash(vec2 q) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   float s = cellSize();
   vec2 a = vec2(uv.x * ratio, uv.y);
   vec3 eye = vec3(0.5 * ratio, 0.5, -EYE);

@@ -118,8 +118,6 @@ vec4 drawPanel(vec4 color, vec4 img, float d, float g, float ink, float fade) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   vec2 p = vec2(uv.x * ratio, 1.0 - uv.y);
 
   // the gutters open at the start and close over the incoming image at the end

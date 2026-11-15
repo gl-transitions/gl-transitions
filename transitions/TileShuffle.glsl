@@ -126,8 +126,6 @@ vec4 tileColor(vec4 src, float w, float lift, float e, float sh) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   // at least two tiles along each side, so that the tiles move along both
   float nl = clamp(float(tiles), 2.0, MAX_TILES);

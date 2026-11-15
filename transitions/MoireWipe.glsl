@@ -37,8 +37,6 @@ float ringLines(float r, float f) {
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   float t = progress * progress * (3.0 - 2.0 * progress);
   float f = max(density, 1.0);

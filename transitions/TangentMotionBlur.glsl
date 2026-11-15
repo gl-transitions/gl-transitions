@@ -106,7 +106,7 @@ vec4 transition (vec2 uv) {
     vec2 myst = uv;
     float animationTime = progress; //getAnimationTime();
     float easingTime = KeySpline(animationTime, .68,.01,.17,.98);
-    float blur = normpdf(easingTime);
+    float blur = max(normpdf(easingTime) - exp(-5.0), 0.0) / (1.0 - exp(-5.0));
     float r = 0.;
     float rotation = 180./180.*3.14159;
     if (easingTime <= .5) {

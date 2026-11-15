@@ -29,8 +29,6 @@ vec2 mirror(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   // 0 at both ends, 1 in the middle: the glass builds up, then flattens out
   float h = 1.0 - abs(2.0 * progress - 1.0);

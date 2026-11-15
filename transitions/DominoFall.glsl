@@ -26,7 +26,6 @@ float knockPart() {
 
 // the fall of slat j, 0 standing to 1 lying flat
 float fallTime(float j, float n) {
-  if (progress >= 1.0) return 1.0;
   float k = knockPart();
   // each slat falls during d and knocks the next one after k * d
   float d = 1.0 / (1.0 + (n - 1.0) * k);
@@ -86,7 +85,7 @@ vec4 drawSlat(vec4 color, float j, vec4 pt, vec4 front, float w) {
   // the next slat, less fallen and so in front, shades the one leaning onto it along its edge, up to its top
   if (front.z >= 0.0 && front.z < t && front.x < 0.0) {
     float reach = clamp(1.0 - (front.y - 1.0) / 0.05, 0.0, 1.0);
-    shade *= 1.0 - 0.6 * shading * exp(front.x / (0.15 * w)) * reach;
+    shade *= 1.0 - 0.6 * shading * exp(front.x / (0.15 * w)) * reach * min((t - front.z) / knockPart(), 1.0);
   }
   img.rgb *= shade;
   return mix(color, img, m);

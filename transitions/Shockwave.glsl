@@ -21,8 +21,6 @@
 
  vec4 transition(vec2 uv) {
    // Preserve perfect, undistorted source and destination frames.
-   if (progress <= 0.0) return getFromColor(uv);
-   if (progress >= 1.0) return getToColor(uv);
 
    // Build an aspect-correct grid: square cells on wide and tall sliders.
    float size = max(tileSize, 0.008);

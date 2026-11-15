@@ -58,8 +58,6 @@ float cardDist(vec2 q, vec2 size) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   vec2 g = gridSize();
   float n = g.x * g.y;

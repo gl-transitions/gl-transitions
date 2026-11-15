@@ -45,8 +45,6 @@ float fbm(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   const float PI = 3.141592653589793;
   float p = progress;

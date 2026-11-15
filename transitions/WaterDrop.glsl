@@ -27,8 +27,6 @@ float wave(float s, float k, float lambda, float t) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   float k = 2.0 * max(amplitude, 1.0);
   float lambda = 6.2831853 / k;

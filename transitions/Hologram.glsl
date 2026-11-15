@@ -39,8 +39,6 @@ vec4 source(vec2 uv, float m) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   float p = progress;
   // how much of the hologram shows, and how broken up it is (peaking mid-transition)

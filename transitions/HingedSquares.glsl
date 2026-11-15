@@ -71,8 +71,6 @@ vec2 toUV(vec2 c, float n) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   float n = max(float(cells), 1.0);
   float e = progress * progress * (3.0 - 2.0 * progress);
   float a = 0.5 * PI * e;

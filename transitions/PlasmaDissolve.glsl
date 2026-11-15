@@ -19,8 +19,6 @@ const float PI = 3.14159265;
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   // measured in square pixels, so the waves are not stretched
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0) * max(scale, 0.0) * 2.0 * PI;

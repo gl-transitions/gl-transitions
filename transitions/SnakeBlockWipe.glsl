@@ -13,8 +13,6 @@ uniform float smoothness; // = 0.5
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   vec2 g = max(vec2(grid), 1.0);
   // block coordinates from the top left corner

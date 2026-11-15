@@ -105,12 +105,10 @@ float blockMask(vec2 uv, float f) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   float f = floor(progress * frameRate);
   float reveal = frameReveal(f);
-  float glitch = frameGlitch(f);
+  float glitch = frameGlitch(f) * (1.0 - smoothstep(0.96, 1.0, progress));
 
   float rnd = hash12(vec2(f, 9.13));
   vec2 jitter = vec2(

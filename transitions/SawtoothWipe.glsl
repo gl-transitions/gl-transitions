@@ -32,8 +32,6 @@ float zigzag(vec2 q, float w, float h) {
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
   // measured in square pixels, so the teeth are not stretched

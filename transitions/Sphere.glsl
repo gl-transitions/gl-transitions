@@ -19,9 +19,7 @@ const float AA = 0.0015;
 const vec3 LIGHT = vec3(-0.5, 0.6, 1.0) / 1.2689;
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress >= 1.0) return b;
 
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
   vec2 side = vec2(-dir.y, dir.x);

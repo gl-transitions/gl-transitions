@@ -67,8 +67,6 @@ vec4 sampleRevolve(vec2 uv, float t) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   float e = revolveEnvelope(progress);
   float span = 0.060 * motionBlur * e;

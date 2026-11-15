@@ -66,8 +66,6 @@ vec4 tree(vec2 P, vec2 s0, bool incoming, float thr, float dmax, float seamFade)
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   // kept inside the frame, so the right and top edges stay in the last blocks
   vec2 P = clamp(vec2(uv.x * ratio, uv.y), vec2(0.0), vec2(ratio, 1.0) - 1e-4);
   // u: 0 at the ends (the real images), 1 in the middle (the biggest blocks)

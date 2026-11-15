@@ -13,6 +13,6 @@ vec4 transition(vec2 p) {
   return mix(
     getToColor(p),
     getFromColor(p),
-    smoothstep(0., smoothness, atan(rp.y,rp.x) - (progress-.5) * PI * 2.5)
+    smoothstep(0., smoothness, atan(rp.y,rp.x) + PI + smoothness - progress * (2.0 * PI + smoothness))
   );
 }

@@ -60,8 +60,6 @@ float droplets(vec2 q, float cell, float density, float seed) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   float t = progress;
 
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);

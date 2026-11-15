@@ -42,8 +42,6 @@ vec4 premultiplied(vec4 c) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   // measured in square pixels, so the squares stay square
   vec2 aspect = vec2(ratio, 1.0);
@@ -56,7 +54,8 @@ vec4 transition(vec2 uv) {
 
   // the incoming image, under the squares that have not left yet
   vec2 n0 = floor(p / h);
-  vec4 col = flight(groupOf(n0, h, c, maxR)) <= 0.0 ? premultiplied(getFromColor(uv)) : premultiplied(getToColor(uv));
+  // (it shows once the square above it has started to move away, so their edges never let it through at rest)
+  vec4 col = mix(premultiplied(getFromColor(uv)), premultiplied(getToColor(uv)), smoothstep(0.0, 0.05, flight(groupOf(n0, h, c, maxR))));
 
   // the flying squares, painted from the last wave to leave (lowest) to the first (highest)
   for (int k = 0; k < GROUPS; k++) {

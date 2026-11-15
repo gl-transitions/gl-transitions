@@ -24,8 +24,6 @@ vec4 premultiplied(vec4 c) {
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   vec2 an = clamp(anchor, 0.0, 1.0);
   vec2 sq = vec2(ratio, 1.0);

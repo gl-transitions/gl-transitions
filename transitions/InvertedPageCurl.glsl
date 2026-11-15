@@ -36,7 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 in vec2 texCoord;
 */
 
-const float MIN_AMOUNT = -0.16;
+const float MIN_AMOUNT = -0.4;
 const float MAX_AMOUNT = 1.5;
 
 const float PI = 3.141592653589793;

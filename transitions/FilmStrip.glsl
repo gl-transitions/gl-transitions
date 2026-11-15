@@ -51,8 +51,6 @@ vec4 film(float x, float y, float base, float n, float aa, float holeX, vec2 hol
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   float n = max(float(frames), 1.0);
   float pitch = 1.0 + FRAME_LINE;
   float p = progress;

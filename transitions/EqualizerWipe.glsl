@@ -42,8 +42,6 @@ float level(float i, vec4 k, float lead, float t, float amp) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   float n = float(bars < 1 ? 1 : bars);
   float amp = max(bounce, 0.0);

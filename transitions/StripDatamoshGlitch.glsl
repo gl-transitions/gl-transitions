@@ -124,8 +124,6 @@ vec2 distortUv(vec2 uv, float dir, float b, float h, float v, float frame) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
 
   float b = burst();
   float frame = floor(progress * 30.0);

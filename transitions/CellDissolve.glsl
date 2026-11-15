@@ -26,8 +26,6 @@ vec2 hash22(vec2 p) {
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   float n = max(cells, 1.0);
   // measured in square pixels, so the cells are not stretched
