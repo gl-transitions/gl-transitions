@@ -21,13 +21,11 @@ const float SLOT_BOTTOM = 0.165;
 const float SLOT_ROUND = 0.025;
 // height of the point the keyhole grows around, in its head
 const float GROW_Y = 0.1;
-// widths of the bevel and of the rim's shadows, in keyhole units
 const float BEVEL = 0.028;
 const float SHADE = 0.05;
 
 float dot2(vec2 v) { return dot(v, v); }
 
-// Signed distance to the slot, a trapezoid with rounded corners
 float sdSlot(vec2 p) {
   p.y -= SLOT_Y;
   float r1 = SLOT_BOTTOM - SLOT_ROUND;
@@ -69,7 +67,6 @@ vec4 transition (vec2 uv) {
   vec2 hi = asp - o + 2.5 * sm;
   float full = max(max(reach(lo), reach(hi)), max(reach(vec2(lo.x, hi.y)), reach(vec2(hi.x, lo.y))));
 
-  // The keyhole grows linearly until it fills the frame
   float p = progress;
   float s = full * p;
   if (s <= 0.0) return a;
@@ -82,8 +79,6 @@ vec4 transition (vec2 uv) {
   float fade = smoothstep(0.0, 0.08, p) * (1.0 - smoothstep(0.7, 1.0, p));
   float rimA = rim * fade;
   if (rimA > 0.0) {
-    // Plate around the hole: a bevel lit from above going down into the hole, and a soft shadow
-    // on its rim
     vec2 e = vec2(0.002, 0.0);
     vec2 n = vec2(sdKeyhole(q + e) - sdKeyhole(q - e), sdKeyhole(q + e.yx) - sdKeyhole(q - e.yx));
     float lit = -dot(n / max(length(n), 1e-6), vec2(-0.35, 0.94));
@@ -92,8 +87,6 @@ vec4 transition (vec2 uv) {
     a.rgb *= 1.0 - rimA * (0.35 * shade + bevel * 0.4 * max(-lit, 0.0));
     a.rgb += rimA * bevel * bevel * 0.3 * max(lit, 0.0) * a.a;
 
-    // Inside the hole: the plate's thickness shades the incoming image under the top of the rim,
-    // with a softer vignette all around the edge
     float wall = smoothstep(-0.03, 0.03, sdKeyhole(q + vec2(0.0, 0.05)));
     float vign = exp(min(d, 0.0) / SHADE);
     b.rgb *= 1.0 - rimA * (0.5 * wall + 0.3 * vign);

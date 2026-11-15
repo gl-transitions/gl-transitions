@@ -43,7 +43,6 @@ vec4 crossFade(in vec2 uv, in float dissolve) {
 vec4 transition(vec2 uv) {
     vec2 texCoord = uv.xy / vec2(1.0).xy;
 
-    // Linear interpolate center across center half of the image
     vec2 center = vec2(Linear_ease(0.25, 0.5, 1.0, progress), 0.5);
     float dissolve = Exponential_easeInOut(0.0, 1.0, 1.0, progress);
 

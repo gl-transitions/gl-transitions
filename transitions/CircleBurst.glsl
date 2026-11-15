@@ -14,25 +14,19 @@ uniform vec4 color3; // = vec4(0.13, 0.15, 0.3, 1.0)
 // @range(0, 1) Delay between the discs, relative to the burst of one disc (at 0, they burst as one: a single circle opens onto the incoming image)
 uniform float stagger; // = 0.3
 
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0015;
-// width and opacity of the soft shadow each disc casts on what is under it
 const float SW = 0.03;
 const float SO = 0.32;
 
-// local progress of a layer starting at s and lasting d
 float phase(float s, float d) {
   return clamp((progress - s) / d, 0.0, 1.0);
 }
 
-// radius of the edge of a layer at local progress t: it bursts out of just before the point and
-// leaves the frame still moving, its shadow last
 float radius(float t, float R) {
   float u = 1.0 - t;
   return mix(-SW - AA, R, mix(t, 1.0 - u * u * u, 0.8));
 }
 
-// fold texture coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(abs(v), 2.0));
 }
@@ -54,7 +48,6 @@ vec4 transition(vec2 uv) {
   float k = clamp(stagger, 0.0, 1.0);
   float d = 1.0 / (1.0 + 3.0 * k);
 
-  // the outgoing image is pushed in by the first burst
   float t = phase(0.0, d);
   vec4 a = getFromColor(mirror(center + (uv - center) / (1.0 + 0.06 * t * (2.0 - t))));
   vec4 p = vec4(a.rgb * a.a, a.a);
@@ -63,8 +56,6 @@ vec4 transition(vec2 uv) {
   float r = radius(phase(2.0 * k * d, d), R);
   p = layer(p, color3, r, x);
 
-  // the hole in the last disc shows the incoming image, which pops in slightly zoomed, overshoots
-  // and settles, shaded along the hole's rim as much as the disc around it is wide
   t = phase(3.0 * k * d, d);
   float h = radius(t, R);
   float u = 1.0 - t;

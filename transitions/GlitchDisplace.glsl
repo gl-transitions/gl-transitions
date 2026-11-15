@@ -70,7 +70,4 @@ vec4 transition(vec2 uv) {
   color1 = mix(color1, dColor2, smoothstep(0.0, 0.5, progress));
   color2 = mix(color2, dColor1, smoothstep(1.0, 0.5, progress));
   return mix(color1, color2, val);
-  //gl_FragColor = mix(gl_FragColor, dColor, smoothstep(0.0, 0.5, progress));
-
-   //gl_FragColor = mix(texture2D(from, p), texture2D(to, p), progress);
 }

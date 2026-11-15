@@ -13,9 +13,7 @@ uniform float shading; // = 0.6
 uniform float shadow; // = 0.5
 
 const float PI = 3.14159265;
-// half width of the antialiased ball edge, in frame heights
 const float AA = 0.0015;
-// toward the light, from the top left
 const vec3 LIGHT = vec3(-0.5, 0.6, 1.0) / 1.2689;
 
 vec4 transition(vec2 uv) {
@@ -23,7 +21,6 @@ vec4 transition(vec2 uv) {
 
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
   vec2 side = vec2(-dir.y, dir.x);
-  // measured in square pixels, so the ball is round
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
   float shorter = min(ratio, 1.0);
   float r0 = clamp(size, 0.1, 0.5) * shorter;
@@ -40,7 +37,6 @@ vec4 transition(vec2 uv) {
   // (its shortest half extent reaches around to the back)
   float tight = mix(1.0, min(1.0, 0.48 * shorter / (PI * r0)), w * w);
   float paper = radius * tight;
-  // half extent of the frame along the direction
   float e = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
   // far enough that the ball (0.5 * r0 by then) and its shadow (within 0.9 * r0 of it) have left
   float full = e + 1.1 * r0 + 2.0 * AA;
@@ -52,7 +48,6 @@ vec4 transition(vec2 uv) {
   vec2 d = p - center;
   float r = length(d);
 
-  // soft shadow on the incoming image, below and to the right of the ball (light from the top left)
   vec2 sd = d - vec2(0.25, -0.3) * radius * w;
   float sh = shadow * w * (1.0 - smoothstep(0.6 * radius, 1.4 * radius, length(sd)));
   vec4 bg = vec4(b.rgb * b.a * (1.0 - sh), b.a);
@@ -63,7 +58,6 @@ vec4 transition(vec2 uv) {
     // normal of the visible point of the ball (no squared radius, which overflows when it is huge)
     vec2 nd = d / radius;
     vec3 n = vec3(nd, sqrt(max(1.0 - dot(nd, nd), 0.0)));
-    // undo the roll: rotate around the axis across the direction
     float u = dot(n.xy, dir);
     float s = dot(n.xy, side);
     float cu = cos(angle), su = sin(angle);
@@ -73,7 +67,6 @@ vec4 transition(vec2 uv) {
     float arc = atan(lq, q.z) * paper;
     vec2 img = lq > 0.0 ? (q.x * dir + q.y * side) / lq * arc : vec2(0.0);
     vec2 iuv = img / vec2(ratio, 1.0) + 0.5;
-    // distance to the edge of the image, antialiased like the ball's outline
     vec2 edge = min(iuv, 1.0 - iuv) * vec2(ratio, 1.0);
     float inside = cover * smoothstep(-AA, AA, min(edge.x, edge.y));
     if (inside > 0.0) {

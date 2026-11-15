@@ -13,7 +13,6 @@ uniform float spread; // = 0.05
 uniform vec4 backColor; // = vec4(0.04, 0.04, 0.05, 1.0)
 
 const float PI = 3.141592653589793;
-// distance of the eye, in frame heights
 const float EYE = 2.5;
 // width of the anti-aliased edges and half width of the open cracks, in frame heights
 const float EDGE = 0.0015;
@@ -53,7 +52,6 @@ float ease(float t) {
   return t * t * (3.0 - 2.0 * t);
 }
 
-// how far a shard is out of place along its flight t: a quick burst, then a soft landing
 float burst(float t) {
   float u = clamp(t / 0.4, 0.0, 1.0);
   float v = clamp((t - 0.4) / 0.6, 0.0, 1.0);
@@ -71,7 +69,6 @@ vec4 transition(vec2 uv) {
   vec3 H = normalize(L + vec3(0.0, 0.0, 1.0));
   vec3 eye = vec3(0.0, 0.0, EYE);
   vec3 dir = vec3(x, -EYE);
-  // the cracks open as the image breaks and close as the shards lock back into place
   float act = smoothstep(0.0, START + DELAY, p) * (1.0 - smoothstep(START + FLIGHT, 1.0, p));
 
   // where this point roughly comes from, to find the shards that can cover it
@@ -90,10 +87,8 @@ vec4 transition(vec2 uv) {
       vec3 h = hash3(g + 17.0);
       float t = clamp((p - START - DELAY * h.x) / FLIGHT, 0.0, 1.0);
       float b = burst(t);
-      // each shard turns over around its own axis at its own moment, while it is out of place
       float th = PI * ease(clamp((t - 0.1 - 0.48 * h.z) / 0.24, 0.0, 1.0));
       float ct = cos(th), st = sin(th);
-      // and turns a little in the frame, back straight when it lands
       float phi = PI * h.y;
       float rz = 0.5 * (h.z - 0.5) * b;
       vec2 a0 = vec2(cos(phi), sin(phi));
@@ -122,11 +117,9 @@ vec4 transition(vec2 uv) {
       // at rest the shards lie at the same depth: the one that covers this point fully comes first
       float zk = lam - 0.001 * m;
       if (m <= 0.0 || zk >= z2) continue;
-      // lit from the upper left, with a glint as a shard faces the light; unchanged at rest
       vec3 n = nrm * front;
       float lit = mix(0.45, 1.0, clamp(dot(n, L) / L.z, 0.0, 1.0));
       float glint = 0.2 * min(b * 4.0, 1.0) * pow(max(dot(n, H), 0.0), 24.0);
-      // a pale rim on the broken edges while they fly, flashing as each shard locks into place
       float lock = sin(PI * clamp((t - 0.86) / 0.14, 0.0, 1.0));
       float rim = (0.3 * act * min(b * 4.0, 1.0) + 0.35 * lock) * (1.0 - smoothstep(0.0, 0.006, e));
       if (zk < z1) {

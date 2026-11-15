@@ -21,7 +21,6 @@ uniform float shading; // = 0.4
 uniform vec4 background; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 const float PI = 3.141592653589793;
-// width of the anti-aliased edges, as a part of the frame's shorter side
 const float EDGE = 0.001;
 
 float hash12(vec2 v) {
@@ -30,7 +29,6 @@ float hash12(vec2 v) {
   return fract((v3.x + v3.y) * v3.z);
 }
 
-// the cell's flip, 0 to 1
 float cellTime(vec2 cell, vec2 grid) {
   float wave = (cell.x + 0.5 * (grid.y - 1.0 - cell.y)) / max(grid.x - 1.0 + 0.5 * (grid.y - 1.0), 1.0);
   float order = mix(wave, hash12(cell + 17.0), randomness);
@@ -73,7 +71,6 @@ vec4 transition (vec2 uv) {
   vec2 cellSize = vec2(ratio, 1.0) / grid / min(ratio, 1.0);
   vec2 cell = floor(uv * grid);
   vec2 l = uv * grid - cell;
-  // the gaps open at the start and close at the end
   float g = gap * smoothstep(0.0, 0.12, progress) * (1.0 - smoothstep(0.88, 1.0, progress));
   // w: height above the hinge, in cell heights
   float w = l.y - 0.5;
@@ -87,7 +84,6 @@ vec4 transition (vec2 uv) {
   bool started = t * n > k;
   bool landed = t >= 1.0;
   vec4 color = card(k + (upper ? (started ? 1.0 : 0.0) : (landed ? 1.0 : 0.0)), n, cell, grid, l);
-  // shadows of the flap leaning over the top half, then falling onto the bottom half
   if (started && !landed) color.rgb *= 1.0 - 0.45 * shading * max(upper ? cos(a) : -cos(a), 0.0);
   color = mix(background, color, cardMask(l.x, abs(w), cellSize, g));
 
@@ -113,7 +109,6 @@ vec4 transition (vec2 uv) {
     float m = cardMask(lx, f, cellSize, g);
     if (m <= 0.0) continue;
     vec4 img = card(flapIndex(nt, n) + (front ? 0.0 : 1.0), n, nc, grid, lc);
-    // lit from above the viewer: the front darkens as it turns down, the back brightens as it lands
     float lambert = (front ? 0.92 * fc - 0.4 * fs : 0.4 * fs - 0.92 * fc) / 0.92;
     img.rgb *= mix(1.0 - shading, 1.0, clamp(lambert, 0.0, 1.0));
     color = mix(color, img, m);

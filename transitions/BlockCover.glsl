@@ -35,16 +35,13 @@ vec2 timing (vec2 cell) {
     cut + hold + (1.0 - cut - hold - duration) * hash(cell + 71.7));
 }
 
-// scale of the block of a cell: 0 when it is not there, 1 when it fills its cell
 float blockScale (vec2 cell, float c) {
   vec2 t = timing(cell);
   float a = clamp((progress - t.x) / duration, 0.0, 1.0);
   float b = clamp((progress - t.y) / duration, 0.0, 1.0);
-  // it grows from nothing with an overshoot, and shrinks back to nothing
   return b > 0.0 ? (1.0 - b) * (1.0 - b) : backOut(a, c);
 }
 
-// how much of the point q (in cells) the block of a cell covers
 float coverage (vec2 q, vec2 cell, float s, float sm) {
   // at scale 1, its solid part fills the whole cell, so that a covered frame shows no seams
   float h = s * (0.5 + sm);
@@ -79,7 +76,6 @@ vec4 transition (vec2 uv) {
       }
     }
   }
-  // each cell switches to the incoming image while its own block covers it
   vec2 t = timing(cell);
   vec4 under = progress < 0.5 * (t.x + duration + t.y) ? getFromColor(uv) : getToColor(uv);
   return mix(under, color, cover);

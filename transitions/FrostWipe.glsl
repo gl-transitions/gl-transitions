@@ -31,7 +31,6 @@ float vnoise(vec2 v) {
   );
 }
 
-// ridged noise: thin bright veins where the noise crosses its middle, like crystal ferns
 float ridged(vec2 v) {
   float sum = 0.0;
   float amp = 0.5;
@@ -70,12 +69,10 @@ vec4 grains(vec2 v) {
   return vec4(sqrt(d2) - sqrt(d1), seed);
 }
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
 
-// the image under the frost: the outgoing one, then the incoming one, switched under full cover
 vec4 image(vec2 uv, float m) {
   if (m <= 0.0) return getFromColor(uv);
   if (m >= 1.0) return getToColor(uv);
@@ -87,11 +84,10 @@ vec4 transition(vec2 uv) {
   // 0 at both ends, 1 while the frost covers the whole frame (from 0.425 to 0.575)
   float h = 1.0 - abs(2.0 * p - 1.0);
   float a = clamp(h / 0.85, 0.0, 1.0);
-  a = a * (1.6 - 0.6 * a); // fast start, slowing down as the frost closes in
+  a = a * (1.6 - 0.6 * a);
   float m = smoothstep(0.47, 0.53, p);
   if (a <= 0.0) return image(uv, m);
 
-  // how deep in the frame the pixel is: 0 on the edges, 1 at the center
   vec2 q = uv * vec2(ratio, 1.0);
   vec2 dEdge = min(uv, 1.0 - uv) * vec2(ratio, 1.0);
   float depth = min(dEdge.x, dEdge.y) / (0.5 * min(ratio, 1.0));
@@ -103,36 +99,28 @@ vec4 transition(vec2 uv) {
   float front = mix(-0.1, 1.0 + reach + 0.2, a);
   if (depth > front + 0.08) return image(uv, m);
 
-  // crystals: ferns grow from the boundaries between grains, with parallel needles shooting
-  // off them at an angle that changes from grain to grain
   vec2 gv = q * scale;
-  // the stems bend a little
   vec4 gr = grains(gv + 0.35 * vec2(vnoise(gv * 1.7), vnoise(gv * 1.7 + 23.1)));
   // the needles' direction, any angle (a rational point on the unit circle)
   float u = 2.0 * gr.y - 1.0;
   vec2 dir = vec2(1.0 - u * u, 2.0 * u) / (1.0 + u * u);
   float t = dot(gr.zw, dir) * 7.0;
-  float needle = 1.0 - abs(2.0 * fract(t) - 1.0); // 1 along each needle, 0 between them
+  float needle = 1.0 - abs(2.0 * fract(t) - 1.0);
   float nh = fract(gr.y + 0.618034 * floor(t));
-  float len = mix(0.15, 0.6, nh); // each needle has its own length
+  float len = mix(0.15, 0.6, nh);
   float r = ridged(gv * 1.3);
   float rf = ridged(gv * 4.0 + 11.0);
-  // when the frost reaches the pixel, after the edges: the stems first, then the needles, then
-  // the gaps between them
   float grow = min(gr.x * 3.5, gr.x / len * 0.5 + (1.0 - needle) * 1.2 + 0.2 * fract(nh * 13.7));
   float field = depth + reach * (0.8 * min(grow, 1.0) + 0.2 * (1.0 - r)) + 0.1 * (1.0 - rf);
   float inside = front - field; // > 0 under the frost
   float f = smoothstep(0.0, 0.03, inside);
-  // a thin, faint haze of fine crystals just ahead of the front
   float haze = 0.4 * smoothstep(0.9, 1.0, rf) * smoothstep(-0.08, 0.0, inside);
   float frost = max(f, haze);
   if (frost <= 0.0) return image(uv, m);
 
-  // thicker ice close to the edges, where it started growing
   float thick = smoothstep(0.0, 0.5, inside);
   float full = smoothstep(0.75, 0.95, h); // the frost turns opaque to hide the switch
 
-  // frosted glass: blur over a small jittered disc, scattered along the crystals
   float radius = (0.004 + 0.03 * blur) * frost * (0.5 + 0.5 * thick);
   float rot = 6.2831853 * hash12(floor(q * 90.0));
   vec3 rgb = vec3(0.0);
@@ -148,8 +136,6 @@ vec4 transition(vec2 uv) {
   alpha /= float(TAPS);
   rgb = alpha > 0.0 ? rgb / (alpha * float(TAPS)) : vec3(0.0);
 
-  // a cool white crystal tint, brighter on the stems, the needles (fading out toward their tips)
-  // and the growing front
   float stem = 1.0 - smoothstep(0.0, 0.03, gr.x);
   float needles = smoothstep(0.7, 1.0, needle) * (1.0 - smoothstep(0.0, len, gr.x));
   float glint = 0.4 + 0.6 * rf;
@@ -162,7 +148,6 @@ vec4 transition(vec2 uv) {
   // the frost color mixes as straight RGBA, like every fill color
   vec4 res = mix(under, vec4(ice, color.a), cover);
 
-  // fine sparkles on the ice, twinkling as it grows
   vec2 sq = q * 36.0;
   vec2 cell = floor(sq);
   vec2 d = abs(sq - cell - 0.25 - 0.5 * vec2(hash12(cell + 1.3), hash12(cell + 5.9)));

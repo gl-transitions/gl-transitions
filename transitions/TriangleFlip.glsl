@@ -14,16 +14,13 @@ uniform float shading; // = 0.6
 
 const float PI = 3.141592653589793;
 const float SQRT3 = 1.7320508075688772;
-// half width of the anti-aliased edges, as a part of the frame's height
 const float EDGE = 0.0012;
 // distance of the eye from the sheet, in triangle sides
 const float EYE = 3.0;
 // how high a turning triangle lifts off the sheet, in triangle sides
 const float LIFT = 0.3;
-// light from the upper left, in front of the frame
 const vec3 LIGHT = vec3(-0.4, 0.45, 0.8);
 
-// smooth start and landing, without lingering at either end
 float easeInOut(float t) {
   return mix(t, t * t * (3.0 - 2.0 * t), 0.75);
 }
@@ -45,7 +42,6 @@ float triDist(vec2 p, float r, float o) {
   return triDistSqueezed(p, r, o, vec2(1.0, 0.0), vec2(0.0, 1.0), 1.0);
 }
 
-// folds coordinates back into the frame, so no turning piece shows clamped borders
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -74,17 +70,14 @@ vec4 transition(vec2 uv) {
   float sh = clamp(shading, 0.0, 1.0);
   vec3 l = normalize(LIGHT);
   vec3 hv = normalize(l + vec3(0.0, 0.0, 1.0));
-  // the median axes of the triangles, the same for both orientations
   vec2 a0 = vec2(0.0, 1.0);
   vec2 a1 = vec2(0.5 * SQRT3, 0.5);
   vec2 a2 = vec2(-0.5 * SQRT3, 0.5);
 
-  // the triangles lying flat, weighted by side, and the holes of the turning ones
   float wFrom = 0.0;
   float wTo = 0.0;
   float hole = 0.0;
   float shadow = 0.0;
-  // the two nearest turning triangles covering this point
   vec4 c1 = vec4(0.0);
   vec4 c2 = vec4(0.0);
   float m1 = 0.0;
@@ -135,7 +128,6 @@ vec4 transition(vec2 uv) {
         wFrom += mh * (1.0 - k2);
         wTo += mh * k2;
         hole = max(hole, mh * sa);
-        // soft shadow under the turning triangle, squeezed like it and pushed away from the light
         vec2 sq = q + LIGHT.xy / LIGHT.z * lift;
         float sk = 0.3 + 0.7 * abs(ca);
         vec2 sp = dot(sq, a) * a + dot(sq, b) / sk * b;
@@ -158,7 +150,6 @@ vec4 transition(vec2 uv) {
         float m = aa(d, EDGE);
         if (m <= 0.0) continue;
 
-        // the front shows the outgoing image, the back the incoming one seen from behind
         bool front = ca > 0.0;
         if (front) {
           col = getFromColor(mirror((ctr + lp) / frame));

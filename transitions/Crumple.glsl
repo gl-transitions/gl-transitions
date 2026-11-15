@@ -27,7 +27,6 @@ mat2 rot(float a) {
   return mat2(c, -s, s, c);
 }
 
-// distance from the center to the edge of the frame in the direction a (unit vector)
 float frame(vec2 a) {
   return min(0.5 * ratio / max(abs(a.x), 1e-4), 0.5 / max(abs(a.y), 1e-4));
 }
@@ -38,7 +37,6 @@ float outline(vec2 a, float c, float k, float radius) {
   float rect = frame(a);
   float th = atan(a.y, a.x);
   float buckle = 0.03 + 0.05 * abs(sin(4.0 * th + 0.7)) + 0.03 * abs(sin(9.0 * th + 2.0)) + 0.015 * abs(sin(23.0 * th + 1.3));
-  // the ball is a polygon with irregular corners
   float i = floor((th / (2.0 * PI) + 0.5) * 9.0);
   float a0 = i * 2.0 * PI / 9.0 - PI;
   float a1 = a0 + 2.0 * PI / 9.0;
@@ -95,12 +93,10 @@ vec4 transition(vec2 uv) {
   float bend = dir.x < 0.0 ? -1.0 : 1.0;
   vec2 center = dir * reach * t + vec2(-dir.y, dir.x) * 0.15 * bend * sin(PI * t);
   float angle = 0.6 * c - 5.0 * bend * t;
-  // how high the paper is above the incoming image
   float lift = 0.012 * c + 0.06 * t;
 
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
 
-  // soft shadow on the incoming image
   vec2 sp = rot(angle) * (p - center - vec2(0.6, -1.0) * lift);
   float sl = length(sp);
   float sd = sl - outline(sl > 1e-5 ? sp / sl : vec2(1.0, 0.0), c, k, radius);
@@ -123,7 +119,6 @@ vec4 transition(vec2 uv) {
   float rect = frame(dq);
   vec2 s = dq * rect * mix(r, r * (0.6 + 0.4 * r), k);
 
-  // the creases of the sheet, then those of the ball, that crumpling adds over them
   int count = creases < 1 ? 1 : creases;
   vec2 grad = vec2(0.0);
   vec2 shift = vec2(0.0);
@@ -138,8 +133,7 @@ vec4 transition(vec2 uv) {
   grad += g2 * 0.8;
   vec2 piece = s + shift + s2 * 3.0;
 
-  // the facets over the volume of the ball, lit from the top left (the light does not turn
-  // with the ball)
+  // facets over the ball's volume, lit from the top left (the light does not turn with the ball)
   float rr = clamp(l / (radius * 1.1), 0.0, 1.0);
   vec3 sphere = vec3(q / (radius * 1.1) * k * 0.8, sqrt(1.0 - 0.64 * rr * rr * k));
   vec3 n = normalize(sphere + vec3(grad, 0.0));
@@ -153,13 +147,11 @@ vec4 transition(vec2 uv) {
   float relief = min(2.0 * c, 1.0);
   float shade = 1.0 + relief * ((0.12 + diffuse) / (0.12 + level) - 1.0) + 0.7 * spec * relief;
   shade -= 0.2 * relief * min(valley, 1.0);
-  // occlusion toward the rim of the ball
   shade *= 1.0 - 0.3 * k * smoothstep(0.6, 1.0, r);
 
   // the edges of the sheet that the folds pull in are mirrored, as if folded back
   vec2 f = piece / vec2(ratio, 1.0) + 0.5;
   vec4 img = getFromColor(1.0 - abs(1.0 - mod(f, 2.0)));
-  // the ink cracks along the ridges
   img.rgb = mix(img.rgb, paper.rgb, 0.6 * min(ridge, 1.0) * paper.a * c);
   vec4 ball = vec4(img.rgb * shade, img.a);
 

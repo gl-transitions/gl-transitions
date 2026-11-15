@@ -9,7 +9,6 @@ float rand (vec2 co) {
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
  
-// motion blur for texture from
 vec4 motionBlurFrom(vec2 _st, vec2 speed) {
     vec2 texCoord = _st.xy / vec2(1.0).xy;
     // Premultiplied sums, so that transparent samples do not darken the blur
@@ -30,7 +29,6 @@ vec4 motionBlurFrom(vec2 _st, vec2 speed) {
     return vec4(color / max(alpha, 1e-5), alpha / total);
 }
 
-// motion blur for texture to
 vec4 motionBlurTo(vec2 _st, vec2 speed) {
     vec2 texCoord = _st.xy / vec2(1.0).xy;
     vec3 color = vec3(0.0);
@@ -51,7 +49,6 @@ vec4 motionBlurTo(vec2 _st, vec2 speed) {
 }
 
 
-// bezier in gpu
 float A(float aA1, float aA2) {
     return 1.0 - 3.0 * aA2 + 3.0 * aA1;
 }
@@ -68,7 +65,6 @@ float CalcBezier(float aT, float aA1, float aA2) {
     return ((A(aA1, aA2)*aT + B(aA1, aA2))*aT + C(aA1))*aT;
 }
 float GetTForX(float aX, float mX1, float mX2) {
-    // iteration to solve
     float aGuessT = aX;
     for (int i = 0; i < 4; ++i) {
         float currentSlope = GetSlope(aGuessT, mX1, mX2);
@@ -79,23 +75,22 @@ float GetTForX(float aX, float mX1, float mX2) {
     return aGuessT;
 }
 float KeySpline(float aX, float mX1, float mY1, float mX2, float mY2) {
-    if (mX1 == mY1 && mX2 == mY2) return aX; // linear
+    if (mX1 == mY1 && mX2 == mY2) return aX;
     return CalcBezier(GetTForX(aX, mX1, mX2), mY1, mY2); // x to t, t to y
 }
 
-// norm distribution
 float normpdf(float x) {
     float d = x - .5;
     return exp(-20.*d*d);
 }
 
 vec2 rotateUv(vec2 uv, float angle, vec2 anchor, float zDirection) {
-    uv = uv - anchor; // anchor to origin
+    uv = uv - anchor;
     float s = sin(angle);
 	float c = cos(angle);
 	mat2 m = mat2(c, -s, s, c);
     uv = m * uv;
-    uv += anchor; // anchor back
+    uv += anchor;
     return uv;
 }
 
@@ -103,7 +98,7 @@ vec2 rotateUv(vec2 uv, float angle, vec2 anchor, float zDirection) {
 
 vec4 transition (vec2 uv) {
     vec2 myst = uv;
-    float animationTime = progress; //getAnimationTime();
+    float animationTime = progress;
     float easingTime = KeySpline(animationTime, .68,.01,.17,.98);
     float blur = max(normpdf(easingTime) - exp(-5.0), 0.0) / (1.0 - exp(-5.0));
     float r = 0.;
@@ -114,7 +109,6 @@ vec4 transition (vec2 uv) {
         r = -rotation + rotation * easingTime;
     }
 
-    // rotation for current frame
     vec2 mystCurrent = myst;
     mystCurrent.y *= 1./ratio;
     mystCurrent = rotateUv(mystCurrent, r, vec2(1., 0.), -1.);
@@ -128,13 +122,11 @@ vec4 transition (vec2 uv) {
         r = -rotation + rotation * (easingTime+timeInterval);
     }
     
-    // rotation for next frame
     vec2 mystNext = myst;
     mystNext.y *= 1./ratio;
     mystNext = rotateUv(mystNext, r, vec2(1., 0.), -1.);
     mystNext.y *= ratio;
     
-    // get speed at tagent direction
     vec2 speed  = (mystNext - mystCurrent) / timeInterval * blur * 0.5;
     if (easingTime <= .5) {
         return motionBlurFrom(mystCurrent, speed);

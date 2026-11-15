@@ -4,8 +4,6 @@
 // Tags: melt, columns, retro
 
 
-// Transition parameters --------
-
 // Number of total bars/columns
 uniform int bars; // = 30
 
@@ -21,8 +19,6 @@ uniform float frequency; // = 0.5
 // How much the bars seem to "run" from the middle of the screen first (sticking to the sides). 0 = no drip, 1 = curved drip
 uniform float dripScale; // = 0.5
 
-
-// The code proper --------
 
 float rand(int num) {
   return fract(mod(float(num) * 67123.313, 12.0) * sin(float(num) * 10.3) * cos(float(num)));
@@ -56,6 +52,5 @@ vec4 transition(vec2 uv) {
     c = getToColor(p);
   }
 
-  // Finally, apply the color
   return c;
 }

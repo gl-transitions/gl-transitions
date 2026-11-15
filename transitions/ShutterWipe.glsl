@@ -29,22 +29,16 @@ vec4 transition(vec2 uv) {
   vec2 vel = travel * 6.0 * t * (1.0 - t) / 0.7;
 
   float x = (uv.x - 0.5) * ratio;
-  // the images are swapped halfway, behind the closed shutter
   vec4 col = progress < 0.5 ? getFromColor(uv) : getToColor(uv);
   // painted from the lowest blade to the highest, each one over the top of the one below it
   for (int i = 0; i < 10; i++) {
     float k = float(i) / (n - 1.0);
     if (k < 1.0001) {
       float v = mix(vel.x, vel.y, k);
-      // the blades ride on arms, so the fast ones tilt a little, and their travel blurs their edges
       float d = uv.y - mix(pos.x, pos.y, k) + tilt * 0.1 * v * x;
-      // contact shadow cast on what lies just below the leading edge
       float aa = 0.002 + 0.005 * v;
       float sh = (1.0 - smoothstep(0.0, 0.03 + 0.012 * v, -d)) * (1.0 - smoothstep(-aa, aa, d));
       col.rgb *= 1.0 - 0.65 * color.a * sh * sh;
-      // matte metal, slightly curved: lighter toward the leading edge, which ends in a bright
-      // rolled lip, darker toward the top where it slides under the next blade, with a sheen
-      // that crosses each blade as it passes the light
       float l = clamp(d / h, 0.0, 1.0);
       float lip = smoothstep(0.003, 0.007, d) * (1.0 - smoothstep(0.007, 0.014, d));
       float s = (uv.y - d - 0.55 + 0.3 * x) * 2.5;
@@ -55,12 +49,10 @@ vec4 transition(vec2 uv) {
       col = mix(col, vec4(clamp(metal, 0.0, 1.0), color.a), cover);
     }
   }
-  // the camera's gate frames the image while the shutter fires
   float g = gate * smoothstep(0.0, 0.12, progress) * (1.0 - smoothstep(0.88, 1.0, progress));
   vec2 c = abs(uv - 0.5) * vec2(ratio, 1.0) - vec2(0.5 * ratio, 0.5) + 1.5 * g;
   float e = length(max(c, 0.0)) + min(max(c.x, c.y), 0.0) - 0.5 * g;
   float on = smoothstep(0.0, 0.002, gate) * smoothstep(0.0, 0.04, progress) * (1.0 - smoothstep(0.96, 1.0, progress));
-  // it shades the image along its inner edge
   col.rgb *= 1.0 - 0.5 * color.a * on * smoothstep(-0.4 * g - 0.001, 0.0, e);
   vec3 housing = min(color.rgb * (1.5 - smoothstep(0.0, 0.2 * g + 0.001, e)), 1.0);
   return mix(col, vec4(housing, color.a), on * smoothstep(-0.002, 0.002, e));

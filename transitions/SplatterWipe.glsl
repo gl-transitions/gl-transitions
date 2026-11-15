@@ -17,7 +17,6 @@ uniform float rim; // = 0.5
 uniform float seed; // = 3.0
 
 const float PI = 3.141592653589793;
-// number of spikes around a splat
 const float SPIKES = 14.0;
 // furthest reach of the shapes of a splat from its center, in cells. Splats are looked for in the 3x3 cells
 // around a pixel, and the center of a splat 2 cells away is more than 1.35 cells away; on top of REACH, the
@@ -41,7 +40,6 @@ float turnNoise(float t, float n, vec2 key) {
   return mix(a, b, f * f * (3.0 - 2.0 * f));
 }
 
-// smooth union of two signed distances (> 0 inside)
 float smax(float a, float b, float k) {
   float h = max(k - abs(a - b), 0.0) / k;
   return max(a, b) + h * h * k * 0.25;
@@ -49,14 +47,13 @@ float smax(float a, float b, float k) {
 
 // signed distance (approximately, in cells, > 0 inside) to the splat of a grid cell
 float splat(vec2 q, vec2 cell, vec2 key) {
-  float t0 = 0.01 + 0.6 * hash12(key + vec2(3.0, 0.0)); // when it lands
+  float t0 = 0.01 + 0.6 * hash12(key + vec2(3.0, 0.0));
   if (progress <= t0) return -1.0;
   vec2 c = cell + 0.5 + 0.3 * (vec2(hash12(key + vec2(5.0, 1.0)), hash12(key + vec2(9.0, 2.0))) - 0.5);
   vec2 d = q - c;
   float l = length(d);
   // nothing of the splat reaches this far (its distance there would be below -0.08 anyway)
   if (l > REACH + 0.1) return -1.0;
-  // a fast pop-in, then the paint slowly spreads until it covers its whole cell
   float pop = clamp((progress - t0) / 0.08, 0.0, 1.0);
   pop = 1.0 - (1.0 - pop) * (1.0 - pop) * (1.0 - pop);
   float x = clamp((progress - t0) / (0.96 - t0), 0.0, 1.0);
@@ -66,7 +63,6 @@ float splat(vec2 q, vec2 cell, vec2 key) {
   float rc = mix(r0 * pop, 1.03, grow);
 
   float a = l > 1e-5 ? atan(d.y, d.x) / (2.0 * PI) + 0.5 : 0.0;
-  // an irregular body
   float lumps = mix(0.3, 0.06, grow) * (turnNoise(a, 5.0, key) - 0.5) + mix(0.18, 0.06, grow) * (turnNoise(a, 19.0, key + 3.0) - 0.5);
   float f = rc * (1.0 + lumps) - l;
 
@@ -95,7 +91,6 @@ float splat(vec2 q, vec2 cell, vec2 key) {
   }
   f = smax(f, spike, 0.08);
 
-  // droplets flung out around the splat
   for (int j = 0; j < 5; j++) {
     vec2 dk = key + vec2(float(j), 29.0);
     float hr = hash12(dk + 0.5);
@@ -107,7 +102,6 @@ float splat(vec2 q, vec2 cell, vec2 key) {
     }
   }
 
-  // drips running down from the bottom of the splat
   if (drips > 0.0) {
     float run = clamp((progress - t0 - 0.03) / 0.45, 0.0, 1.0);
     run = run * (2.0 - run);
@@ -143,7 +137,6 @@ vec4 transition(vec2 uv) {
   float inside = smoothstep(-aa, aa, f);
   vec4 from = getFromColor(uv);
   vec4 to = getToColor(uv);
-  // thick paint: a darker rim with a thin glossy line just inside it, gone once the frame is covered
   float e = clamp(f / 0.045, 0.0, 1.0);
   float amount = rim * (1.0 - smoothstep(0.75, 1.0, progress));
   float dark = (1.0 - e) * (1.0 - e) * 0.6;

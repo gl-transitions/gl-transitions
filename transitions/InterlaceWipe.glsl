@@ -15,11 +15,9 @@ vec4 transition(vec2 uv) {
   float cols = max(floor(lines * ratio + 0.5), 1.0);
   // no more passes than fit: the first pass's blocks are never taller than the picture
   float n = max(min(clamp(float(passes), 2.0, 6.0), 1.0 + floor(log2(lines) + 0.01)), 2.0);
-  // the picture is read from its top left corner, in pixel rows and columns
   float row = min(floor((1.0 - uv.y) * lines), lines - 1.0);
   float col = min(floor(uv.x * cols), cols - 1.0);
 
-  // a slight ease, so the loading starts and finishes gently
   float p = mix(progress, progress * progress * (3.0 - 2.0 * progress), 0.5);
   // each pass sweeps the whole frame in time T; the passes start one after another and overlap a little
   float T = 1.5 / (n + 0.5);
@@ -51,7 +49,6 @@ vec4 transition(vec2 uv) {
   if (bestB <= 1.0) {
     c = getToColor(uv);
   } else {
-    // a block repeats the top left pixel of its block
     float top = floor(row / bestB) * bestB;
     float left = floor(col / bestB) * bestB;
     c = getToColor(vec2((left + 0.5) / cols, 1.0 - (top + 0.5) / lines));

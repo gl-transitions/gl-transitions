@@ -15,7 +15,6 @@ uniform float brightness; // = 1.0
 // the wavelengths sampled from red to violet
 const int TAPS = 7;
 
-// the glass surface: smooth waves of a few sizes, warped into each other and flowing over time
 float surface(vec2 q, float t) {
   q += 0.45 * vec2(sin(1.3 * q.y + 0.9 * t), sin(1.1 * q.x - 1.2 * t));
   float h = sin(q.x + 0.6 * t) * sin(1.2 * q.y - 0.8 * t);
@@ -32,7 +31,6 @@ float hash12(vec2 v) {
   return fract((v3.x + v3.y) * v3.z);
 }
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -49,11 +47,9 @@ vec3 spectrum(float w) {
 
 vec4 transition(vec2 uv) {
   float p = progress;
-  // 0 at both ends, 1 in the middle: the glass builds up slowly, then calms down
   float h = 1.0 - abs(2.0 * p - 1.0);
   float amount = h * h * (2.0 - h);
 
-  // the glass refracts along the slope of its surface
   vec2 q = (uv - 0.5) * vec2(ratio, 1.0) * scale;
   float t = 3.0 * p;
   float e = 0.01;
@@ -62,12 +58,9 @@ vec4 transition(vec2 uv) {
     surface(q + vec2(0.0, e), t) - surface(q - vec2(0.0, e), t)
   ) / (2.0 * e);
   vec2 offset = slope * strength * amount / scale;
-  // the switch to the incoming image, around the peak: it appears through the glass's waves,
-  // the crests first, then the troughs
   float wave = clamp(0.5 * surface(q, t), -1.0, 1.0);
   float m = smoothstep(-0.015, 0.015, p - 0.5 + 0.1 * wave);
 
-  // each wavelength bends a little differently: red the least, violet the most
   vec3 color = vec3(0.0);
   vec3 weights = vec3(0.0);
   float alpha = 0.0;
@@ -86,7 +79,6 @@ vec4 transition(vec2 uv) {
   alpha /= float(TAPS);
   color = color / weights / max(alpha, 1e-5);
 
-  // a flare at the peak: the image is pushed toward an overexposed white
   float flare = 2.0 * brightness * pow(h, 8.0);
   color = color * (1.0 + flare) / (1.0 + flare * color);
   color += 0.1 * flare * dot(color, vec3(0.3333));

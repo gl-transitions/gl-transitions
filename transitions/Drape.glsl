@@ -16,7 +16,6 @@ const float PI = 3.141592653589793;
 const int STEPS = 24;
 const float DEPTH = 0.8; // height of the deepest folds, times the fold width
 
-// folds a coordinate back into 0..1, mirroring the image at its edges
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -41,7 +40,6 @@ float topEdge(float x, vec4 m) {
   return m.y - 0.08 * m.x * (1.0 - c * c);
 }
 
-// how far the sides are pulled in at the height sy, more so at the bunched top
 float sidePull(float sy, float gT) {
   return 0.035 * gT * (0.3 + 0.7 * clamp(sy, 0.0, 1.0));
 }
@@ -57,17 +55,13 @@ vec4 cloth(vec2 p, vec4 m, float foldN) {
   float sy = (p.y - botY) / max(top - botY, 1e-4); // 0 at the hem, 1 at the top edge
   float pull = sidePull(sy, gT);
   float xc = (x - pull) / (1.0 - 2.0 * pull);
-  // uneven folds: their width, depth and course along the cloth all wander
   float wander = (noise1(0.5 * foldN * xc + 2.5 * sy + 5.3) - 0.5) * 2.4 * (1.0 - sy);
   float ph = 2.0 * PI * (foldN * xc + 0.6 * noise1(0.7 * foldN * xc + 1.7)) + wander;
   float d = 0.15 + 0.85 * noise1(1.1 * foldN * xc + 1.4 * sy + 7.0);
-  // deepest near the bunched top, relaxing toward the hem
   float amp = DEPTH * depth * gT * (0.3 + 0.7 * sy * sqrt(max(sy, 0.0))) / max(foldN, 2.0);
-  // the free sides of the cloth hang flat
   float w = 0.6 / foldN;
   amp *= smoothstep(0.0, w, xc) * smoothstep(0.0, w, 1.0 - xc);
   float prof = 0.5 - 0.5 * cos(ph); // 1 on a ridge, 0 in a valley
-  // small sagging creases where the fabric piles up under the top edge
   float dt = (1.0 - sy) * (top - botY);
   float crease = exp(-30.0 * dt) * (0.5 + 0.5 * sin(80.0 * dt + 0.7 * ph));
   bool on = sy >= 0.0 && sy <= 1.0 && xc >= 0.0 && xc <= 1.0;
@@ -76,10 +70,8 @@ vec4 cloth(vec2 p, vec4 m, float foldN) {
 
 vec4 transition (vec2 uv) {
   float t = progress;
-  // the top edge falls first and the hem follows later: the cloth collapses as it slides down
   float topY = 1.0 - 1.06 * t * (0.35 + 0.65 * t);
   float botY = -0.75 * t * t * t;
-  // the folds form as soon as the top is let go
   float f = 1.0 - (1.0 - t) * (1.0 - t) * (1.0 - t);
   float foldN = max(1.0, floor(folds * min(ratio, 1.0) + 0.5));
   float shiftX = sway * 0.035 * sin(2.0 * PI * t) * f;
@@ -113,7 +105,6 @@ vec4 transition (vec2 uv) {
   float zHit = zB;
   if (found && zA > zB) {
     if (onA) {
-      // crossed the surface: refine between the last two steps
       zHit = mix(zA, zB, dA / (dA - dB));
     } else {
       // came in through the top edge: find where the ray first meets the cloth,
@@ -144,13 +135,11 @@ vec4 transition (vec2 uv) {
     // (capped so that the texture never runs backwards where the folds bunch up)
     float mu = min(0.25 * slope * slope / (1.0 + 0.25 * slope * slope), 0.5);
     float u = xc - mu * sin(2.0 * ph) / (4.0 * PI * foldN);
-    // and pushed together under the top edge
     float h = max(topY - botY, 1e-4);
     float comp = max(1.0 - h, 0.0);
     float v = sy * (1.0 - comp) + comp * sy * sy * sy;
     vec4 tex = getFromColor(mirror(vec2(u, v)));
-    float span = topEdge(hp.x - shiftX, m) - botY; // local height of the cloth
-    // surface normal from the height of the cloth around the visible point
+    float span = topEdge(hp.x - shiftX, m) - botY;
     float e = 0.002;
     float hx = cloth(hp + vec2(e, 0.0), m, foldN).x;
     float hy = cloth(hp + vec2(0.0, e), m, foldN).x;
@@ -159,10 +148,8 @@ vec4 transition (vec2 uv) {
     vec3 nrm = normalize(vec3(-(hx0 - hit.x) / e, -(hy0 - hit.x) / e, 1.0));
     vec3 light = normalize(vec3(-0.45, 0.35, 1.0));
     float diffuse = mix(1.0, max(dot(nrm, light), 0.0) / light.z, min(1.0, 3.0 * f));
-    // soft ambient occlusion in the valleys, deeper where the folds are deep
     float valley = 1.0 - (0.5 - 0.5 * cos(ph));
     float ao = 1.0 - 0.6 * depth * f * valley * valley * (0.35 + 0.65 * sy);
-    // the rolled top edge gets less light
     float rim = exp(-(1.0 - sy) * span * 70.0) * 0.35 * f;
     // below the surface, the ray sees the shaded inside of a fold through the top edge
     float under = max(hit.x - zHit, 0.0);
@@ -175,7 +162,6 @@ vec4 transition (vec2 uv) {
     cover = aa > 0.0 ? clamp(inside / aa, 0.0, 1.0) : 1.0;
     if (cover >= 1.0) return col;
   }
-  // soft shadow of the cloth, held a little away from the incoming image, gone once it has left
   vec4 to = getToColor(uv);
   float x = uv.x - shiftX;
   float pull = sidePull((uv.y - botY) / max(topEdge(x, m) - botY, 1e-4), f);

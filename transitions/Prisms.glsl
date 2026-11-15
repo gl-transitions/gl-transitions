@@ -17,7 +17,6 @@ uniform bool horizontal; // = false
 uniform vec4 backColor; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 const float PI = 3.141592653589793;
-// width of the anti-aliased edges, in frame heights
 const float EDGE = 0.002;
 
 vec4 transition (vec2 uv) {
@@ -36,7 +35,6 @@ vec4 transition (vec2 uv) {
   for (int d = -1; d <= 1; d++) {
     float i = floor(a * n) + float(d);
     if (i < 0.0 || i > n - 1.0) continue;
-    // each prism turns after a delay that grows across the frame, left to right or top to bottom
     float order = (horizontal ? n - 1.0 - i : i) / (n - 1.0);
     float t = clamp((progress - stagger * order) / (1.0 - stagger), 0.0, 1.0);
     t = mix(t, t * t * (3.0 - 2.0 * t), 0.7);
@@ -54,7 +52,6 @@ vec4 transition (vec2 uv) {
       float u = f == 0 ? (x + s) / c : (x - c) / s;
       float z = f == 0 ? u * s + c : s - u * c;
       if (abs(u) > 1.0 || z <= z2) continue;
-      // nearer parts look bigger
       float scale = 1.0 - k * (z - 1.0);
       float y = (b - 0.5) * scale + 0.5;
       if (y < 0.0 || y > 1.0) continue;
@@ -65,7 +62,6 @@ vec4 transition (vec2 uv) {
       float sa = (i + 0.5 + 0.5 * u) / n;
       vec2 p = horizontal ? vec2(y, sa) : vec2(sa, y);
       vec4 img = f == 0 ? getFromColor(p) : getToColor(p);
-      // lit from the front and the incoming side: the outgoing face darkens as it turns away
       float lambert = clamp(f == 0 ? c - 0.6 * s : s + 0.6 * c, 0.0, 1.0);
       vec4 color = vec4(img.rgb * mix(1.0 - shading, 1.0, lambert), img.a);
       if (z > z1) {

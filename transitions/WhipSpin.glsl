@@ -21,7 +21,6 @@ float hash(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// fold the coordinates back into the image so that the rotated frame stays filled
 vec2 mirror(vec2 v) {
   vec2 m = mod(v, 2.0);
   return mix(m, 2.0 - m, step(1.0, m));
@@ -42,7 +41,6 @@ float rollAngle(float t) {
 vec4 transition(vec2 uv) {
   float p = progress;
   float h = 1.0 - abs(2.0 * p - 1.0); // 0 at both ends, 1 at the cut
-  // the shutter is open longer as the spin speeds up, and closed at both ends
   float shutter = blur * 0.1 * h;
   float scale = 1.0 + zoom * h * h * h;
   vec2 q = (uv - 0.5) * vec2(ratio, 1.0);

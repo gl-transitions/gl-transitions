@@ -14,7 +14,6 @@ uniform vec4 background; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 // width of a character cell, in cell heights
 const float ASPECT = 0.6;
-// half width of the strokes, in cell heights
 const float STROKE = 0.05;
 
 float hash12(vec2 p) {
@@ -23,15 +22,13 @@ float hash12(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// distance to the segment from a to b
 float segment(vec2 q, vec2 a, vec2 b) {
   vec2 pa = q - a;
   vec2 ba = b - a;
   return length(pa - ba * clamp(dot(pa, ba) / dot(ba, ba), 0.0, 1.0));
 }
 
-// distance to the strokes of the character of this density, from 0 (" ") to 9 ("@"),
-// at q, in cell heights from the cell's center
+// distance to the strokes of the character of density g, 0 (" ") to 9 ("@"), q in cell heights from its center
 float glyph(float g, vec2 q) {
   if (g < 0.5) return 1.0; // " "
   if (g < 1.5) return length(q - vec2(0.0, -0.27)) - 0.035; // "."
@@ -67,12 +64,10 @@ float glyph(float g, vec2 q) {
   return d - 0.8 * STROKE;
 }
 
-// the brightness of a color, from 0 to 1, as a character density
 float density(vec4 c) {
   return floor(pow(clamp(dot(c.rgb, vec3(0.299, 0.587, 0.114)) * c.a, 0.0, 1.0), 0.75) * 9.99);
 }
 
-// the average color of a cell, from 4 samples
 vec4 cellColor(vec2 center, vec2 dims, bool incoming) {
   vec4 c = vec4(0.0);
   for (int i = 0; i < 4; i++) {
@@ -92,8 +87,6 @@ vec4 transition(vec2 uv) {
   vec2 center = (cell + 0.5) * dims;
   vec2 q = (fp - center) / h;
 
-  // each cell switches to the incoming image at its own time, scrambling through
-  // random characters around it
   float r = hash12(cell + 100.0);
   float at = 0.4 + 0.2 * r;
   bool incoming = p > at;
@@ -107,14 +100,10 @@ vec4 transition(vec2 uv) {
   float cover = 1.0 - smoothstep(-0.02, 0.02, glyph(g, q));
   vec3 tint = colored ? mix(c.rgb, c.rgb / max(max(c.r, max(c.g, c.b)), 0.05), 0.7) : ink.rgb;
   float alpha = colored ? c.a : ink.a * c.a;
-  // where the image is transparent, so are the characters and their background
-  // colored characters glow faintly over their cell, so the picture stays readable
   vec3 behind = colored ? mix(background.rgb, c.rgb, 0.3) : background.rgb;
   vec4 back = vec4(behind, background.a * c.a);
   vec4 text = mix(back, vec4(clamp(tint, 0.0, 1.0), alpha), cover);
 
-  // each cell dissolves into its character at its own time, from 0.05 to 0.35,
-  // and back into the incoming image from 0.65 to 0.95
   float into = 0.05 + 0.22 * hash12(cell + 200.0);
   float outof = 0.95 - 0.22 * hash12(cell + 300.0);
   float show = smoothstep(into, into + 0.08, p) * (1.0 - smoothstep(outof - 0.08, outof, p));

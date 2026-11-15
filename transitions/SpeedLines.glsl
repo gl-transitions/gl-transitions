@@ -15,7 +15,6 @@ uniform float focus; // = 0.35
 uniform float zoom; // = 0.12
 
 const float PI = 3.141592653589793;
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0012;
 
 float hash12(vec2 p) {
@@ -28,7 +27,6 @@ float hash12(vec2 p) {
 // each line shoots in up to a little later than the others and retracts the same way
 float reachOf(float h) {
   float d = 0.05 * h;
-  // fast at first, slowing down as the lines close in, then the other way round on the way out
   float a = 1.0 - clamp((progress - d) / 0.4, 0.0, 1.0);
   float b = clamp((progress - 0.5 - d) / 0.4, 0.0, 1.0);
   return (1.0 - a * a * a) * (1.0 - b * b * b);
@@ -43,17 +41,13 @@ float layer(float a, float e, float r, float n, float seed, float E) {
   float h1 = hash12(vec2(cell, seed));
   float h2 = hash12(vec2(cell, seed + 7.0));
   float h3 = hash12(vec2(cell, seed + 13.0));
-  // a line in most cells
   float on = step(0.22, h1);
-  // where the tip of the line is at the peak, then where it is now
-  // the lines are redrawn a dozen times along the way, each time a bit longer or shorter
   float h4 = hash12(vec2(cell, seed + 50.0 + floor(progress * 12.0)));
   // (a share of the way from the frame's edge to the focus point, so that the burst stays even
   // when the focus point is off-center)
   float len = 1.0 - 0.85 * h2 * h2 - 0.15 * h4;
   float tipPeak = E * (1.0 - (1.0 - focus) * (0.55 + 0.45 * len));
   float tip = mix(E + 0.05, tipPeak, reachOf(h3));
-  // the line widens from a sharp tip to its full width over a taper length
   float t = clamp((e - tip) / max(E * (0.2 + 0.5 * h2), 1e-4), 0.0, 1.0);
   float cellWidth = 2.0 * PI * r / n;
   // its position across the cell, and its width, kept so that its antialiased edges stay in the cell
@@ -80,7 +74,6 @@ vec4 transition(vec2 uv) {
   vec2 exits = room / max(abs(w), vec2(1e-6));
   float E = e * min(exits.x, exits.y);
 
-  // the punch in: eased in toward the cut, then the incoming image eases back out of it
   float k = p < 0.5 ? smoothstep(0.0, 0.5, p) : 1.0 - smoothstep(0.5, 1.0, p);
   float s = 1.0 - zoom * k * k;
   // (between the focus point and uv, so in the frame)
@@ -93,7 +86,6 @@ vec4 transition(vec2 uv) {
   l = max(l, layer(fract(a + 0.5 / n), e, r, n, 31.0, E));
   l *= lineColor.a;
 
-  // lines laid over the image (premultiplied)
   vec4 pc = vec4(c.rgb * c.a, c.a);
   pc = pc * (1.0 - l) + vec4(lineColor.rgb, 1.0) * l;
   return pc.a > 0.0 ? vec4(pc.rgb / pc.a, pc.a) : vec4(0.0);

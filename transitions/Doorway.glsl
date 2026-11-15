@@ -23,7 +23,6 @@ vec2 leafHit (float x, float w, float eye, float a) {
   return vec2(t, hit.x * c - hit.y * s);
 }
 
-// screen x of a point (x, z) seen from the eye
 float project (vec2 p, float w, float eye) {
   return 0.5 * w + (p.x - 0.5 * w) * eye / (eye + p.y);
 }
@@ -32,7 +31,6 @@ float easeInOut (float t) {
   return t < 0.5 ? 4.0 * t * t * t : 1.0 - 4.0 * (1.0 - t) * (1.0 - t) * (1.0 - t);
 }
 
-// the room behind: the incoming image coming forward, and its reflection on the floor
 vec4 room (vec2 uv, float x, float edgeL, float edgeR, float close, float dolly) {
   float size = mix(max(depth, 1.0), 1.0, dolly);
   vec2 p = (uv - 0.5) * size + 0.5;
@@ -45,8 +43,6 @@ vec4 room (vec2 uv, float x, float edgeL, float edgeR, float close, float dolly)
     float f = reflection * (1.0 - r.y) * m.x * smoothstep(0.0, 0.01, r.y);
     c += getToColor(clamp(r, 0.0, 1.0)) * f * (1.0 - m.y);
   }
-  // the lit room spills its light through the opening, and the leaves cast soft shadows
-  // along their edges; both settle as the doors open
   float wl = 0.03 + 0.12 * close;
   float shadow = (1.0 - smoothstep(0.0, wl, x - edgeL)) + (1.0 - smoothstep(0.0, wl, edgeR - x));
   float light = (1.0 + 0.6 * close * close) * (1.0 - 0.7 * close * min(shadow, 1.0));
@@ -58,11 +54,9 @@ vec4 transition (vec2 uv) {
   float x = uv.x * w;
   // camera distance: the leaves always stay in front of it
   float eye = max(w, 1.0) * (0.5 + 0.2 / max(perspective, 0.01));
-  // the leaves swing until their free edges have just left the frame
   float swing = progress * progress * (3.0 - 2.0 * progress);
   float a = min(atan(2.0 * eye / w) + 0.1, 0.5 * PI) * swing;
   float dolly = mix(easeInOut(progress), progress, 0.3);
-  // the free edge of the left leaf, front and back of its thickness, as (x, z)
   float hw = 0.5 * w;
   vec2 front = hw * vec2(cos(a), -sin(a));
   float thick = 0.02 * w * (1.0 - smoothstep(0.8, 1.0, swing));
@@ -75,12 +69,9 @@ vec4 transition (vec2 uv) {
   float lx = left ? x : w - x;
   vec2 hit = leafHit(lx, w, eye, a);
   float s = clamp(hit.y, 0.0, hw);
-  // the ray meets the leaf nearer to the eye, where it looks bigger
   float v = 0.5 + (uv.y - 0.5) * hit.x;
   vec4 leaf = getFromColor(clamp(vec2(left ? s / w : 1.0 - s / w, v), 0.0, 1.0));
-  // turned away from the light, and darker toward the free edge as the opening deepens
   leaf.rgb *= 1.0 - 0.5 * (1.0 - cos(a)) - 0.25 * sin(a) * (s / hw);
-  // the edge of the leaf catches the light coming from the room
   vec4 side = getFromColor(clamp(vec2(left ? 0.499 : 0.501, v), 0.0, 1.0));
   side.rgb = min(side.rgb * 1.5, vec3(side.a));
   // sharp at both ends, so that nothing of the doors is left at the start and the end

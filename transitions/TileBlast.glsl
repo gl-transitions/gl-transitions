@@ -23,7 +23,6 @@ const float WAVE = 0.75;
 const float JITTER = 0.06;
 const float FLIGHT = 0.45;
 const float FINAL = 0.75;
-// width of the anti-aliased edges, in frame heights
 const float EDGE = 0.0015;
 // direction toward the light, upper left, and the half vector between it and the eye
 const vec3 L = vec3(-0.32, 0.4, 0.86);
@@ -37,14 +36,12 @@ vec4 hash4(vec2 p) {
 
 // how far the tile of cell g is along its flight, 0 at rest to 1 gone: a kick, then it speeds up toward the eye
 float flight(vec2 g, vec2 size, vec2 c, float dmax) {
-  // the tiles around the blast point leave first, right at the start, and the farthest ones last
   float d = clamp((length((g + 0.5) * size - c) - 0.7 * size.y) / dmax, 0.0, 1.0);
   float t = (progress - WAVE * d - JITTER * hash4(g).x) / FLIGHT;
   t = clamp(max(t, (progress - FINAL) / (1.0 - FINAL)), 0.0, 1.0);
   return t * (0.55 + 0.45 * t);
 }
 
-// the unit direction the tile of cell g flies along, away from the blast point
 vec2 flyDir(vec2 g, vec2 size, vec2 c) {
   vec2 v = (g + 0.5) * size - c;
   float l = length(v);
@@ -109,7 +106,6 @@ vec4 transition(vec2 uv) {
       vec2 dir = flyDir(g, size, c);
       vec2 h0 = (g + 0.5) * size;
       vec3 tc = vec3(h0 + dir * DRIFT * u, ZEND * u);
-      // a spin in the frame, then a tumble around an axis across the flight
       float a = spinAmt * 2.4 * (h.x - 0.5) * u;
       float b = spinAmt * (0.5 + 0.7 * h.y) * (h.z < 0.5 ? -1.0 : 1.0) * 1.8 * u;
       vec3 ax = normalize(vec3(-dir.y + 0.4 * (h.w - 0.5), dir.x, 0.0));
@@ -128,7 +124,6 @@ vec4 transition(vec2 uv) {
       float e = min(box.x, box.y) * EYE / (EYE - tc.z) * max(abs(nrm.z), 0.15);
       float m = clamp(e / (2.0 * EDGE) + 0.5 + 0.5 * (1.0 - smoothstep(0.0, 0.06, u)), 0.0, 1.0);
       if (m <= 0.0) continue;
-      // lit from the upper left, with a pale rim and a glint as a tile faces the light; unchanged at rest
       vec3 nf = den < 0.0 ? nrm : -nrm;
       float lit = 1.0 - 0.6 * shadeAmt * (1.0 - clamp(dot(nf, L) / L.z, 0.0, 1.0));
       float lift = smoothstep(0.0, 0.15, u);
@@ -143,7 +138,6 @@ vec4 transition(vec2 uv) {
     }
   }
 
-  // soft shadows of the tiles that have just lifted, on the incoming image and the tiles below them
   float shTo = 0.0, sh1 = 0.0, sh2 = 0.0;
   if (shadeAmt > 0.0) {
     vec2 base = floor(P / size);
@@ -169,7 +163,6 @@ vec4 transition(vec2 uv) {
   }
   float dark = 0.5 * shadeAmt;
 
-  // the incoming image settles back from a slight zoom, a little dimmed while the tiles fly
   float settle = 1.0 - progress;
   vec2 tq = c + (P - c) / (1.0 + 0.06 * settle * settle);
   vec4 col = getToColor(tq / aspect);

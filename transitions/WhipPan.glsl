@@ -26,7 +26,6 @@ float rand(vec2 co) {
 
 vec4 transition(vec2 uv) {
   vec2 d = sign(direction);
-  // ease in and out: slow start, whip in the middle, slow landing
   float p = progress;
   float h = 1.0 - abs(2.0 * p - 1.0); // 0 at both ends, 1 in the middle
   // mostly cubic, with a bit of linear so that it starts moving at once

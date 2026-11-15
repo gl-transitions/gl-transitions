@@ -34,19 +34,16 @@ vec4 transition(vec2 uv) {
   float n = clamp(notch, 0.0, 0.9);
   float h = radians(0.5 * clamp(width, 20.0, 160.0));
   float cot = cos(h) / sin(h);
-  // outward normals of the tip's edges and of the notch's edges
   vec2 tipN = vec2(sin(h), cos(h));
   float notchLen = length(vec2(1.0, n * cot));
   vec2 notchN = vec2(1.0, n * cot) / notchLen;
   // how far the tip must pass a point for the soft edge to clear it
   float tipPad = s / sin(h);
 
-  // The frame's corners in the arrow's frame
   vec2 c1 = vec2(0.5 * ratio, 0.5);
   vec2 c2 = vec2(0.5 * ratio, -0.5);
   vec2 k1 = vec2(abs(dot(c1, dir)), abs(dot(c1, across)));
   vec2 k2 = vec2(abs(dot(c2, dir)), abs(dot(c2, across)));
-  // half extent of the frame along the direction, and where its back edge crosses the axis
   float e = max(k1.x, k2.x);
   float r = 0.5 / max(abs(dir.x) / ratio, abs(dir.y));
   // To cover the frame, the tip must be ahead of every corner, and the notch behind every
@@ -67,11 +64,8 @@ vec4 transition(vec2 uv) {
     o = 0.0;
     l = cover * t * (0.4 + 0.6 * t);
   } else {
-    // while it flies, its larger side (length or span) is about the frame's smaller side
     float l0 = 0.92 * min(1.0, ratio) / max(1.0, 2.0 * tan(h));
-    // starts just behind the frame, flies to the middle, then swells
     float o0 = -e - 2.0 * tipPad - body * l0;
-    // it is already moving when it enters, and slows down as it starts to swell
     float u = 1.0 - clamp(t / 0.65, 0.0, 1.0);
     float fly = 1.0 - u * u * u;
     // the swell speeds up and still moves at the end, so the last corners do not linger
@@ -80,7 +74,6 @@ vec4 transition(vec2 uv) {
     l = mix(l0, cover, grow * grow * (2.0 - grow));
   }
 
-  // the nested chevrons follow the first one, each tucked behind the previous one's notch
   float gap = (1.0 - n) * 1.35;
   float d = arrow(q, o + body * l, o - body * l, tipN, notchN);
   for (int i = 1; i < 3; i++) {

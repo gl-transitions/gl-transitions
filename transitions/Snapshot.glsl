@@ -15,10 +15,9 @@ uniform float shadow; // = 0.45
 uniform vec4 borderColor; // = vec4(0.96, 0.94, 0.89, 1.0)
 
 const float SHRINK = 0.24; // how much smaller the photo gets before it drops
-const float RADIUS = 0.008; // corner radius of the photo, in frame heights
-const float AA = 0.0015; // width of the antialiased edges, in frame heights
+const float RADIUS = 0.008;
+const float AA = 0.0015;
 
-// signed distance to a rounded box of half size b and corner radius r
 float roundedBox(vec2 q, vec2 b, float r) {
   vec2 d = abs(q) - b + r;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
@@ -35,15 +34,12 @@ vec4 transition(vec2 uv) {
   vec2 halfImage = 0.5 * asp;
   vec2 halfCard = halfImage + border;
 
-  // the photo shrinks right after the flash, then falls with gravity, turning as it goes
   float k = smoothstep(0.05, 0.4, p);
   float t = clamp((p - 0.3) / 0.7, 0.0, 1.0);
   float fall = t * t;
   float s = 1.0 - SHRINK * k;
   float a = -tilt * (0.12 * k + 0.88 * fall);
-  // fall far enough for the turned photo and its shadow to be out of the frame at the end
   float bound = (abs(sin(tilt)) * halfCard.x + abs(cos(tilt)) * halfCard.y) * (1.0 - SHRINK);
-  // it is lifted a little toward the viewer before it falls
   float lift = 0.035 * k * (1.0 - fall);
   vec2 center = vec2(0.08 * fall, lift - (0.5 + bound + 0.1) * fall);
 
@@ -52,7 +48,6 @@ vec4 transition(vec2 uv) {
   float ca = cos(a), sa = sin(a);
   mat2 unrotate = mat2(ca, -sa, sa, ca);
 
-  // the incoming image, already behind the photo, in its soft shadow
   vec4 col = getToColor(uv);
   float sh = shadow * k;
   if (sh > 0.0) {
@@ -63,7 +58,6 @@ vec4 transition(vec2 uv) {
   }
   col = premultiply(col);
 
-  // the photo: the outgoing image, framed by its border
   vec2 r = unrotate * (q - center) / s;
   float dCard = roundedBox(r, halfCard, rad) * s;
   float dImage = roundedBox(r, halfImage, 0.0) * s;

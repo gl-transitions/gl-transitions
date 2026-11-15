@@ -20,12 +20,10 @@ float hash(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
 
-// the pushed strip: the outgoing image, and the incoming one next to it all around
 vec4 strip(vec2 q, vec2 d) {
   if (q.x >= 0.0 && q.x <= 1.0 && q.y >= 0.0 && q.y <= 1.0) {
     return getFromColor(q);
@@ -43,7 +41,6 @@ vec4 transition(vec2 uv) {
   float pos = p * p * p * (p * (p * 6.0 - 15.0) + 10.0);
   float speed = 30.0 * p * p * (1.0 - p) * (1.0 - p) / 1.875;
   float len = clamp(blur, 0.0, 1.0) * 0.25 * speed;
-  // the lens and the fringes grow, peak in the middle and relax
   float h = 1.0 - abs(2.0 * p - 1.0);
   float hs = h * h * (3.0 - 2.0 * h);
   float k = clamp(strength, 0.0, 1.0) * 0.75 * hs;
@@ -73,7 +70,6 @@ vec4 transition(vec2 uv) {
     alpha += c.a;
   }
   col /= max(wsum, vec3(1e-5));
-  // a touch of lens vignetting while the lens is strong
   col *= 1.0 - 0.45 * k * r2;
   return vec4(col, alpha / float(SAMPLES));
 }

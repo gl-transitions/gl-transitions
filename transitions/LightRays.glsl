@@ -17,7 +17,6 @@ uniform float intensity; // = 1.5
 uniform vec3 tint; // = vec3(1.0, 0.82, 0.55)
 
 const int TAPS = 20;
-// number of shafts around the center
 const float SHAFTS = 23.0;
 const float PI = 3.141592653589793;
 
@@ -37,18 +36,15 @@ float shaftNoise(float t, float n, float seed) {
   return mix(a, b, f * f * (3.0 - 2.0 * f));
 }
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
 
-// the light of a pixel (premultiplied): its color above the threshold
 vec3 glow(vec4 c, float knee) {
   float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
   return c.rgb * c.a * smoothstep(knee, knee + 0.2, lum);
 }
 
-// the light at a ray tap: one image, or both during the short switch
 vec3 light(vec2 st, float knee, float m) {
   if (m <= 0.0) return glow(getFromColor(st), knee);
   if (m >= 1.0) return glow(getToColor(st), knee);
@@ -57,7 +53,6 @@ vec3 light(vec2 st, float knee, float m) {
 
 vec4 transition(vec2 uv) {
   float p = progress;
-  // the rays grow on the outgoing image, and shrink back into the incoming one
   float amount = p < 0.5 ? smoothstep(0.0, 0.5, p) : 1.0 - smoothstep(0.5, 1.0, p);
   float peak = amount * amount * amount;
   float m = smoothstep(0.46, 0.54, p);
@@ -65,27 +60,22 @@ vec4 transition(vec2 uv) {
   vec4 toColor = getToColor(uv);
   if (amount <= 0.0) return m < 0.5 ? fromColor : toColor;
 
-  // the rays stream away from a center drifting slowly across the frame
   vec2 origin = center + vec2(drift * (p - 0.5), 0.0);
   float len = reach * amount;
-  // more and more of the image catches the light as the rays grow
   float knee = mix(threshold, 0.75 * threshold, peak);
   // a small shift of the taps, under their spacing, blends them into smooth shafts;
   // hashed by integer cell so that every GPU computes the same shift
   float jitter = hash12(floor(uv * vec2(ratio, 1.0) * 997.0));
 
-  // the light gathered on the way to the center, fading with the distance it travels
   vec3 rays = vec3(0.0);
   float total = 0.0;
   for (int i = 0; i < TAPS; i++) {
     float s = (float(i) + jitter) / float(TAPS);
     float w = exp(-2.0 * s);
-    // warm white near the sources, tinted further along the rays
     vec3 hue = mix(vec3(1.0), tint, smoothstep(0.0, 0.6, s));
     rays += w * hue * light(mirror(mix(uv, origin, s * len)), knee, m);
     total += w;
   }
-  // the light breaks into shafts of different strengths, slowly turning
   vec2 d = (uv - origin) * vec2(ratio, 1.0);
   // atan is undefined at the center itself
   float turn = length(d) > 1e-6 ? atan(d.y, d.x) / (2.0 * PI) + 0.5 : 0.0;
@@ -96,8 +86,7 @@ vec4 transition(vec2 uv) {
   // compressed, so that bright areas never flatten into white
   rays = 0.9 * (1.0 - exp(-rays));
 
-  // the image stays sharp, with a slight lift of the exposure at the peak; the rays are screened
-  // on top of its colors and add nothing to its alpha
+  // the image stays sharp, with a slight lift at the peak; the rays are screened on top and add nothing to its alpha
   vec4 c = mix(vec4(fromColor.rgb * fromColor.a, fromColor.a), vec4(toColor.rgb * toColor.a, toColor.a), m);
   if (c.a <= 0.0) return vec4(0.0);
   vec3 base = min(c.rgb / c.a * (1.0 + 0.2 * peak), 1.0);

@@ -20,7 +20,6 @@ float hash (vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// value noise, smooth along both axes
 float vnoise (vec2 p) {
   vec2 i = floor(p);
   vec2 f = fract(p);
@@ -52,12 +51,12 @@ vec2 stroke (float k, float t, float u, float U, float n, float h) {
   // at the end even the shortest bristles, at the rounded corners, are past the far edge with their dry trail
   float head = mix(-U, U + lag + 0.3 * h + 1.15 * dry + 0.01, s);
   float b = bristles(t, k * 3.7, k * 17.0);
-  float front = head - lag * (1.0 - b) - 0.3 * h * t * t; // a rounded, ragged head
+  float front = head - lag * (1.0 - b) - 0.3 * h * t * t;
   float streak = bristles(t * 1.7, x * 2.0 / h, k * 5.0 + 9.0);
   float along = clamp(((front - x) / (dry + 0.001) - 0.1 - 0.8 * streak) * 6.0, 0.0, 1.0);
   float fringe = 0.1 + 0.7 * r;
   float e = (abs(t) - 1.0) / fringe; // < 0 in the core of the stroke
-  float reach = 0.5 + 0.5 * vnoise(vec2(x * 2.5 / h, k * 7.0 + (t > 0.0 ? 3.0 : 0.0))); // the edge wanders
+  float reach = 0.5 + 0.5 * vnoise(vec2(x * 2.5 / h, k * 7.0 + (t > 0.0 ? 3.0 : 0.0)));
   float hair = clamp(bristles(t * 1.4, x * 3.0 / h, k * 11.0 + 3.0) * 2.0 - 0.5, 0.0, 1.0);
   float side = clamp((reach * hair - e) * 12.0 + 1.0, 0.0, 1.0);
   float cover = along * side;
@@ -75,11 +74,11 @@ vec4 transition (vec2 uv) {
   float U = 0.5 * (abs(c) * ratio + abs(sn));
   float V = 0.5 * (abs(sn) * ratio + abs(c));
   float n = max(1.0, floor(strokes + 0.5));
-  float h = 2.0 * V / n; // height of a stroke
+  float h = 2.0 * V / n;
   // waves shared by the neighbouring strokes so that they always tile the frame
   float A = 0.12 * waviness * h;
   float w = v + A * sin(u * 5.0 / U + v * 2.0 / h + 1.3) + 0.5 * A * sin(u * 11.0 / U - v * 3.0 / h);
-  float y = (V + 1.5 * A - w) / (2.0 * V + 3.0 * A) * n; // strokes go from top to bottom
+  float y = (V + 1.5 * A - w) / (2.0 * V + 3.0 * A) * n;
   float hh = (2.0 * V + 3.0 * A) / n;
   float k = clamp(floor(y), 0.0, n - 1.0);
   float cover = 0.0;
@@ -89,7 +88,7 @@ vec4 transition (vec2 uv) {
     if (j >= 0.0 && j <= n - 1.0) {
       vec2 s = stroke(j, (y - j - 0.5) * 2.0, u, U, n, hh);
       cover = max(cover, s.x);
-      shade = mix(shade, s.y, s.x); // the latest stroke is on top
+      shade = mix(shade, s.y, s.x);
     }
   }
   vec4 from = getFromColor(uv);

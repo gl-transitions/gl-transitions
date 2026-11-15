@@ -21,7 +21,6 @@ const int PANELS = 6;
 const float OPEN = 0.28;
 // the first push starts at START, the last one ends at 1 - START
 const float START = 0.1;
-// width of the antialiased edges, as a part of the frame's shorter side
 const float EDGE = 0.0025;
 
 // panel i of the layout: xy its bottom-left corner, zw its top-right corner, in uv; panels in reading order
@@ -69,7 +68,6 @@ float span1(float x, float lo, float hi, float aa) {
   return smoothstep(lo - aa, lo + aa, x) * (1.0 - smoothstep(hi - aa, hi + aa, x));
 }
 
-// signed distance from p to the box [lo, hi]
 float boxDist(vec2 p, vec2 lo, vec2 hi) {
   vec2 d = abs(p - 0.5 * (lo + hi)) - 0.5 * (hi - lo);
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
@@ -77,14 +75,11 @@ float boxDist(vec2 p, vec2 lo, vec2 hi) {
 
 vec4 transition(vec2 uv) {
   bool portrait = ratio < 1.0;
-  // frame coordinates, in shorter sides
   vec2 aspect = vec2(ratio, 1.0) / min(ratio, 1.0);
   vec2 p = uv * aspect;
-  // the gutters open then close, 0 at both ends
   float open = smoothstep(0.0, OPEN, progress) * (1.0 - smoothstep(1.0 - OPEN, 1.0, progress));
   float g = gutter * open;
   float ov = clamp(overlap, 0.0, 0.9);
-  // duration of a push, the pushes starting one after another over [START, 1 - START]
   float span = (1.0 - 2.0 * START) / (1.0 + float(PANELS - 1) * (1.0 - ov));
 
   vec4 color = vec4(0.0);
@@ -98,9 +93,7 @@ vec4 transition(vec2 uv) {
     lo = mix(lo, vec2(-1.0), step(r.xy, vec2(0.0)));
     hi = mix(hi, aspect + 1.0, step(vec2(1.0), r.zw));
     float t = clamp((progress - START - float(i) * span * (1.0 - ov)) / span, 0.0, 1.0);
-    // the panel being pushed lifts off the paper: its shadow grows longer and softer
     float lift = 1.0 + 1.2 * sin(3.141592653589793 * t);
-    // soft drop shadow down and to the right on the paper
     float sd = boxDist(p - vec2(0.2, -0.35) * g * lift, lo, hi);
     shade = max(shade, (1.0 - smoothstep(-0.2 * g, 0.6 * g * lift + 1e-4, sd)) / sqrt(lift));
     // separable coverage, so that the panels of the grid add up to exactly 1 once the gutters close
@@ -120,15 +113,12 @@ vec4 transition(vec2 uv) {
         vec2 q = uv - dir * e * (len + w);
         // position along dir from the outgoing image's trailing edge (inside it when >= 0)
         float a = dot(q - (dir.x + dir.y < 0.0 ? r.zw : r.xy), dir);
-        // the same in frame units, for antialiasing
         float af = a * abs(dot(aspect, dir));
         float wf = w * abs(dot(aspect, dir));
         float fromW = smoothstep(-EDGE, 0.0, af);
         float toW = 1.0 - smoothstep(-wf, -wf + EDGE, af);
-        // the incoming image's leading edge casts a soft shadow on the band
         float bandShade = 1.0 - shadow * 0.5 * (1.0 - smoothstep(-wf, -wf + 0.35 * wf + 1e-4, af));
         vec4 b = vec4(accent.rgb * bandShade, accent.a);
-        // the antialiased ends of the images are sampled inside the panel
         c = mix(b, getFromColor(clamp(q, r.xy, r.zw)), fromW);
         c = mix(c, getToColor(clamp(q + dir * (len + w), r.xy, r.zw)), toW);
       }

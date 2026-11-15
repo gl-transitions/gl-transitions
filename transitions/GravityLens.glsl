@@ -16,9 +16,7 @@ uniform vec4 hole; // = vec4(0.0, 0.0, 0.0, 1.0)
 const float OVERSHOOT = 0.12;
 // moment the frame is black: the swallow takes a little longer than the release
 const float PEAK = 0.55;
-// half width of the antialiased edge of the disk, in frame heights
 const float AA = 0.002;
-// tint of the light piled up around the disk
 const vec3 WARM = vec3(1.0, 0.86, 0.68);
 
 // fold the coordinates back into the frame, so the image stays filled without smearing its border
@@ -34,7 +32,6 @@ vec4 transition(vec2 uv) {
   float u2 = u * u;
   float k = u2 * (0.6 + 0.4 * u2);
 
-  // measured in frame heights, so the disk is round
   vec2 aspect = vec2(ratio, 1.0);
   vec2 far = max(center, 1.0 - center) * aspect;
   float rh = length(far) * (1.0 + OVERSHOOT) * k;
@@ -48,11 +45,9 @@ vec4 transition(vec2 uv) {
   vec4 c = swallowing ? getFromColor(q) : getToColor(q);
   // the shading fades in with the disk, so it is exactly 0 at both ends
   float amount = smoothstep(0.0, 0.04, rh);
-  // the second, flipped image squeezed between the ring and the disk is dimmer
   float inner = clamp((r - rh) / (re - rh + 1e-4), 0.0, 1.0);
   c.rgb *= 1.0 - 0.7 * amount * (1.0 - inner * inner * (3.0 - 2.0 * inner));
 
-  // light piles up into a ring where the image is most stretched, and into a thin ring hugging the edge
   float g = max(glow, 0.0) * amount;
   float einstein = (r - re) / (0.3 * (re - rh) + 0.01);
   float photon = max(r - rh, 0.0) / (0.006 + 0.012 * rh);

@@ -14,7 +14,6 @@ uniform float zoom; // = 0.35
 // @color Color seen in the gaps between the blocks
 uniform vec4 background; // = vec4(0.0, 0.0, 0.0, 1.0)
 
-// blocks per strip, at most
 const int MAX_BLOCKS = 40;
 
 float hash(vec2 p) {
@@ -35,11 +34,9 @@ vec4 transition(vec2 uv) {
   float strips = vertical ? g.x : g.y;
   // every block of a strip slides along it, so a point can only show a block of its own strip
   float r = min(floor(b * strips), strips - 1.0);
-  // the strips set off one after another, from the top (or the left)
   float rowOrder = strips > 1.0 ? (vertical ? r : strips - 1.0 - r) / (strips - 1.0) : 0.0;
   float st = clamp(stagger, 0.0, 0.95);
   float z = clamp(zoom, 0.0, 0.9);
-  // in blocks
   float an = a * n;
   float bn = b * strips - r;
 
@@ -57,11 +54,8 @@ vec4 transition(vec2 uv) {
     float p = clamp((progress - st * order) / (1.0 - st), 0.0, 1.0);
     p = p * p * (3.0 - 2.0 * p);
     float pin = max(0.0, 1.0 - (1.0 - rear) * (1.0 + (n - 1.0 - i) / n));
-    // about half of the blocks shrink as they leave, and their incoming blocks grow as they come
     float zi = hash(vec2(i, r) + 3.7) < 0.5 ? z : 0.0;
-    // position in the block, from its corner, for the outgoing block (xy), which travels the
-    // frame's length to leave it, and the incoming one (zw), from one length behind; at rest,
-    // the blocks tile the frame exactly
+    // position in the block from its corner: outgoing (xy) leaves over a frame's length, incoming (zw) starts one length behind
     float sFrom = 1.0 - zi * p * p;
     float sTo = 1.0 - zi * (1.0 - pin) * (1.0 - pin);
     vec4 l = vec4(
@@ -72,7 +66,6 @@ vec4 transition(vec2 uv) {
     bool inFrom = all(greaterThanEqual(l.xy, vec2(0.0))) && all(lessThan(l.xy, vec2(1.0)));
     bool inTo = all(greaterThanEqual(l.zw, vec2(0.0))) && all(lessThan(l.zw, vec2(1.0)));
     if (inFrom || inTo) {
-      // back to the frame's coordinates
       vec2 q = (vec2(i, r) + (inTo ? l.zw : l.xy)) / vec2(n, strips);
       if (backward) q.x = 1.0 - q.x;
       q = vertical ? q.yx : q;

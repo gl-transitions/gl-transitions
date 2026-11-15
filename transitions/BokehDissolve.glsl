@@ -15,7 +15,6 @@ uniform float intensity; // = 1.0
 #define PI 3.141592653589793
 const int TAPS = 16;
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -27,7 +26,6 @@ float hash12(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// how much a pixel is a highlight: none below the threshold, full at white
 float highlight(vec4 c, float t) {
   float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
   // nothing is brighter than white, so a threshold of 1 makes no highlights
@@ -37,13 +35,10 @@ float highlight(vec4 c, float t) {
 }
 
 vec4 transition(vec2 uv) {
-  // the lens defocuses then focuses back: 0 at both ends, 1 at the peak
   float t = 1.0 - abs(2.0 * progress - 1.0);
   float k = t * t * (3.0 - 2.0 * t);
-  // the incoming image takes over while everything is out of focus
   float w = smoothstep(0.35, 0.65, progress);
   float r = radius * k;
-  // the highlights weigh more as they swell, so they read as bright discs
   float boost = 12.0 * intensity * k;
 
   // fewer than 3 blades: a round aperture
@@ -59,8 +54,6 @@ vec4 transition(vec2 uv) {
   // each image is only read while it shows
   bool useFrom = w < 1.0;
   bool useTo = w > 0.0;
-  // premultiplied, weighted sums of each image, and the light of their highlights,
-  // starting with the pixel itself
   vec4 s0 = vec4(0.0);
   vec4 s1 = vec4(0.0);
   float t0 = 0.0;
@@ -88,7 +81,6 @@ vec4 transition(vec2 uv) {
     float a = fi * 2.39996323 + spin;
     float d = sqrt((fi + jitter) / float(TAPS));
     if (n > 0.0) {
-      // the aperture's polygon: its boundary in the direction of the tap
       float s = mod(a, sector) - 0.5 * sector;
       d *= apothem / cos(s);
     }

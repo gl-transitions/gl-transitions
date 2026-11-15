@@ -35,7 +35,6 @@ vec2 seedOffset() {
   return vec2(37.0, 17.0) * floor(seed);
 }
 
-// a corner of the cracks: the point p of a grid, moved at random
 vec2 corner(vec2 p) {
   return (p + JITTER * (2.0 * hash32(p + seedOffset()).xy - 1.0)) * cellSize();
 }
@@ -46,7 +45,6 @@ float side(vec2 q, vec2 a, vec2 b) {
   return (d.x * (q.y - a.y) - d.y * (q.x - a.x)) / length(d);
 }
 
-// the cell c is cut into two triangular shards along one of its diagonals, picked at random
 bool diagonalUp(vec2 c) {
   return hash32(c + seedOffset() + 0.5).z > 0.5;
 }
@@ -93,13 +91,11 @@ vec2 impact() {
   return clamp(center, 0.0, 1.0) * vec2(ratio, 1.0);
 }
 
-// distance from the impact to the farthest corner of the frame
 float reach() {
   vec2 c = impact();
   return length(max(c, vec2(ratio, 1.0) - c));
 }
 
-// how far below its center a shard must fall to leave the frame
 float fallMargin() {
   return 0.1 + 1.5 * cellSize();
 }
@@ -111,7 +107,6 @@ float releaseTime(vec2 mid, float dn, float h, float g, float margin) {
   return 0.04 + (latest - 0.04) * (0.8 * pow(dn, 0.8) + 0.2 * h);
 }
 
-// a flash at the impact, at the start
 float flash(vec2 q) {
   float f = sin(3.141592653589793 * clamp(progress / 0.12, 0.0, 1.0));
   vec2 d = q - impact();
@@ -132,7 +127,6 @@ vec4 transition(vec2 uv) {
   // the cracks run from the impact to the farthest corner, before the last shards break loose
   float crackTime = clamp(0.6 * (0.94 - sqrt(2.0 * (1.0 + margin) / g)), 0.05, 0.22);
 
-  // the part of the pane still in place, behind the loose shards
   vec4 pane = vec4(0.0);
   float paneDepth = 1e9;
   vec4 here = locate(a);
@@ -175,7 +169,6 @@ vec4 transition(vec2 uv) {
       vec2 ca = corner(c), cb = corner(c + vec2(1.0, 0.0)), ccc = corner(c + 1.0), cd = corner(c + vec2(0.0, 1.0));
       bool up = diagonalUp(c);
       for (int k = 0; k < 2; k++) {
-        // the corners of the triangle k of the cell, counterclockwise
         vec2 p0 = (k == 1 && !up) ? cb : ca;
         vec2 p1 = k == 0 ? cb : ccc;
         vec2 p2 = (k == 0 && up) ? ccc : cd;
@@ -187,18 +180,15 @@ vec4 transition(vec2 uv) {
         float e = progress - releaseTime(mid, dn, h1.x, g, margin);
         if (e <= 0.0) continue;
         vec3 h2 = hash32(c + vec2(0.73, 0.19) * float(k + 1) + seedOffset());
-        // pushed away from the impact and toward the camera, spinning around a random axis, falling
         float near = 1.0 - dn;
         vec3 vel = vec3(away / max(dist, 1e-3) * (0.03 + 0.08 * h1.y) * (0.4 + near), -(0.05 + 0.2 * near * h1.z));
         vec3 pos = vec3(mid, 0.0) + vel * e - vec3(0.0, 0.5 * g * e * e, 0.0);
-        // already out of the frame
         if (pos.y + 1.5 * s < -0.05) continue;
         vec3 axis = normalize(vec3(h2.x - 0.5, h2.y - 0.5, 0.3 * (h2.z - 0.5)) + 1e-4);
         float angle = (3.0 + 5.0 * h2.z) * (h2.x < 0.5 ? -1.0 : 1.0) * e;
         vec3 n = rotate(vec3(0.0, 0.0, -1.0), axis, angle);
         float rel = smoothstep(0.0, 0.04, e);
 
-        // the camera ray, hidden behind the pane still in place
         float den = dot(ray, n);
         float t = dot(pos - eye, n) / (abs(den) > 1e-4 ? den : 1e-4);
         vec2 q = mid + rotate(eye + t * ray - pos, axis, -angle).xy;
@@ -211,7 +201,6 @@ vec4 transition(vec2 uv) {
           col.rgb *= mix(1.0, clamp(dot(nf, light) / -light.z, 0.45, 1.1), rel);
           float glint = max(dot(nf, halfway), 0.0);
           col.rgb += rel * 0.3 * pow(glint, 60.0) * col.a;
-          // the crack line it carried turns into a bright bevel
           float line = 0.85 * (1.0 - smoothstep(0.0, CRACK_WIDTH, inside)) * (1.0 - rel);
           float bevel = 0.8 * rel * (1.0 - smoothstep(0.0, BEVEL, ed)) * (0.3 + 0.7 * pow(glint, 6.0));
           col.rgb = mix(col.rgb, vec3(0.92, 0.97, 0.97) * col.a, max(line, bevel));
@@ -224,7 +213,6 @@ vec4 transition(vec2 uv) {
           }
         }
 
-        // the shadow on the pane and on the incoming image behind
         float lden = dot(light, n);
         float ts = dot(pos - vec3(a, 0.0), n) / (abs(lden) > 1e-4 ? lden : 1e-4);
         vec2 qs = mid + rotate(vec3(a, 0.0) + ts * light - pos, axis, -angle).xy;

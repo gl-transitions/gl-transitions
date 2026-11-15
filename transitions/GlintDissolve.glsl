@@ -18,7 +18,6 @@ uniform float rainbow; // = 0.35
 // @color Tint of the glints, added as light
 uniform vec3 tint; // = vec3(1.0, 0.95, 0.85)
 
-// the long rays reach over this many cells of the glint grid
 const float REACH = 6.0;
 
 float hash12(vec2 v) {
@@ -42,10 +41,8 @@ vec3 spectrum(float a) {
 
 vec4 transition(vec2 uv) {
   float p = progress;
-  // the glints swell up to the cut, then shrink back: 0 at both ends
   float t = 1.0 - abs(2.0 * p - 1.0);
   float amount = t * (2.0 - t);
-  // a short crossfade under the glints at their brightest
   float m = smoothstep(0.42, 0.58, p);
   if (amount <= 0.0) return m < 0.5 ? getFromColor(uv) : getToColor(uv);
 
@@ -78,7 +75,6 @@ vec4 transition(vec2 uv) {
     // the rays are never longer than this, so farther glints cannot reach the pixel
     if (max(abs(off.x), abs(off.y)) > REACH * amount + 1.0) continue;
     vec2 id = home + off;
-    // only some of the cells hold a glint
     if (hash12(id + 89.5) > 0.55) continue;
     float h0 = hash12(id + 0.5);
     float h1 = hash12(id + 19.5);
@@ -89,16 +85,12 @@ vec4 transition(vec2 uv) {
     vec2 cw = center * cell;
     vec2 st = vec2(cw.x * cs.x - cw.y * cs.y, cw.x * cs.y + cw.y * cs.x) / aspect + 0.5;
     if (st.x < 0.0 || st.x > 1.0 || st.y < 0.0 || st.y > 1.0) continue;
-    // each glint reads one image: it blinks out at its own moment of the crossfade and comes back
-    // on the incoming image
     float turn = 0.15 + 0.7 * h3;
     vec4 src = m < turn ? getFromColor(st) : getToColor(st);
     float lum = dot(src.rgb, vec3(0.2126, 0.7152, 0.0722)) * src.a;
-    // the brighter the image, the more of its cells sparkle
     float knee = threshold + 0.8 * (1.0 - threshold) * h2;
     float b = smoothstep(knee, knee + 0.2 * (1.0 - threshold) + 1e-3, lum);
     if (b <= 0.0) continue;
-    // each glint twinkles at its own pace
     float twinkle = (0.6 + 0.4 * sin(6.2831853 * (h2 + (1.5 + h0) * p))) * smoothstep(0.0, 0.12, abs(m - turn));
     float len = REACH * amount * (0.45 + 0.55 * b) * (0.3 + 0.7 * h1 * h1) * (0.85 + 0.15 * twinkle);
     vec2 d = q - center;
@@ -108,10 +100,8 @@ vec4 transition(vec2 uv) {
       vec2 e = vec2(d.x + d.y, d.x - d.y) * 0.70710678;
       star += 0.5 * (ray(e, 0.25 * len, width) + ray(e.yx, 0.25 * len, width));
     }
-    // a bright core and a faint halo
     float cr = r / (0.08 * len);
     star += exp(-cr * cr) + 0.3 * exp(-r / 0.2);
-    // white light with the hue of the highlight, and rainbow fringes toward the tips
     float along = r / len;
     vec3 hue = mix(vec3(1.0), spectrum(1.3 * along + h0), rainbow * smoothstep(0.05, 0.4, along));
     vec3 col = mix(src.rgb / max(max(src.r, max(src.g, src.b)), 1e-3), vec3(1.0), 0.6);

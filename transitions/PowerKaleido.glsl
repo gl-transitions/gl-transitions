@@ -29,7 +29,6 @@ vec4 mainImage(vec2 uv)
   uv.x *= ratio;
   uv *= z;
   uv = rot(uv, vec2(0.0), progress*speed);
-  // uv.x = fract(uv.x/l/3.0)*l*3.0;
 	float theta = progress*6.+PI/.5;
 	for(int iter = 0; iter < 10; iter++) {
     for(float i = 0.; i < 2. * PI; i+=deg) {

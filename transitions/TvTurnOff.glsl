@@ -23,14 +23,12 @@ vec4 screen(vec2 uv, float t, bool isFrom) {
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
   vec2 q = clamp(0.5 + 0.5 * p / size, 0.0, 1.0);
   vec4 c = getColor(q, isFrom);
-  // the squeezed picture gets brighter and burns to white
   float white = smoothstep(0.4, 1.0, collapse);
   vec4 light = vec4(mix(min(c.rgb * (1.0 + 2.0 * collapse), 1.0), vec3(1.0), white), c.a);
   // soft edges, outside the picture so that t = 0 is the exact image
   vec2 d = abs(p) - size;
   float dist = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
   float inside = clamp(1.0 - dist / 0.004, 0.0, 1.0);
-  // a glow around the line, tinted by the center of the picture, then warm white around the dot
   vec4 mid = getColor(vec2(0.5), isFrom);
   vec4 halo = vec4(mix(mix(mid.rgb, vec3(1.0), 0.7), vec3(1.0, 0.92, 0.8), shrink), mid.a);
   float h = 1.0 - exp(-2.0 * glow * white * exp(-max(dist, 0.0) / (0.02 + 0.04 * shrink)));

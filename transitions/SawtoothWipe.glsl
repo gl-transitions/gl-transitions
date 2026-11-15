@@ -14,7 +14,6 @@ uniform bool jaws; // = false
 // @range(0, 0.1) Softness of the edge
 uniform float smoothness; // = 0.004
 
-// half width of the antialiased edge, in frame heights
 const float AA = 0.0015;
 
 // signed distance to a zigzag line of period w and peak-to-peak height h, centered on y = 0,
@@ -36,7 +35,6 @@ vec4 transition(vec2 uv) {
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
   // measured in square pixels, so the teeth are not stretched
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
-  // half extents of the frame along the direction and across it
   float e = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
   float w = 0.5 * (abs(dir.y) * ratio + abs(dir.x));
   float period = 2.0 * w / float(teeth < 1 ? 1 : teeth);

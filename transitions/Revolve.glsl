@@ -2,7 +2,6 @@
 // License: MIT
 // Description: The outgoing image swirls and zooms with motion blur into the incoming one
 // Tags: swirl, zoom, rotate, blur
-// gl-transitions v1 compatible
 
 // @param Center of the swirl
 uniform vec2 center;       // = vec2(0.46, 0.52)

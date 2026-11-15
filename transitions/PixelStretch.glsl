@@ -34,7 +34,6 @@ vec2 at(vec2 uv, float s0, float s, vec2 d, float ext) {
 
 vec4 transition(vec2 uv) {
   vec2 d = normalize(direction + vec2(1e-6, 0.0));
-  // ext: length of the frame along the sweep, in uv units
   float ext = abs(d.x) + abs(d.y);
   float s = 0.5 + dot(uv - 0.5, d) / ext;
   // rows across the streaks (about one per pixel line), in frame heights
@@ -62,11 +61,9 @@ vec4 transition(vec2 uv) {
   vec4 fg = getFromColor(at(uv, s, smax(s, a, k), d, ext));
   vec4 fb = getFromColor(at(uv, s, smax(s, a - split, k), d, ext));
   vec4 streak = vec4(fr.r, fg.g, fb.b, fg.a);
-  // a faint flicker along the streaks
   float behind = step(s, a);
   streak.rgb *= 1.0 + 0.06 * jitter * h * (hash(row * 3.0 + 5.0) - 0.5) * behind;
 
-  // past the end of its streak, each row shows the incoming image as it is
   float w = smoothstep(len - k, len + k, a - s);
   return mix(streak, getToColor(uv), w);
 }

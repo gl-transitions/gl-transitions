@@ -11,7 +11,6 @@ vec4 transition (vec2 uv) {
   vec4 from = getFromColor(uv);
   vec4 to = getToColor(uv);
 
-  // Multipliers
   float from_m = 1.0 - progress + sin(PI * progress) * strength;
   float to_m = progress + sin(PI * progress) * strength;
   

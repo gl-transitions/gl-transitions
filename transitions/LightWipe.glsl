@@ -14,7 +14,6 @@ uniform vec3 color; // = vec3(1.0, 0.86, 0.66)
 
 const int TAPS = 12;
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -24,13 +23,11 @@ float ease(float t) {
   return 0.5 * (t + t * t * (3.0 - 2.0 * t));
 }
 
-// the image on screen at a point: the outgoing one ahead of the switch, the incoming one behind it
-// (both always sampled, so that no texture read sits in a branch that differs between pixels)
+// both images are always sampled, so that no texture read sits in a divergent branch
 vec4 frame(vec2 st, float m) {
   return mix(getFromColor(st), getToColor(st), m);
 }
 
-// the light of a pixel (premultiplied): its color above a soft knee
 vec3 highlight(vec4 c) {
   float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
   return c.rgb * c.a * smoothstep(0.45, 1.0, lum);
@@ -39,7 +36,6 @@ vec3 highlight(vec4 c) {
 vec4 transition(vec2 uv) {
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
-  // half extent of the frame along the direction
   float e = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
   float w = max(width, 0.001);
   float s = 0.35 * w;
@@ -50,34 +46,26 @@ vec4 transition(vec2 uv) {
   float d = dot(p, dir) - pos;
   float m = 1.0 - smoothstep(-s, s, d);
 
-  // the light ignites as it enters and dies away as it leaves: exactly none at both ends
   float env = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
-  // a hot core, a thinner glint trailing behind it, and a wide soft halo
   float core = exp(-d * d / (w * w));
   float g = (d + 2.2 * w) / (0.3 * w);
   float glint = 0.45 * exp(-g * g);
   float halo = 0.35 * exp(-abs(d) / (5.0 * w));
   float band = (core + glint + halo) * env * intensity;
-  // the moving glint itself, where the highlights bloom
   float glow = (core + glint) * env * intensity;
 
   vec4 c = frame(uv, m);
 
-  // the highlights near the band bloom along it: taps across the band, sampled where the band is brightest
   vec3 bloom = vec3(0.0);
-  // spread over the band, short enough that its taps blend into a smooth glow
   float spread = min(3.0 * w, 0.12);
   for (int i = 0; i < TAPS; i++) {
     float t = (float(i) + 0.5) / float(TAPS) * 2.0 - 1.0;
     vec2 st = mirror((p + dir * (t * spread)) / vec2(ratio, 1.0) + 0.5);
-    // the image on screen where the tap reads, on the same side of the switch
     float dq = dot((st - 0.5) * vec2(ratio, 1.0), dir) - pos;
     bloom += (1.0 - abs(t)) * highlight(frame(st, 1.0 - smoothstep(-s, s, dq)));
   }
-  // the sum of the tent weights
   bloom /= 0.5 * float(TAPS);
 
-  // white at the heart of the core, tinted toward the edges of the band
   vec3 hue = mix(color, vec3(1.0), core * core);
   float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
   // the light lifts the image, the bright parts more: exposure that rolls off softly to white, never clipping

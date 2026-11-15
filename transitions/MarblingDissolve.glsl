@@ -50,13 +50,11 @@ vec2 unrake(vec2 p, float rake, float comb) {
   return p;
 }
 
-// phase across the bands of ink, at a point of the bath before it was raked
 float bandPhase(vec2 q) {
   return q.y * bands + 0.35 * sin(q.x * 2.3 + 1.0) + 0.2 * sin(q.x * 5.1 - q.y * 3.0);
 }
 
 vec4 transition(vec2 uv) {
-  // the rake goes in first and comes out last, the comb goes in and out around the middle
   float rake = pull * ease(progress / 0.35) * ease((1.0 - progress) / 0.35);
   float comb = 0.6 * pull * ease((progress - 0.15) / 0.3) * ease((0.85 - progress) / 0.3);
   vec2 p = vec2(uv.x * ratio, uv.y);
@@ -67,7 +65,6 @@ vec4 transition(vec2 uv) {
   float gx = bandPhase(unrake(p + vec2(e, 0.0), rake, comb)) - ph;
   float gy = bandPhase(unrake(p + vec2(0.0, e), rake, comb)) - ph;
   float aa = max(length(vec2(gx, gy)), 0.002);
-  // the bands of ink widen until they cover the frame
   float cover = ease((progress - 0.08) / 0.84);
   // half width of the bands: from just below 0 to just above 0.5, so they are exactly empty then full
   float w = cover * (0.5 + 2.0 * aa) - aa;
@@ -75,7 +72,6 @@ vec4 transition(vec2 uv) {
   float m = 1.0 - smoothstep(w - aa, w + aa, d);
   vec2 suv = mirror(vec2(q.x / ratio, q.y));
   vec4 col = mix(getFromColor(suv), getToColor(suv), m);
-  // pigment gathers in a thin line along the edge of each band
   float line = 1.0 - smoothstep(0.0, 2.5 * aa + 0.02, abs(d - w));
   float show = veins * 4.0 * cover * (1.0 - cover); // exactly 0 when the bands are empty or full
   col.rgb *= 1.0 - 0.6 * show * line;

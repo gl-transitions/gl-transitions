@@ -12,7 +12,6 @@ uniform float shadow; // = 0.55
 // @color Color of the tray seen under the tiles
 uniform vec4 tray; // = vec4(0.07, 0.07, 0.08, 1.0)
 
-// tiles per side, at most
 const float MAX_TILES = 8.0;
 // rounds of swaps, along the rows in even rounds and along the columns in odd ones
 const int ROUNDS = 4;
@@ -30,7 +29,6 @@ const float GROW = 0.08;
 const float SINK = 0.03;
 // how far the tile that slides over swings out of its line, in cells
 const float SWING = 0.2;
-// width of the anti-aliased edges, in frame heights
 const float EDGE = 0.0015;
 
 float hash12(vec2 p) {
@@ -39,7 +37,6 @@ float hash12(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// signed distance to a box of half size b with corner radius r, negative inside
 float boxDist(vec2 p, vec2 b, float r) {
   vec2 d = abs(p) - b + r;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
@@ -131,7 +128,6 @@ vec4 transition(vec2 uv) {
   vec2 n = ratio >= 1.0
     ? vec2(nl, clamp(floor(nl / ratio + 0.5), 2.0, MAX_TILES))
     : vec2(clamp(floor(nl * ratio + 0.5), 2.0, MAX_TILES), nl);
-  // a cell, and this point, in frame heights
   vec2 cell = vec2(ratio, 1.0) / n;
   vec2 x = uv * vec2(ratio, 1.0);
   vec2 here = clamp(floor(uv * n), vec2(0.0), n - 1.0);
@@ -148,7 +144,6 @@ vec4 transition(vec2 uv) {
   // the two highest tiles seen here: height, coverage, lift, turn, edge distance, outgoing and incoming image points
   float z1 = -9.0, z2 = -9.0, m1 = 0.0, m2 = 0.0, l1 = 0.0, l2 = 0.0, w1 = 0.0, w2 = 0.0, e1 = 0.0, e2 = 0.0;
   vec4 s1 = vec4(0.0), s2 = vec4(0.0);
-  // the tiles that can be seen here are held by the cells nearby
   for (int j = 0; j < 5; j++) {
     for (int i = 0; i < 5; i++) {
       vec2 o = vec2(float(i) - 2.0, float(j) - 2.0);
@@ -157,7 +152,6 @@ vec4 transition(vec2 uv) {
       vec4 cur = currentSwap(c, n, sw);
       float lift = swapLift(c, cur);
       float sc = 1.0 + GROW * max(lift, 0.0) - SINK * max(-lift, 0.0);
-      // this point in the tile, from its center, scaled back to its size at rest
       vec2 q = (x - swapPos(c, cur, lift) * cell) / sc;
       float e = -boxDist(q, hb, rad) * sc;
       float cov = clamp(e / EDGE + 0.5, 0.0, 1.0);
@@ -197,7 +191,6 @@ vec4 transition(vec2 uv) {
     }
   }
 
-  // shadows cast on the tray and on the two tiles by the tiles above them, longer and softer as they lift
   float sh0 = 0.0, sh1 = 0.0, sh2 = 0.0;
   vec2 light = vec2(0.45, -0.75) * min(cell.x, cell.y);
   for (int j = 0; j < 5; j++) {

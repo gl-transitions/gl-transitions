@@ -41,7 +41,6 @@ vec2 sdTone (vec2 uv) {
 float sdHatch (vec2 q, vec2 d, float dark) {
   float s = dot(q, d) * 60.0 + 0.5 * sdNoise(q * 9.0 + d * 13.0);
   float row = floor(s);
-  // each row is made of strokes of uneven length and pressure, with small gaps
   float along = dot(q, vec2(-d.y, d.x)) * 8.0 + sdHash(vec2(row, d.y * 7.0)) * 5.0;
   float cell = floor(along);
   float k = sdHash(vec2(row, cell) + d * 31.0);
@@ -52,7 +51,6 @@ float sdHatch (vec2 q, vec2 d, float dark) {
 
 vec4 transition (vec2 uv) {
   vec2 q = vec2(uv.x * ratio, uv.y);
-  // a slightly wobbly hand: the outlines are traced a bit off the real edges
   vec2 wob = (vec2(sdNoise(q * 6.0), sdNoise(q * 6.0 + 17.0)) - 0.5) * 0.004;
   vec2 su = uv + wob * (1.0 - progress);
   vec2 dx = vec2(0.001 * lineWidth / ratio, 0.0);
@@ -67,29 +65,23 @@ vec4 transition (vec2 uv) {
   vec4 toC = getToColor(uv);
   float l = clamp((tm.x + bm.x + ml.x + mr.x) * 0.25, 0.0, 1.0);
 
-  // graphite grain, and the order in which the strokes are laid down
   float grain = 0.65 + 0.35 * sdNoise(q * vec2(180.0, 60.0));
   float order = sdNoise(q * 3.0 + 4.0);
   float fine = sdNoise(q * 24.0);
   float drawOutline = smoothstep(0.0, 0.1, progress - (0.22 * order + 0.05 * fine));
   float drawHatch = smoothstep(0.0, 0.12, progress - (0.2 + 0.2 * order + 0.05 * fine));
 
-  // the shading builds up from the darkest parts to the lightest, then the colors come in
   float fill = smoothstep(0.0, 0.22, progress - (0.4 + 0.25 * l + 0.1 * order));
 
-  // hatching: one direction in the shadows, crossed in the darkest parts
   float dark = 1.0 - l;
   float h1 = sdHatch(q, vec2(0.7071, 0.7071), smoothstep(0.35, 0.9, dark));
   float h2 = sdHatch(q, vec2(0.7071, -0.7071), smoothstep(0.65, 1.0, dark));
   float hatch = hatching * 0.8 * max(h1, 0.8 * h2) * toC.a;
 
-  // the hatching is absorbed by the shading as it fills in
   hatch *= drawHatch * (1.0 - 0.6 * fill);
   float pencil = max(outline * drawOutline, hatch) * grain;
-  // the pencil lines give way to the finished picture at the end
   pencil *= 1.0 - smoothstep(0.7, 1.0, progress);
 
-  // the outgoing image fades back to paper
   vec4 base = mix(getFromColor(uv), paper, smoothstep(0.02, 0.38, progress));
   float sat = smoothstep(0.55, 1.0, progress);
   vec4 tone = vec4(paper.rgb * mix(0.3, 1.0, l), paper.a * toC.a);

@@ -10,7 +10,6 @@ uniform float seams; // = 0.35
 
 // number of levels: the smallest blocks are 1/64 of the largest ones
 const int LEVELS = 7;
-// width of the anti-aliased edges and of the seams, as a part of the frame's height
 const float AA = 0.0015;
 const float SEAM = 0.0025;
 
@@ -75,14 +74,10 @@ vec4 transition(vec2 uv) {
   float dmax = float(LEVELS) * (1.0 - coarse) + 0.2;
   float seamFade = smoothstep(0.0, 0.25, u);
 
-  // the largest blocks: nearly square, two of them across the frame's shorter side
   vec2 s0 = ratio >= 1.0
     ? vec2(ratio / floor(2.0 * ratio + 0.5), 0.5)
     : vec2(0.5 * ratio, 1.0 / floor(2.0 / ratio + 0.5));
-  // around the middle, each big block changes from the outgoing colors to the incoming ones at its
-  // own moment, in a quick fade
   float t = (progress - 0.4) / 0.2;
-  // the blocks take turns in a shuffled order, evenly spread over the time of the change
   vec2 cell = floor(P / s0);
   float h = fract((cell.y * floor(ratio / s0.x + 0.5) + cell.x) * 0.618034 + 0.31);
   float flip = smoothstep(0.75 * h, 0.75 * h + 0.25, t);
@@ -94,7 +89,6 @@ vec4 transition(vec2 uv) {
   } else {
     col = mix(tree(P, s0, false, thr, dmax, seamFade), tree(P, s0, true, thr, dmax, seamFade), flip);
   }
-  // the real image shows through the finest blocks at both ends
   vec4 real = progress < 0.5 ? getFromColor(uv) : getToColor(uv);
   return mix(real, col, smoothstep(0.0, 0.18, u));
 }

@@ -25,7 +25,6 @@ const float GAP = 0.07;
 const float LEAD = 0.06;
 // part of a swing after which a layer has turned into place, and only comes down flat onto the paper
 const float SETTLE = 0.8;
-// width of the anti-aliased edges, in frame heights
 const float EDGE = 0.002;
 
 float hash12(vec2 v) {
@@ -58,7 +57,6 @@ float shapeDist(vec2 o, float type) {
   return (o.x + o.y - 1.0) * 0.70710678;                    // triangle
 }
 
-// signed distance (in cell units) to a piece of a cell at the local point l, negative inside
 float pieceDist(vec2 l, vec2 cell, float piece) {
   float k = floor(hash12(cell + 1.7) * 4.0);
   // cells side by side never share a shape
@@ -75,7 +73,6 @@ float easeOutCubic(float t) {
   return 1.0 - u * u * u;
 }
 
-// how high a layer floats above the paper along its swing, 0 once landed
 float lift(float t) {
   return 1.0 - smoothstep(0.3, 1.0, t);
 }
@@ -100,12 +97,9 @@ float startTime(vec2 cell, vec2 n) {
 // and its scale
 vec3 swingPoint(vec2 p, vec2 cell, vec2 cs, float piece, float t) {
   vec2 pc = pivotCorner(floor(hash12(cell + 1.7) * 4.0));
-  // the first piece turns around its pivot corner, its complement around the opposite one
   vec2 piv = (cell + (piece < 0.5 ? pc : 1.0 - pc)) * cs;
   float sgn = hash12(cell + vec2(piece * 3.3, 5.2)) < 0.5 ? -1.0 : 1.0;
-  // grows out of the corner while it swings a quarter turn into place, a bit bigger while it floats
   float s = smoothstep(0.0, 0.45, t) * (1.0 + 0.1 * lift(t));
-  // the swing settles first, then the layer comes down flat onto the paper
   float a = sgn * 0.5 * PI * (1.0 - easeOutCubic(t / SETTLE));
   float ca = cos(a), sa = sin(a);
   vec2 d = p - piv;
@@ -113,7 +107,6 @@ vec3 swingPoint(vec2 p, vec2 cell, vec2 cs, float piece, float t) {
   return vec3((piv + d) / cs - cell, s);
 }
 
-// the coverage of a swinging layer and its local point in the cell
 vec3 layerCover(vec2 p, vec2 cell, vec2 cs, float piece, float t) {
   vec3 q = swingPoint(p, cell, cs, piece, t);
   if (q.z < 0.01) return vec3(0.0);
@@ -122,7 +115,6 @@ vec3 layerCover(vec2 p, vec2 cell, vec2 cs, float piece, float t) {
   return vec3(m, clamp(q.xy, 0.0, 1.0));
 }
 
-// the coverage of the soft shadow of a swinging layer: it falls down and to the right, further away the higher it floats
 float layerShadow(vec2 p, vec2 cell, vec2 cs, float piece, float t) {
   float h = lift(t);
   vec3 q = swingPoint(p - vec2(0.07, -0.1) * h * cs.y, cell, cs, piece, t);
@@ -170,7 +162,6 @@ vec4 transition(vec2 uv) {
       for (int pc = 0; pc < 2; pc++) {
         float piece = float(pc);
         float t0 = tc + GAP * piece;
-        // how far the piece is in its swing
         float tp = (progress - t0) / sw;
         for (int ly = 0; ly < 2; ly++) {
           float isPlate = ly == 0 ? 1.0 : 0.0;
@@ -211,7 +202,6 @@ vec4 transition(vec2 uv) {
     c = mix(c, premultiplied(tc), top.y);
   }
 
-  // the soft shadows of the layers floating above the top one
   float sh = 0.0;
   if (shadow > 0.0) {
     for (int dy = -1; dy <= 1; dy++) {

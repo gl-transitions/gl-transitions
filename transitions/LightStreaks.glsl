@@ -26,19 +26,16 @@ float hash12(vec2 v) {
   return fract((v3.x + v3.y) * v3.z);
 }
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
 
-// the image on screen: the outgoing one, then the incoming one after a short switch
 vec4 frame(vec2 st, float m) {
   if (m <= 0.0) return getFromColor(st);
   if (m >= 1.0) return getToColor(st);
   return mix(getFromColor(st), getToColor(st), m);
 }
 
-// the light of a pixel: its color above the threshold
 vec3 glow(vec4 c, float knee) {
   float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
   return c.rgb * c.a * smoothstep(knee, knee + 0.2, lum);
@@ -67,7 +64,6 @@ vec4 transition(vec2 uv) {
   // hashed by integer cell so that every GPU computes the same shift
   float jitter = hash12(floor(uv * vec2(ratio, 1.0) * 997.0)) - 0.5;
 
-  // the image smears along the streaks (a tent filter)
   float smear = blur * amount;
   vec3 base = vec3(0.0);
   float alpha = 0.0;
@@ -85,16 +81,13 @@ vec4 transition(vec2 uv) {
   base /= total;
   alpha /= total;
 
-  // the streaks: the light above the threshold, spread along the axis with an exponential falloff
   float falloff = 0.25 * reach * amount;
   float knee = mix(threshold, 0.8 * threshold, peak);
   vec3 streak = glow(frame(uv, m), knee);
   float weights = 1.0;
   for (int k = 1; k <= STREAK_TAPS; k++) {
-    // the distance in units of the falloff, and the stretch of the streak this tap stands for
     float d = exp(0.14 * (float(k) + 0.8 * jitter)) - 1.0;
     float span = 0.14 * (d + 1.0);
-    // white at the source, tinted along the streak, red fading first so the tails turn blue and violet
     vec3 hue = mix(vec3(1.0), tint, smoothstep(0.0, 0.8, d));
     hue *= exp(-d * vec3(0.6, 0.2, -0.15));
     float w = exp(-d) * span * 4.0;
@@ -108,7 +101,6 @@ vec4 transition(vec2 uv) {
   // compressed, so that bright skies never flatten into white
   streak = 0.85 * (1.0 - exp(-streak));
 
-  // a lift of the exposure at the peak, then the streaks screened on top (premultiplied colors)
   base = min(base * (1.0 + 0.2 * peak), vec3(alpha));
   vec3 color = base + streak - base * streak;
   float a = alpha + max(streak.r, max(streak.g, streak.b)) * (1.0 - alpha);

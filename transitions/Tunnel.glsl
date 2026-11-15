@@ -28,12 +28,10 @@ vec4 transition(vec2 uv) {
   float e = mix(progress, progress * progress * (3.0 - 2.0 * progress), 0.7);
   float d = pow(far, 1.0 - e);
   float t = far - d; // distance flown
-  // the end wall covers the center of the view, the tube's walls the rest
   float k = r * d < R ? d / far : R / (R + t * r); // image scale at that point
   float a = twist * min(t * r / R, t / d); // spiral, continuous at the end wall
   vec4 walls = getFromColor(0.5 + rotate(c * k, a) / aspect);
   walls.rgb *= 0.4 + 0.6 * sqrt(k); // darker where the walls are close
-  // the incoming image opens in the end wall
   float open = smoothstep(0.0, 0.6, progress);
   vec2 q = 0.5 + (uv - 0.5) * d / max(open, 1e-4);
   vec2 inside = step(0.0, q) * step(q, vec2(1.0));
