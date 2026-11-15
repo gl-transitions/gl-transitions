@@ -12,7 +12,8 @@ vec4 transition(vec2 uv) {
   
   float circPos = atan(p.y - 0.5, p.x - 0.5) + progress * speed;
   float modPos = mod(circPos, 3.1415 / 4.);
-  float signed = sign(progress - modPos);
+  // starts just below 0 so the sector edges are not drawn on the first frame
+  float signed = sign(progress * (3.1415 / 4. + 0.01) - 0.01 - modPos);
   
   return mix(getToColor(p), getFromColor(p), step(signed, 0.5));
   
