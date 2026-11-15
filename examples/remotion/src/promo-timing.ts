@@ -31,8 +31,8 @@ export const PROMO_GRID_NAMES = [
   "Curtains",
   "Tunnel",
 ] as const;
-export const PROMO_TRANSITION = 24;
-export const PROMO_HOLD = 14;
+export const PROMO_TRANSITION = 45;
+export const PROMO_HOLD = 15;
 export const PROMO_LAST_HOLD = 22;
 export const PROMO_INTRO = 76;
 export const PROMO_SERIES =
