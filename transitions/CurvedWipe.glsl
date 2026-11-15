@@ -22,7 +22,6 @@ float ease (float t) {
 vec4 transition (vec2 uv) {
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(0.0, 1.0);
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
-  // half extents of the frame along the direction and across it
   float e = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
   float w = 0.5 * (abs(dir.y) * ratio + abs(dir.x));
   vec2 across = vec2(-dir.y, dir.x);
@@ -39,10 +38,8 @@ vec4 transition (vec2 uv) {
   float edge = -e - s + travel * ease(t);
   float side = -e - s + travel * ease(progress);
   float m = 1.0 - smoothstep(-s, s, d - edge);
-  // the more the edge is lifted, the wider and softer the shadow it casts on the incoming image
   float lift = edge - side;
   float spread = 0.012 + 0.25 * lift;
-  // it falls behind the edge only, on the incoming image, cast by the outgoing image at the edge
   vec4 to = getToColor(uv);
   vec2 caster = clamp((p + (edge - d) * dir) / vec2(ratio, 1.0) + 0.5, 0.0, 1.0);
   float sh = shadow.a * sin(PI * progress) * exp(-max(edge - d, 0.0) / spread) * m * getFromColor(caster).a * to.a;

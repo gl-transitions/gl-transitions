@@ -13,14 +13,12 @@ uniform float drift; // = 0.25
 uniform float lines; // = 0.5
 
 const float PI = 3.141592653589793;
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0012;
 // half width of a ring line, in ring spacings
 const float LINE = 0.1;
 // widest antialiased edge of the bands, in bands, which also sets when they start and finish
 // opening
 const float EDGE = 0.05;
-// angle of the line between the two centers at the start, in radians
 const float START = 0.35;
 // strength of the ring lines at lines = 1, so the image always shows through them
 const float INK = 0.7;
@@ -37,14 +35,11 @@ float ringLines(float r, float f) {
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   float t = progress * progress * (3.0 - 2.0 * progress);
   float f = max(density, 1.0);
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
 
-  // the two centers turn around the middle of the frame and come together
   float ang = 2.0 * PI * drift * t + START;
   float k = max(bands, 1.0) * (1.0 - 0.75 * t);
   vec2 axis = vec2(cos(ang), sin(ang)) * 0.5 * k / f;
@@ -56,8 +51,6 @@ vec4 transition(vec2 uv) {
   // the beat of the two ring sets: wide bands where their rings line up, at this distance
   // from the middle of the nearest band, in bands
   float beat = abs(fract(f2 * r2 - f * r1 + 0.5) - 0.5);
-  // the bands open from their middles and widen until they cover the frame
-  // with an edge antialiased from the analytic gradient of the beat
   vec2 grad = f2 * (p + axis) / max(r2, AA) - f * (p - axis) / max(r1, AA);
   float s = min(AA * length(grad) + 0.004, EDGE);
   float w = mix(-EDGE, 0.5 + EDGE, t);
@@ -65,8 +58,6 @@ vec4 transition(vec2 uv) {
 
   vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
 
-  // the thin lines of both sets, dark over the outgoing image and light over the incoming
-  // one, fade in and out
   float o = INK * clamp(lines, 0.0, 1.0) * sin(PI * t);
   float l = 1.0 - (1.0 - o * ringLines(r1, f)) * (1.0 - o * ringLines(r2, f2));
   c.rgb = mix(c.rgb, vec3(c.a * m), l);

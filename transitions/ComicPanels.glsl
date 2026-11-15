@@ -13,16 +13,12 @@ uniform vec4 borderColor; // = vec4(0.0, 0.0, 0.0, 1.0)
 uniform float seed; // = 0.0
 
 const float PI = 3.141592653589793;
-// width of the ink borders, as a part of the frame's height
 const float INK = 0.005;
-// width of the anti-aliased edges, as a part of the frame's height
 const float EDGE = 0.0012;
-// part of the transition taken by each panel's punch
 const float PUNCH = 0.3;
 // the first panel's punch starts at START, the last one ends at END
 const float START = 0.05;
 const float END = 0.97;
-// number of spikes of the burst that brings the incoming image into a panel
 const float SPIKES = 11.0;
 
 float hash(vec2 v) {
@@ -31,7 +27,6 @@ float hash(vec2 v) {
   return fract((v3.x + v3.y) * v3.z);
 }
 
-// number of panels in row r (0 is the top row)
 float cols(float r) {
   float h = hash(vec2(r * 7.0 + 3.0, seed * 1.37 + 11.0));
   float n = h < 0.15 ? 1.0 : (h < 0.6 ? 2.0 : 3.0);
@@ -76,23 +71,18 @@ vec2 panelCenter(float r, float c, float n) {
   return vec2(x0 / (x0 - x1), y);
 }
 
-// the panel's punch, 0 to 1: panel k of the n panels of the page, in reading order
 float panelTime(float k, float total) {
   float t0 = START + (END - START - PUNCH) * k / max(total - 1.0, 1.0);
   return clamp((progress - t0) / PUNCH, 0.0, 1.0);
 }
 
-// how high the panel is lifted off the page: a quick rise, a slower settle
 float lift(float t) {
   float u = 1.0 - (1.0 - t) * (1.0 - t);
   return sin(PI * u);
 }
 
-// the panel's image at the page point p: the outgoing one until the incoming one bursts out of the panel's center
-// in a jagged star with an ink outline
 vec4 panelImage(vec2 p, vec2 center, float t) {
   float k = lift(t);
-  // the image zooms in with the kick, then settles
   vec2 q = center + (p - center) / (1.0 + 0.1 * k);
   vec2 uv = vec2(q.x / ratio, 1.0 - q.y);
   if (t <= 0.0) return getFromColor(uv);
@@ -100,7 +90,6 @@ vec4 panelImage(vec2 p, vec2 center, float t) {
   vec2 v = p - center;
   float a = (atan(v.y, v.x + 1e-6) + PI) / (2.0 * PI) * SPIKES + center.x * 7.0;
   float i = floor(a);
-  // the spikes, of uneven lengths
   // (the spike index wraps around so that the star has no seam where the angle wraps)
   float spike = (1.0 - abs(2.0 * (a - i) - 1.0)) * (0.5 + 0.5 * hash(vec2(mod(i, SPIKES), center.y * 13.0 + seed)));
   // large enough to cover the widest panel, a whole row of a wide frame
@@ -118,11 +107,8 @@ vec4 drawPanel(vec4 color, vec4 img, float d, float g, float ink, float fade) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   vec2 p = vec2(uv.x * ratio, 1.0 - uv.y);
 
-  // the gutters open at the start and close over the incoming image at the end
   float open = smoothstep(0.0, 0.14, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
   float g = 0.5 * gutter * open;
   float ink = INK * open;
@@ -134,7 +120,6 @@ vec4 transition(vec2 uv) {
   float n2 = cols(2.0);
   float total = n0 + n1 + n2;
 
-  // the panel under the point, on the page
   float r = rowDist(1.0, p) < 0.0 ? 0.0 : (rowDist(2.0, p) < 0.0 ? 1.0 : 2.0);
   float n = r == 0.0 ? n0 : (r == 1.0 ? n1 : n2);
   float c = colDist(r, 1.0, n, p) < 0.0 ? 0.0 : (colDist(r, 2.0, n, p) < 0.0 || n < 2.5 ? 1.0 : 2.0);
@@ -162,7 +147,6 @@ vec4 transition(vec2 uv) {
     float k = lift(pt);
     vec2 center = panelCenter(pr, pc, pn);
     float s = 1.0 + 0.08 * k;
-    // its soft shadow on the page, down and to the right
     vec2 sq = center + (p - vec2(0.012, 0.018) * k - center) / s;
     float sd = panelDist(pr, pc, pn, sq) - g;
     color.rgb *= 1.0 - 0.4 * k * fade * smoothstep(-0.02, 0.01, sd);

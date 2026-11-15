@@ -17,11 +17,8 @@ uniform float refraction; // = 0.03
 uniform float bubbles; // = 0.5
 
 const float PI = 3.141592653589793;
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0015;
-// width of the meniscus line, in frame heights
 const float LINE = 0.006;
-// size of the cells the bubbles are scattered in, in frame heights
 const float CELL = 0.08;
 
 float hash (vec2 p) {
@@ -40,20 +37,16 @@ float surface (float x, float t) {
 
 vec4 transition (vec2 uv) {
   vec4 a = getFromColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return getToColor(uv);
 
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(0.0, 1.0);
   vec2 across = vec2(-dir.y, dir.x);
   // measured in square pixels, so the waves and bubbles are not stretched
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
-  // half extents of the frame along the direction and across it
   float e = 0.5 * (abs(dir.x) * ratio + abs(dir.y));
   float w = 0.5 * (abs(dir.y) * ratio + abs(dir.x));
   float d = dot(p, dir);
   float x = dot(p, across);
   float t = progress;
-  // the liquid moves most in the middle of the transition and settles at the ends
   float stir = sin(PI * t);
   float amp = max(amplitude, 0.0) * (0.35 + 0.65 * stir);
   // the surface starts fully below the frame and ends fully above it, waves and meniscus included
@@ -64,12 +57,10 @@ vec4 transition (vec2 uv) {
   float depth = level - d;
   float m = smoothstep(-AA, AA, depth);
 
-  // the incoming image is bent by the waves just below the surface, less and less deeper down
   float bend = refraction * stir * exp(-max(depth, 0.0) / 0.06);
   vec2 offset = bend * (dir * sin(18.0 * x - 7.0 * t) + across * cos(13.0 * x + 5.0 * t));
   vec4 b = getToColor(clamp(uv + offset / vec2(ratio, 1.0), 0.0, 1.0));
 
-  // bubbles rise in columns through the liquid, carried up with it and rising faster still
   float glow = 0.0;
   float rise = mean + 0.5 * t;
   vec2 bq = vec2(x, d - rise) / CELL;
@@ -80,16 +71,12 @@ vec4 transition (vec2 uv) {
   if (hs < bubbles * 0.6 && r > px) {
     // placed so that it stays inside its cell, wobble and soft edge included
     vec2 c = cell + 0.5 + (0.42 - r - px) * (vec2(hash(cell + 1.3), hash(cell + 9.4)) * 2.0 - 1.0);
-    // a slight wobble as it rises
     c.x += 0.08 * sin(6.0 * t + 6.28 * hs);
     float dist = length(bq - c);
-    // its rim, and a small glint near its top
     float rim = smoothstep(0.7 * r - px, 0.7 * r + px, dist) * (1.0 - smoothstep(r - px, r + px, dist));
     float glint = 1.0 - smoothstep(0.25 * r - px, 0.25 * r + px, length(bq - c - 0.45 * r * vec2(-0.7, 0.7)));
-    // only in the liquid, and fading out as it nears the surface
     glow = max(rim * 0.6, glint) * smoothstep(0.0, 0.05, depth) * stir;
   }
-  // the meniscus: a bright line along the surface, on the liquid side
   float line = 1.0 - smoothstep(LINE - AA, LINE + AA, abs(depth - LINE));
   line += 0.35 * stir * exp(-max(depth, 0.0) / 0.03) * m;
   float light = highlight.a * clamp(max(line, glow), 0.0, 1.0) * (0.4 + 0.6 * stir);

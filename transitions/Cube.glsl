@@ -14,7 +14,6 @@ uniform float floating; // = 3.0
 uniform float shading; // = 0.5
 
 const float PI = 3.141592653589793;
-// width of the anti-aliased edges, as a part of the frame's height at the box's front
 const float EDGE = 0.002;
 
 // the ray (eye, dir) in the box's frame, the box turned by (c, s) around its vertical axis:
@@ -25,7 +24,6 @@ vec4 hitBox(vec3 eye, vec3 dir, float w, float c, float s) {
   vec2 e = eye.xz - pivot;
   vec2 o = vec2(e.x * c + e.y * s, -e.x * s + e.y * c) + pivot;
   vec2 d = vec2(dir.x * c + dir.z * s, -dir.x * s + dir.z * c);
-  // the side faces seen from outside: the box spans [0, w] on x and z
   vec2 inv = 1.0 / vec2(d.x < 0.0 ? min(d.x, -1e-6) : max(d.x, 1e-6), d.y < 0.0 ? min(d.y, -1e-6) : max(d.y, 1e-6));
   vec2 t0 = (vec2(0.0) - o) * inv;
   vec2 t1 = (vec2(w) - o) * inv;
@@ -47,7 +45,6 @@ vec4 hitBox(vec3 eye, vec3 dir, float w, float c, float s) {
 
 vec4 transition(vec2 uv) {
   float w = ratio;
-  // the turn starts and ends softly
   float turn = progress * progress * (3.0 - 2.0 * progress);
   float a = 0.5 * PI * turn;
   float c = cos(a), s = sin(a);
@@ -62,19 +59,16 @@ vec4 transition(vec2 uv) {
   vec2 sp = (uv - 0.5) * zoom + 0.5;
   vec3 dir = vec3(sp.x * w, sp.y, 0.0) - eye;
 
-  // pixel footprint on the screen plane, for the anti-aliased edges
   float px = EDGE * zoom * min(10.0 * motion, 1.0);
   float shade0 = 1.0 - shading * (1.0 - c);
   float shade1 = 1.0 - shading * (1.0 - s);
 
-  // the box in front, premultiplied
   vec4 front = vec4(0.0);
   vec4 b = hitBox(eye, dir, w, c, s);
   if (b.x > 0.0) {
     vec4 img = b.w < 0.5 ? getFromColor(vec2(b.y, b.z)) : getToColor(vec2(b.y, b.z));
     float m = 1.0;
     if (px > 0.0) {
-      // the silhouette: top, bottom and the outer vertical edge of the face, seen foreshortened
       float e = px * b.x;
       vec3 n = b.w < 0.5 ? vec3(s, 0.0, -c) : vec3(-c, 0.0, -s);
       float fore = max(abs(dot(n, normalize(dir))), 0.05);
@@ -89,13 +83,11 @@ vec4 transition(vec2 uv) {
     front = vec4(img.rgb * (b.w < 0.5 ? shade0 : shade1) * img.a, img.a) * m;
   }
 
-  // the floor, h below the box, premultiplied; it fades in and out with the motion
   vec4 ground = vec4(0.0);
   float h = 0.005 * max(floating, 0.0);
   if (dir.y < 0.0 && motion > 0.0) {
     float tf = -(eye.y + h) / dir.y;
     vec3 f = eye + tf * dir;
-    // the reflection: the same ray mirrored by the floor, fading with the height on the box
     vec3 meye = vec3(eye.x, -2.0 * h - eye.y, eye.z);
     vec3 mdir = vec3(dir.x, -dir.y, dir.z);
     vec4 r = hitBox(meye, mdir, w, c, s);
@@ -104,7 +96,6 @@ vec4 transition(vec2 uv) {
       float k = clamp(reflection, 0.0, 1.0) * (1.0 - r.z) * (1.0 - r.z);
       ground = vec4(img.rgb * (r.w < 0.5 ? shade0 : shade1) * img.a, img.a) * k;
     }
-    // the contact shadow around the box, softer as it floats higher
     vec2 q = f.xz - vec2(0.5 * w);
     vec2 l = vec2(q.x * c + q.y * s, -q.x * s + q.y * c);
     float soft = 0.03 + 1.5 * h;

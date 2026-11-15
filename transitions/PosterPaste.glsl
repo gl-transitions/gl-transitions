@@ -8,7 +8,6 @@ uniform float sheets; // = 4.0
 // @range(0, 1) How wrinkled, blistered and billowing the wet paper is before the brush smooths it flat
 uniform float wrinkles; // = 0.6
 
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0015;
 // length of the bend of a loose sheet just below its pasted part, in frame heights
 const float ARC = 0.18;
@@ -26,7 +25,6 @@ const float OVERLAP = 0.006;
 const float PERSPECTIVE = 1.2;
 // direction towards the light: from the upper left, in front of the wall
 const vec3 LIGHT = vec3(-0.25, 0.5, 0.83);
-// how much the relief of the paper is exaggerated in its shading
 const float RELIEF = 2.5;
 
 float ppHash(vec2 p) {
@@ -59,15 +57,12 @@ vec4 ppSheet(float k, float n) {
   float a = clamp(t / UNFOLD, 0.0, 1.0);
   a = a * a * (3.0 - 2.0 * a);
   float b = max((t - UNFOLD) / (1.0 - UNFOLD), 0.0);
-  // the brush starts slowly, then sweeps down at a steady pace (and on below the frame, as the paste dries)
   float f = b < 0.2 ? b * b * 2.5 : b - 0.1;
   float front = 1.0 + 2.0 * AA - f * 1.12 / 0.9;
-  // the paper swings down from the top edge as it unfolds, sways a little and is held closer as it is brushed on
   float theta = mix(1.35, 0.6, a) - 0.15 * smoothstep(0.0, 0.4, b) + 0.1 * sin(b * 10.0) * (1.0 - smoothstep(0.0, 0.6, b));
   return vec4(front, 0.035 * a, theta, FLAP * a);
 }
 
-// wrinkles of the wet paper of sheet k: soft ridges, mostly running down the sheet as it hung
 float ppWrinkle(vec2 q, float k) {
   float a = 1.0 - abs(2.0 * ppNoise(q * vec2(12.0, 2.5) + vec2(k * 13.1, k * 5.7)) - 1.0);
   float b = ppNoise(q * vec2(22.0, 6.0) + vec2(k * 7.3 + 4.0, 2.0));
@@ -82,7 +77,6 @@ vec2 ppRelief(vec2 q, float k, float fresh, vec4 st, float x0, float x1) {
   for (int j = 0; j < 3; j++) {
     float fj = float(j);
     vec4 h = vec4(ppHash(vec2(k, fj)), ppHash(vec2(fj, k + 11.0)), ppHash(vec2(k + 5.0, fj + 3.0)), ppHash(vec2(fj + 7.0, k + 2.0)));
-    // an air bubble: it swells as the brush passes over it and is pushed out after
     vec2 c = vec2(mix(x0, x1, 0.2 + 0.6 * h.z) * ratio, 0.12 + 0.76 * h.w);
     float e = 0.6 * (2.0 * h.z - 1.0);
     float past = c.y - st.x - st.y * e * e;
@@ -130,7 +124,6 @@ vec4 ppLoose(vec2 p, vec4 st, float x0, float x1, float xl, float xr, float w, f
 vec4 transition(vec2 uv) {
   float n = floor(clamp(sheets, 2.0, 8.0) + 0.5);
   float creases = clamp(wrinkles, 0.0, 1.0);
-  // the paste dries out completely by the end
   float wet = 1.0 - smoothstep(END, 1.0, progress);
   float relief = creases * wet;
   float aax = AA / ratio;
@@ -139,7 +132,6 @@ vec4 transition(vec2 uv) {
   float wall = 1.0; // shading of the outgoing image
   vec2 tuv = uv;
 
-  // sheets brushed onto the wall
   for (int i = 0; i < 8; i++) {
     float k = float(i);
     if (k >= n) break;
@@ -152,7 +144,6 @@ vec4 transition(vec2 uv) {
     float past = uv.y - st.x - st.y * e * e;
     float inY = smoothstep(-AA, AA, past);
     float cov = inY * smoothstep(-aax, aax, uv.x - xl) * smoothstep(-aax, aax, xr - uv.x);
-    // the edge of the sheet casts a thin shadow on the one below, until the paste dries
     float edge = (uv.x - xl) * ratio;
     float seam = 0.3 * wet * step(0.5, k) * inY * (1.0 - smoothstep(0.0, 0.005, -edge)) * step(edge, 0.0);
     lit *= 1.0 - seam;
@@ -161,9 +152,7 @@ vec4 transition(vec2 uv) {
     float fresh = 1.0 - smoothstep(0.0, 0.6, past);
     vec2 g = relief > 0.0 ? ppRelief(vec2(uv.x * ratio, uv.y), k, fresh, st, x0, x1) * relief : vec2(0.0);
     float shade = 1.0 - RELIEF * dot(g, LIGHT.xy) / LIGHT.z;
-    // wet paper is darker, and glossy just behind the brush
     shade *= (1.0 - 0.08 * fresh * wet) * (1.0 + 0.06 * (1.0 - smoothstep(0.0, 0.2, past)) * wet);
-    // the overlap is two layers of wet paper, with a lit edge
     float overlap = 0.07 * (1.0 - smoothstep(OVERLAP * ratio, OVERLAP * ratio + 0.002, edge));
     float rim = 0.12 * (1.0 - smoothstep(0.0, 0.0025, edge));
     shade *= 1.0 - (overlap - rim) * wet * step(0.5, k);
@@ -177,14 +166,12 @@ vec4 transition(vec2 uv) {
     float k = float(i);
     if (k >= n) break;
     vec4 st = ppSheet(k, n);
-    // not unfolded yet, or brushed on all the way down
     if (st.w <= 0.0 || st.x + st.y < -0.01) continue;
     float x0 = k / n;
     float x1 = (k + 1.0) / n;
     float xl = k < 0.5 ? -1.0 : x0 - OVERLAP;
     float xr = k > n - 1.5 ? 2.0 : x1;
     float topShift = 2.0 * AA;
-    // soft shadow, cast away from the light
     float zMax = ARC * (1.0 - cos(st.z)) / st.z * smoothstep(0.0, ARC, st.w);
     vec4 sh = ppLoose(uv + LIGHT.xy / LIGHT.z * zMax * vec2(1.0 / ratio, 1.0), st, x0, x1, xl, xr, AA + 0.5 * zMax, topShift);
     float shadow = 0.5 * sh.x * smoothstep(0.0, 0.04, sh.w);
@@ -194,14 +181,11 @@ vec4 transition(vec2 uv) {
     if (l.x <= 0.0) continue;
     float th = acos(clamp(cos(st.z) + l.w * st.z / ARC, -1.0, 1.0));
     vec2 g = relief > 0.0 ? ppRelief(vec2(l.y * ratio, l.z), k, 1.0, st, x0, x1) * relief : vec2(0.0);
-    // the hanging paper billows a little across, more and more down from the brushed edge
     float e = clamp((l.y - x0) / (x1 - x0) * 2.0 - 1.0, -1.0, 1.0);
     float s = min(st.x + st.y * e * e, 1.0) - l.z;
     g.x += 0.8 * creases * smoothstep(0.0, 0.3, s) * cos(l.y * n * 12.57 + k * 2.1 + st.z * 4.0);
-    // it turns under at the fold, and the bottom edge of the sheet curls up towards the light
     float fold = 1.0 - smoothstep(0.0, 0.035, st.w - s);
     float curl = 1.0 - smoothstep(0.0, 0.04, l.z);
-    // lit by its tilt towards the light, a little darker the further it is from the wall, and wet
     float shade = (LIGHT.y * sin(th) + LIGHT.z * cos(th)) / LIGHT.z;
     shade *= (1.0 - RELIEF * dot(g, LIGHT.xy) / LIGHT.z) * (1.0 - 0.8 * l.w) * (1.0 - 0.08 * wet) * (1.0 - 0.35 * fold * fold) * (1.0 + 0.15 * curl);
     tuv = mix(tuv, vec2(l.y, l.z) - g * 0.004, l.x);

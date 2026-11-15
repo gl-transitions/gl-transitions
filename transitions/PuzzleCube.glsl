@@ -15,7 +15,6 @@ uniform vec4 background; // = vec4(0.04, 0.04, 0.05, 1.0)
 const float PI = 3.141592653589793;
 // delay between the turns of a group, as a part of a turn
 const float STAGGER = 0.45;
-// width of the anti-aliased edges, in frame heights
 const float EDGE = 0.0012;
 
 float gridSize() {
@@ -38,7 +37,6 @@ vec3 timeline(float n) {
 
 // the turn of a column (isCol) or of a row, 0 at rest to 1 turned
 float turnTime(vec3 tl, bool isCol, float idx, float n) {
-  // rows are counted from the top
   float k = isCol ? idx : n - 1.0 - idx;
   bool odd = mod(k, 2.0) > 0.5;
   // the odd rows never turn: the columns already brought the incoming image there
@@ -71,7 +69,6 @@ float faceMask(vec2 fp, float n, float g) {
   return smoothstep(0.5 * g - e, 0.5 * g + e, min(d.x, d.y));
 }
 
-// does the cubie of the face at fp show the incoming image, from the turns done so far
 bool isDone(vec3 tl, vec2 fp, float n) {
   vec2 cell = clamp(floor(fp / (vec2(ratio, 1.0) / n)), 0.0, n - 1.0);
   return turnTime(tl, true, cell.x, n) >= 1.0 || turnTime(tl, false, cell.y, n) >= 1.0;
@@ -120,7 +117,6 @@ vec4 sliceHit(vec3 o, vec3 d, float a0, float w, float S, float a) {
   return vec4(tNear, ld.y < 0.0 ? 0.0 : 1.0, across, q.x);
 }
 
-// the color of a turning slice at its hit
 vec4 sliceColor(vec4 hit, vec3 tl, bool isCol, float a, float dir, float S, float n, float g) {
   float f = hit.y;
   if (f > 3.5) return vec4(background.rgb * lighting(vec3(hit.w, 0.0, 0.0), isCol), background.a);
@@ -140,7 +136,6 @@ vec4 sliceColor(vec4 hit, vec3 tl, bool isCol, float a, float dir, float S, floa
 vec4 transition(vec2 uv) {
   float n = gridSize();
   vec3 tl = timeline(n);
-  // the gaps open at the start and close at the end, after the last turn
   float g = gap * smoothstep(0.0, 0.1, progress) * (1.0 - smoothstep(0.9, 1.0, progress));
   vec2 P = vec2(uv.x * ratio, uv.y);
 
@@ -161,10 +156,8 @@ vec4 transition(vec2 uv) {
   float nearest = 1.0;
   vec4 color;
   if (t0 <= 0.0 || t0 >= 1.0) {
-    // the face at rest: the exact image
     color = isDone(tl, P, n) ? getToColor(uv) : getFromColor(uv);
     color = mix(background, color, faceMask(P, n, g));
-    // the shade of the turning slices next to this one, deepest mid-turn
     for (int j = -1; j <= 1; j += 2) {
       float k = k0 + float(j);
       if (k < 0.0 || k > n - 1.0) continue;
@@ -174,7 +167,6 @@ vec4 transition(vec2 uv) {
       color.rgb *= 1.0 - 0.5 * shading * sin(2.0 * turnAngle(tk)) * exp(-dist / (0.2 * w));
     }
   } else {
-    // inside the hollow left by the turning slice: the sides of the slices next to it and the cube's inside, in the dark
     float tw = abs(d.x) < 1e-6 ? 1e6 : (d.x < 0.0 ? k0 * w - o.x : (k0 + 1.0) * w - o.x) / d.x;
     float tb = (o.z + S) / -d.z;
     nearest = min(tw, tb);
@@ -182,11 +174,9 @@ vec4 transition(vec2 uv) {
     float depth = (o.z + nearest * d.z) / -S;
     float light = tw < tb ? lighting(vec3(-sign(d.x), 0.0, 0.0), isCol) : 1.0;
     light *= 1.0 - shading * (0.5 + 0.4 * clamp(depth, 0.0, 1.0));
-    // beyond the cube's edges: the background
     color = along < 0.0 || along > S ? background : vec4(background.rgb * light, background.a);
   }
 
-  // the turning slices, which come out in front of the face as they turn
   for (int j = -1; j <= 1; j++) {
     float k = k0 + float(j);
     if (k < 0.0 || k > n - 1.0) continue;

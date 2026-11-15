@@ -10,11 +10,8 @@ uniform float outline; // = 0.6
 // @range(0, 1) How much the paths are staggered from the middle outward: 0 draws them all at once
 uniform float spread; // = 0.75
 
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0012;
-// width of the outline, in frame heights
 const float LINE = 0.003;
-// how far the shadow reaches outside a band, in frame heights
 const float SHADOW = 0.025;
 // half width of the thin line a path is first drawn as, in tiles
 const float STROKE = 0.08;
@@ -37,11 +34,7 @@ float vnoise(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
-
   float n = max(floor(cells + 0.5), 1.0);
-  // aspect-correct square tiles, centered on the frame
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
   vec2 g = p * n + 0.5;
   vec2 cell = floor(g);
@@ -51,7 +44,6 @@ vec4 transition(vec2 uv) {
   // distance to the nearest arc, in tiles: continuous across the tiles' edges, at most 0.5 (at the corners)
   float d = min(abs(length(q) - 0.5), abs(length(q - 1.0) - 0.5));
 
-  // when the paths reach this point: from the middle outward, made irregular by a noise
   float T = clamp(length(p) / (0.5 * length(vec2(ratio, 1.0))) + 0.4 * (vnoise(p * 3.0 + 4.0) - 0.5), 0.0, 1.0);
   float lag = 0.8 * clamp(spread, 0.0, 1.0);
   // every point is fully covered at progress 0.95
@@ -64,7 +56,6 @@ vec4 transition(vec2 uv) {
   float e = d - w;
 
   float band = 1.0 - smoothstep(-2.0 * aa, 0.0, e);
-  // outside the bands: a thin outline on their edge and a soft shadow, fading in with the line
   float gap = max(e + aa, 0.0);
   float fall = 1.0 - smoothstep(0.0, SHADOW * n, gap);
   float edge = max(0.8 * (1.0 - smoothstep(LINE * n, LINE * n + 2.0 * aa, gap)), 0.4 * fall * fall);

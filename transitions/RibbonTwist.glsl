@@ -15,15 +15,12 @@ uniform bool vertical; // = false
 uniform vec4 backColor; // = vec4(0.0, 0.0, 0.0, 1.0)
 
 const float PI = 3.141592653589793;
-// width of the anti-aliased edges, in frame heights
 const float EDGE = 0.002;
 
 vec4 transition (vec2 uv) {
   // q.x: along the ribbon, the way the twist travels; q.y: across the ribbon
   vec2 q = vertical ? vec2(1.0 - uv.y, uv.x) : uv;
-  // the ribbon's half width across, in frame heights
   float halfSize = vertical ? 0.5 * ratio : 0.5;
-  // each line across the ribbon turns half a turn, a little later than the one before
   float t = smoothstep(0.0, 1.0, (progress * (1.0 + spread) - q.x) / spread);
   // the visible face (outgoing front, incoming back) and its angle from its rest position
   bool front = t < 0.5;
@@ -45,7 +42,6 @@ vec4 transition (vec2 uv) {
   vec2 p = vec2(q.x, 0.5 + 0.5 * v);
   p = vertical ? vec2(p.y, 1.0 - p.x) : p;
   vec4 img = front ? getFromColor(p) : getToColor(p);
-  // lit from the front and slightly from one side of the axis
   float lambert = clamp(c - 0.25 * s, 0.0, 1.0);
   vec4 color = vec4(img.rgb * mix(1.0 - shading, 1.0, lambert), img.a);
   return mix(backColor, color, cover);

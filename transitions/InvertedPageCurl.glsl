@@ -2,7 +2,6 @@
 // License: BSD 3 Clause
 // Description: The outgoing image curls away like a page, revealing the incoming one
 // Tags: page, curl, 3d
-// Adapted by Sergey Kosarevsky from:
 // http://rectalogic.github.io/webvfx/examples_2transition-shader-pagecurl_8html-example.html
 
 /*
@@ -36,7 +35,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 in vec2 texCoord;
 */
 
-const float MIN_AMOUNT = -0.16;
+const float MIN_AMOUNT = -0.4;
 const float MAX_AMOUNT = 1.5;
 
 const float PI = 3.141592653589793;
@@ -176,13 +175,11 @@ vec4 transition(vec2 p) {
 
         if (yc < -cylinderRadius)
         {
-                // Behind surface
                 return behindSurface(p,yc, point, rrotation);
         }
 
         if (yc > cylinderRadius)
         {
-                // Flat surface
                 return getFromColor(p);
         }
 
@@ -212,7 +209,7 @@ vec4 transition(vec2 p) {
                 float nyc2 = -yc / cylinderRadius;
                 shado *= nyc2 * nyc2 * nyc2;
                 shado *= 0.5;
-                otherColor = vec4(0.0, 0.0, 0.0, shado * getToColor(p).a); // a shadow on the incoming image
+                otherColor = vec4(0.0, 0.0, 0.0, shado * getToColor(p).a);
         }
         else
         {

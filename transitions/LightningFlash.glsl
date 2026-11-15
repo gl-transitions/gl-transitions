@@ -31,7 +31,6 @@ float jag(float s, float k) {
   return mix(hash(vec2(i, k)), hash(vec2(i + 1.0, k)), fract(s)) - 0.5;
 }
 
-// the zigzag of a bolt around its straight line, at height y (narrower in a portrait frame)
 float zigzag(float y, float k) {
   return min(ratio, 1.0) * (0.15 * jag(y * 5.0, k) + 0.06 * jag(y * 13.0, k + 1.0) + 0.03 * jag(y * 31.0, k + 2.0) + 0.012 * jag(y * 67.0, k + 3.0));
 }
@@ -75,7 +74,6 @@ vec4 transition(vec2 uv) {
   // the images switch during the brightest strobe, the second one (or the only one)
   int cut = nf > 1 ? 1 : 0;
 
-  // the strobes, a bit irregular; the bolts are lit by all of them, the screen mostly by the brightest
   float flash = 0.0;
   float lit = 0.0;
   float tCut = LEADER;
@@ -93,16 +91,12 @@ vec4 transition(vec2 uv) {
       t += (isCut ? 0.12 : 0.08) + 0.04 * hash(vec2(float(i), k0 + 5.0));
     }
   }
-  // the stutter: the light jumps from one level to another a few times per strobe
   float stutter = mix(0.7, 1.0, hash(vec2(floor(p * 70.0), k0 + 9.0)));
   flash *= stutter;
-  // the brightest strobe whites the screen out while the images switch
   float whiteout = pulse(p, tCut, 0.025, 0.02);
-  // then a few last flickers, fading out
   float tail = p > tLast ? exp(-(p - tLast) / 0.1) * smoothstep(0.03, 0.06, p - tLast) : 0.0;
   flash = max(flash, 0.35 * tail * step(0.45, hash(vec2(floor(p * 40.0), k0 + 13.0))));
 
-  // the bolts crack down in a few jumps while faintly lit, then light up with the strobes and go out
   float grow = clamp(p / LEADER, 0.0, 1.0);
   grow = (floor(grow * 7.0) + smoothstep(0.0, 1.0, fract(grow * 7.0))) / 7.0;
   float faint = 0.5 * mix(0.6, 1.0, hash(vec2(floor(p * 50.0), k0 + 11.0)));
@@ -110,7 +104,6 @@ vec4 transition(vec2 uv) {
   boltLight = max(boltLight, 0.6 * flash * tail);
   boltLight *= 1.0 - smoothstep(tLast + 0.1, tLast + 0.3, p);
 
-  // the bolts: the main one strikes the ground at strike, the others stop in the sky
   float core = 0.0;
   float halo = 0.0;
   float near = 10.0;
@@ -123,7 +116,6 @@ vec4 transition(vec2 uv) {
       float y1 = -0.05;
       float bright = 1.0;
       if (b > 0) {
-        // the second bolt goes to the roomier side, the third to the other side if there is room there
         float roomy = strike < 0.5 ? 1.0 : -1.0;
         bool cramped = min(strike, 1.0 - strike) < 0.25;
         float side = b == 1 || cramped ? roomy : -roomy;
@@ -133,7 +125,6 @@ vec4 transition(vec2 uv) {
         bright = 0.7;
       }
       float x0 = clamp(x1 + (hash(vec2(fb, kb + 2.0)) - 0.5) * 0.5 * min(ratio, 1.0), 0.1 * ratio, 0.9 * ratio);
-      // the tip of the bolt while it cracks down
       float tip = mix(1.02, y1, grow);
       // (the slope is measured over a few pixels, so it changes smoothly at the corners)
       float e = 0.01;
@@ -146,7 +137,6 @@ vec4 transition(vec2 uv) {
       float w = 0.003 * mix(1.0, 0.7, fb / 2.0);
       core += bright * exp(-d * d / (w * w));
       halo += bright * (0.7 * exp(-d * 24.0) + 0.25 * exp(-d * 6.0));
-      // three branches, leaving the bolt on either side and fading toward their ends
       for (int j = 0; j < 3; j++) {
         float fj = float(j);
         float kj = kb + 3.0 + fj * 5.0;
@@ -169,7 +159,6 @@ vec4 transition(vec2 uv) {
     }
   }
 
-  // the outgoing image gives way to the incoming one at the brightest strobe, hidden by it
   float m = smoothstep(tCut, tCut + 0.025, p);
   vec4 c = vec4(0.0);
   if (m < 1.0) {
@@ -183,10 +172,7 @@ vec4 transition(vec2 uv) {
   if (c.a <= 0.0) return vec4(0.0);
   vec3 col = c.rgb / c.a;
 
-  // the effect fades in at the start and is gone at the end
   float live = smoothstep(0.0, 0.03, p) * (1.0 - smoothstep(0.85, 1.0, p));
-  // the sky darkens a little as the storm builds, then the strobes overexpose the image,
-  // more around the bolts, and the bolts glow over it
   float dim = 0.4 * smoothstep(0.0, LEADER, p) * (1.0 - smoothstep(tCut, tLast + 0.15, p));
   float f = flash * mix(0.6 + 0.4 * exp(-near * 4.0), 1.0, smoothstep(0.6, 1.0, flash));
   col *= 1.0 - dim * live;

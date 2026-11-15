@@ -12,10 +12,9 @@ uniform float depth; // = 0.15
 // @color Color seen around the incoming card while it is smaller than the frame
 uniform vec4 backColor; // = vec4(0.06, 0.06, 0.07, 1.0)
 
-const float RADIUS = 0.045; // corner radius of the cards, in frame heights
-const float AA = 0.002; // width of the antialiased card edges
+const float RADIUS = 0.045;
+const float AA = 0.002;
 
-// signed distance to a rounded box of half size b and corner radius r
 float roundedBox(vec2 q, vec2 b, float r) {
   vec2 d = abs(q) - b + r;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
@@ -32,8 +31,6 @@ vec4 transition(vec2 uv) {
   vec2 b = vec2(0.5 * ratio, 0.5);
   float p = progress;
 
-  // the incoming card, behind: grows from a smaller card to the full frame,
-  // and its corners straighten as it fills it
   float h = clamp((p - 0.2) / 0.8, 0.0, 1.0);
   float g = h * h * (3.0 - 2.0 * h);
   float k = 1.0 - g;
@@ -42,17 +39,14 @@ vec4 transition(vec2 uv) {
   float db = roundedBox(q, b * sc, rb);
   float cb = clamp(0.5 - db / max(AA * min(1.0, 40.0 * k), 1e-6), 0.0, 1.0);
   vec4 tc = getToColor(clamp(0.5 + (uv - 0.5) / sc, 0.0, 1.0));
-  // still in the shade of the top card at first
   tc.rgb *= 1.0 - 0.35 * k * k;
   // the cards are opaque: each one replaces what is behind it, keeping its image's alpha
   vec4 col = mix(premultiply(backColor), premultiply(tc), cb);
 
-  // the outgoing card, on top: swings around a point below it as it is flicked away
   float t = clamp(p / 0.75, 0.0, 1.0);
   float lift = smoothstep(0.0, 0.15, p);
   float u = min(t / 0.7, 1.0);
   float swing = u * u * (3.0 - 2.0 * u);
-  // it tilts toward the side it is flicked to
   float a = (d.x < 0.0 ? 1.3 : -1.3) * rotation * swing;
   vec2 pivot = vec2(0.0, -1.1);
   // where the swing alone takes the center of the card, to throw it far enough
@@ -64,7 +58,6 @@ vec4 transition(vec2 uv) {
   vec2 r = unrotate * (q - shift - pivot) + pivot;
   float rf = RADIUS * lift;
 
-  // its soft shadow on the card behind, cast down and away as it lifts
   float sh = 0.6 * lift * (1.0 - t);
   if (sh > 0.0) {
     vec2 rs = unrotate * (q - (0.03 * d + vec2(0.0, -0.03)) * lift - shift - pivot) + pivot;

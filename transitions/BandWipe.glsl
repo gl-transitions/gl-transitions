@@ -12,14 +12,11 @@ uniform float smoothness; // = 0.02
 // @range(0, 0.8) Delay between the first and the last band, so they cascade from the top (or the left)
 uniform float stagger; // = 0.1
 
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0015;
 
 // how far band i has wiped in (0..1) at position a along the bands (0..l), alternate bands
 // entering from opposite ends
 float bandMask(float i, float n, float a, float l, float s) {
-  // each band takes the same time, starting a little after the one before it from the top
-  // (or the left)
   float k = vertical ? i : n - 1.0 - i;
   float g = clamp(stagger, 0.0, 0.95);
   float t = clamp((progress - g * k / max(n - 1.0, 1.0)) / (1.0 - g), 0.0, 1.0);
@@ -31,15 +28,11 @@ float bandMask(float i, float n, float a, float l, float s) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
-
   float n = float(bands < 1 ? 1 : bands);
   // along: position along the bands, in frame heights; across: position across them (0..1)
   float along = vertical ? uv.y : uv.x * ratio;
   float across = vertical ? uv.x : uv.y;
   float l = vertical ? 1.0 : ratio;
-  // the antialiasing across the bands, in units of across
   float aaAcross = vertical ? AA / ratio : AA;
   float s = max(smoothness, AA);
 

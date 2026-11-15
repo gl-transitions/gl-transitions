@@ -3,7 +3,6 @@
 // Description: A flickering glitch with RGB offset, ghosting and scanlines that flashes back to the outgoing image
 // Tags: glitch, flicker, chromatic, scanlines
 // Drop_Zone_Flicker.glsl
-// gl-transitions compatible: progress, ratio, getFromColor, getToColor
 uniform float frameRate;    // = 24.0
 uniform float rgbOffset;    // = 0.014
 uniform float blockAmount;  // = 0.72
@@ -105,12 +104,11 @@ float blockMask(vec2 uv, float f) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
-
   float f = floor(progress * frameRate);
-  float reveal = frameReveal(f);
-  float glitch = frameGlitch(f);
+  // the 24-step tables are read in step with the frames, whatever frameRate is
+  float step24 = f * 24.0 / max(frameRate, 1.0);
+  float reveal = frameReveal(step24);
+  float glitch = frameGlitch(step24) * (1.0 - smoothstep(0.96, 1.0, progress));
 
   float rnd = hash12(vec2(f, 9.13));
   vec2 jitter = vec2(

@@ -36,7 +36,6 @@ vec4 transition(vec2 uv) {
   t = t * t * (3.0 - 2.0 * t);
   vec2 c = path(t, center);
 
-  // it widens until its lit core covers the farthest corner of the frame
   vec2 far = max(center, 1.0 - center) * asp;
   float full = length(vec2(far.x, far.y / FLAT)) / LIT;
   float g = smoothstep(0.44, 1.0, p);
@@ -46,16 +45,13 @@ vec4 transition(vec2 uv) {
   vec2 q = (uv - c) * asp;
   float r = length(vec2(q.x, q.y / FLAT)) / radius;
 
-  // light of the spotlight: a flat core, a soft penumbra, a slightly brighter rim and a faint spill
   float core = 1.0 - smoothstep(0.72, 1.08, r);
   float ring = (r - 0.9) / 0.09;
   float spot = max(core * (1.0 - 0.1 * r * r), 0.12 * (1.0 - smoothstep(0.9, 2.4, r))) + 0.16 * exp(-ring * ring);
 
-  // the stage lights go down at the start and come back up at the end
   float s = darkness * smoothstep(0.0, 0.18, p) * (1.0 - smoothstep(0.72, 1.0, p));
   vec3 light = 1.0 - s + s * spot * warmth;
 
-  // as it comes to rest, the spotlight lights the incoming image inside it
   float lit = smoothstep(0.42, 0.58, p) * (1.0 - smoothstep(LIT, 1.0, r));
   vec4 col = mix(getFromColor(uv), getToColor(uv), lit);
   return vec4(col.rgb * light, col.a);

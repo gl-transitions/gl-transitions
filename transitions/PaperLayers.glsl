@@ -18,7 +18,6 @@ const float STACKED = 0.74;
 const float SLIDE = 0.2;
 // height a sheet falls from, as the extra distance its shadow is cast at
 const float LIFT = 3.0;
-// shadow offset of a sheet lying on the stack, in frame heights, toward the bottom right
 const vec2 SHADOW = vec2(0.012, -0.018);
 // softness of the cut edges and of the shadows' edges, in brightness
 const float CUT = 0.012;
@@ -27,7 +26,6 @@ const float SHADOW_CUT = 0.05;
 // and the wider one for the shadows, in frame heights
 const float BLUR = 0.004;
 const float SHADOW_BLUR = 0.01;
-// width of the anti-aliased leading edge of a sliding sheet, in frame heights
 const float EDGE = 0.0015;
 
 float luma(vec4 c) {
@@ -40,7 +38,6 @@ float plHash(vec2 p) {
   return fract((p3.x + p3.y) * p3.z);
 }
 
-// paper fibers: a faint value noise moving with the sheet
 float grain(vec2 p) {
   vec2 i = floor(p);
   vec2 f = fract(p);
@@ -79,7 +76,6 @@ vec4 transition(vec2 uv) {
   float sh = clamp(shadow, 0.0, 1.0);
   vec2 aspect = vec2(ratio, 1.0);
   vec2 shadowOffset = SHADOW / aspect;
-  // the paper flattens into the photo once the last sheet is about to land
   float toPhoto = smoothstep(STACKED - 0.03, 1.0, progress);
 
   // the incoming image where the sheets lie on the stack, and where they cast their shadow
@@ -104,7 +100,6 @@ vec4 transition(vec2 uv) {
     if (k < n) {
       float t = clamp((progress - k * spacing) / slide, 0.0, 1.0);
       if (t > 0.0) {
-        // eased slide from above the frame, the sheet still lifted (and seen bigger) until it lands
         float e = 1.0 - (1.0 - t) * (1.0 - t) * (1.0 - t);
         float lift = 1.0 - smoothstep(0.5, 1.0, t);
         vec2 q = (uv - 0.5) / (1.0 + 0.03 * lift) + 0.5;
@@ -121,10 +116,8 @@ vec4 transition(vec2 uv) {
           ls = softLuma(q - so, cs, SHADOW_BLUR, aspect);
           shadowAlpha = cs.a;
         }
-        // the sheet ends at its bottom edge (its leading edge) while it slides in
         float m = cut(k, n, l, CUT) * src.a * smoothstep(-EDGE, EDGE, q.y);
         float s = cut(k, n, ls, SHADOW_CUT) * shadowAlpha * smoothstep(-EDGE, EDGE, q.y - so.y);
-        // shadow on what lies below, lighter while the sheet is lifted
         color.rgb *= 1.0 - sh * (1.0 - toPhoto) * (0.7 - 0.35 * lift) * s * (1.0 - m);
         // the sheet's color: a shade of paper for its band of brightness, tinted by the photo
         // (the dark bands are lifted a little, as paper is never black)

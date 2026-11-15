@@ -14,9 +14,7 @@ uniform vec4 shadow; // = vec4(0.0, 0.0, 0.0, 0.45)
 
 // part of the transition during which the blade crosses the frame
 const float CUT = 0.18;
-// width of the anti-aliased edges, as a part of the frame's height
 const float EDGE = 0.0015;
-// offset and softness of the shadows, as a part of the frame's height
 const vec2 SHADOW_OFFSET = vec2(0.015, -0.022);
 const float SHADOW_BLUR = 0.035;
 
@@ -43,17 +41,14 @@ vec4 transition (vec2 uv) {
   float d = dot(q, N);
   float along = dot(q, T);
 
-  // the halves: a quick snap apart across the cut, then an accelerating slide along it
   float t = clamp((p - 0.8 * CUT) / (1.0 - 0.8 * CUT), 0.0, 1.0);
   float open = separation * (1.0 - pow(1.0 - t, 3.0));
-  // far enough along the cut for each half to leave the frame with its shadow
   float margin = length(SHADOW_OFFSET) + SHADOW_BLUR + 2.0 * EDGE;
   float exitX = (ratio + separation + margin) / max(abs(T.x), 1e-3);
   float exitY = (1.0 + separation + margin) / max(abs(T.y), 1e-3);
   float slide = min(exitX, exitY) * t * t * (1.5 - 0.5 * t);
   vec2 vUp = T * slide + N * open;
 
-  // the incoming image with the shadows of both halves
   vec4 to = getToColor(uv);
   vec2 sq = q - SHADOW_OFFSET;
   float sdUp = piece(sq, vUp, N, 1.0).z;
@@ -61,14 +56,12 @@ vec4 transition (vec2 uv) {
   float sh = shadow.a * smoothstep(0.0, 0.1, t) * (1.0 - smoothstep(-0.5 * SHADOW_BLUR, SHADOW_BLUR, min(sdUp, sdDown)));
   vec4 c = vec4(mix(to.rgb, shadow.rgb, sh), to.a);
 
-  // the blade: its head crosses the frame along the cut
   float reach = 0.5 * length(vec2(ratio, 1.0)) + 0.1;
   float k = clamp(p / CUT, 0.0, 1.0);
   float head = mix(-reach, reach, 1.0 - (1.0 - k) * (1.0 - k));
   float behind = head - along;
   float drawn = clamp(0.5 + behind / EDGE, 0.0, 1.0);
 
-  // the halves, their cut edges catching the light of the blade behind its head
   float rim = flash.a * smoothstep(0.0, CUT, p) * (1.0 - 0.6 * t) * drawn;
   for (int i = 0; i < 2; i++) {
     float s = i == 0 ? 1.0 : -1.0;
@@ -80,13 +73,11 @@ vec4 transition (vec2 uv) {
     c = mix(c, col, cover);
   }
 
-  // the blade stroke: a thin streak behind the head, which lingers and fades
   float tail = drawn * (0.35 + 0.65 * exp(-max(behind, 0.0) * 4.0));
   float env = smoothstep(0.0, 0.03, p) * (1.0 - smoothstep(CUT, CUT + 0.12, p));
   float core = exp(-abs(d) / 0.0025) + 0.35 * exp(-abs(d) / 0.02);
   float spark = exp(-length(vec2(behind, d)) / 0.03) * (1.0 - k);
   float glow = flash.a * env * (core * tail + spark);
-  // a short flash of the whole frame as the blade leaves it
   float burst = flash.a * 0.25 * smoothstep(0.6 * CUT, CUT, p) * (1.0 - smoothstep(CUT, CUT + 0.15, p));
   c.rgb = mix(c.rgb, flash.rgb, burst * c.a);
   c.rgb += flash.rgb * glow * c.a;

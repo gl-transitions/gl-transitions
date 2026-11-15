@@ -14,24 +14,17 @@
  // @range(0.0, 1.0) Brightness of the colored edges around moving tiles
  uniform float glow; // = 0.75
 
- // A deterministic pseudo-random value per cell, stable between frames.
  float toseeHash(vec2 p) {
    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
  }
 
  vec4 transition(vec2 uv) {
-   // Preserve perfect, undistorted source and destination frames.
-   if (progress <= 0.0) return getFromColor(uv);
-   if (progress >= 1.0) return getToColor(uv);
-
-   // Build an aspect-correct grid: square cells on wide and tall sliders.
    float size = max(tileSize, 0.008);
    vec2 grid = max(vec2(1.0), floor(vec2(ratio, 1.0) / size));
    vec2 cell = floor(uv * grid);
    vec2 cellUV = fract(uv * grid);
    vec2 centerUV = (cell + 0.5) / grid;
 
-   // Schedule each tile in a diagonal wave with random stagger.
    float sweep = mix(
      centerUV.x,
      0.64 * centerUV.x + 0.36 * (1.0 - centerUV.y),
@@ -43,12 +36,10 @@
    float t = clamp((progress - start) / 0.29, 0.0, 1.0);
    float movement = t * clamp(scatter, 0.0, 1.5);
 
-   // Move each outgoing image tile sideways and downward.
    float wobble = toseeHash(cell + vec2(19.3, 7.7)) * 2.0 - 1.0;
    vec2 drift = vec2(0.65 * wobble, -0.95) * movement;
    vec2 movingCellUV = cellUV - drift;
 
-   // Clip moving tiles to their cells, revealing the next image.
    float inside =
      step(0.012, movingCellUV.x) *
      step(movingCellUV.x, 0.988) *
@@ -59,11 +50,9 @@
    float oldVisibility = 1.0 - smoothstep(0.48, 0.87, t);
    float oldMask = tileShape * oldVisibility;
 
-   // Sample the old image using the tile's displaced position.
    vec2 oldUV = clamp(uv - drift / grid, 0.0, 1.0);
    vec4 oldColor = getFromColor(oldUV);
 
-   // Add chromatic separation while each tile is moving.
    float flare = sin(3.14159265 * t);
    vec2 shift = vec2(0.006, -0.002) * prism * flare;
    vec4 offsetColor = getFromColor(
@@ -71,10 +60,8 @@
    );
    oldColor.r = offsetColor.r;
 
-   // Reveal the incoming image below the falling tiles.
    vec4 result = mix(getToColor(uv), oldColor, oldMask);
 
-   // Draw a temporary cyan or pink glowing rim around moving tiles.
    float edgeDistance = min(
      min(movingCellUV.x, 1.0 - movingCellUV.x),
      min(movingCellUV.y, 1.0 - movingCellUV.y)

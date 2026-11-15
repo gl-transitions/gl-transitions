@@ -4,25 +4,16 @@
 // Tags: melt, noise, luma
 //My own first transition — based on crosshatch code (from pthrasher), using  simplex noise formula (copied and pasted)
 //-> cooler with high contrasted images (isolated dark subject on light background f.e.)
-//TODO : try to rebase it on DoomTransition (from zeh)?
-//optimizations :
-//luminance (see http://stackoverflow.com/questions/596216/formula-to-determine-brightness-of-rgb-color#answer-596241)
-// Y = (R+R+B+G+G+G)/6
-//or Y = (R+R+R+B+G+G+G+G)>>3 
 
 
-//direction of movement :  0 : up, 1, down
 // @param Direction of the melt (false: up, true: down)
 uniform bool direction; // = true
-//luminance threshold
 // @range(0, 1) Luminance threshold
 uniform float l_threshold; // = 0.8 
-//does the movement takes effect above or below luminance threshold ?
 // @param Melt the parts above the threshold instead of below
 uniform bool above; // = false 
 
 
-//Random function borrowed from everywhere
 float rand(vec2 co){
   return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
@@ -57,22 +48,14 @@ float snoise(vec2 v)
                       0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
                      -0.577350269189626,  // -1.0 + 2.0 * C.x
                       0.024390243902439); // 1.0 / 41.0
-// First corner
   vec2 i  = floor(v + dot(v, C.yy) );
   vec2 x0 = v -   i + dot(i, C.xx);
 
-// Other corners
   vec2 i1;
-  //i1.x = step( x0.y, x0.x ); // x0.x > x0.y ? 1.0 : 0.0
-  //i1.y = 1.0 - i1.x;
   i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-  // x0 = x0 - 0.0 + 0.0 * C.xx ;
-  // x1 = x0 - i1 + 1.0 * C.xx ;
-  // x2 = x0 - 1.0 + 2.0 * C.xx ;
   vec4 x12 = x0.xyxy + C.xxzz;
   x12.xy -= i1;
 
-// Permutations
   i = mod289(i); // Avoid truncation effects in permutation
   vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 ))
 		+ i.x + vec3(0.0, i1.x, 1.0 ));
@@ -93,7 +76,6 @@ float snoise(vec2 v)
 // Approximation of: m *= inversesqrt( a0*a0 + h*h );
   m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
 
-// Compute final noise value at P
   vec3 g;
   g.x  = a0.x  * x0.x  + h.x  * x0.y;
   g.yz = a0.yz * x12.xz + h.yz * x12.yw;
@@ -110,11 +92,7 @@ float luminance(vec4 color){
 vec4 transition(vec2 uv) {
   vec2 center = vec2(1.0, direction);
   vec2 p = uv.xy / vec2(1.0).xy;
-  if (progress == 0.0) {
-    return getFromColor(p);
-  } else if (progress == 1.0) {
-    return getToColor(p);
-  } else {
+  {
     float x = progress;
     float dist = distance(center, p)- progress*exp(snoise(vec2(p.x, 0.0)));
     float r = x - rand(vec2(p.x, 0.1));

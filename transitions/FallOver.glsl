@@ -11,7 +11,6 @@ uniform float shading; // = 0.7
 const float PI = 3.141592653589793;
 
 vec4 transition (vec2 uv) {
-  // it starts slowly, then gravity takes over
   float fall = progress * (0.25 + 0.75 * progress);
   float angle = 0.5 * PI * fall;
   float c = cos(angle), s = sin(angle);
@@ -20,7 +19,6 @@ vec4 transition (vec2 uv) {
   float dist = 1.0 / max(perspective, 0.01);
   vec3 eye = vec3(0.5 * ratio, 0.5 * c, -dist);
   vec3 dir = vec3(uv.x * ratio, uv.y, 0.0) - eye;
-  // cast a ray onto the plane of the image turned back by angle around its bottom edge
   float den = dir.z * c - dir.y * s;
   if (den > 0.0) {
     float t = (eye.y * s - eye.z * c) / den;

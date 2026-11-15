@@ -23,7 +23,6 @@ float hexMask(vec2 local, float s, float a, float e) {
   return 1.0 - smoothstep(r - e, r, hexDist(rotation(-a) * local));
 }
 
-// Where the image is sampled, for a point of a hexagon turned by a and scaled by s
 vec2 hexUv(vec2 uv, vec2 local, vec2 cellToUv, float s, float a) {
   return uv + cellToUv * (rotation(-a) * local / max(s, 0.001) - local);
 }
@@ -38,12 +37,9 @@ vec4 transition(vec2 uv) {
   vec2 center = dot(p - a, p - a) < dot(p - b, p - b) ? a : b;
   vec2 local = p - center;
 
-  // each hexagon starts later the further it is from the center
   float d = min(length(center / toCells * vec2(ratio, 1.0)) / (0.5 * length(vec2(ratio, 1.0))), 1.0);
   float t = clamp((progress - 0.6 * d) / 0.4, 0.0, 1.0);
 
-  // the outgoing hexagon spins (opening gaps at the corners of its cell), shrinks away and darkens,
-  // casting a soft shadow on the incoming image
   float s = 1.0 - smoothstep(0.1, 1.0, t);
   float turn = 1.8 * t * (2.0 - t);
   vec4 fromTile = getFromColor(hexUv(uv, local, 1.0 / toCells, s, turn));

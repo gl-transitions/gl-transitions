@@ -11,7 +11,6 @@ uniform float smoothness; // = 0.03
 vec4 transition (vec2 uv) {
   // Measured in square pixels, so the diamond is not stretched
   vec2 d = abs(uv - center) * vec2(ratio, 1.0);
-  // The diamond covers the frame once it reaches the farthest corner
   vec2 far = max(center, 1.0 - center) * vec2(ratio, 1.0);
   float dist = (d.x + d.y) / (far.x + far.y);
   float s = max(smoothness, 0.001);

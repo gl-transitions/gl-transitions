@@ -124,9 +124,6 @@ vec2 distortUv(vec2 uv, float dir, float b, float h, float v, float frame) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
-
   float b = burst();
   float frame = floor(progress * 30.0);
 
@@ -151,7 +148,6 @@ vec4 transition(vec2 uv) {
     reveal
   );
 
-  // Horizontal time-slice residue: old/new frames dragged through uneven scan bands.
   vec2 smearUv = uv;
   smearUv.x += (rowRnd - 0.5) * 0.46 * b * h;
   smearUv.y += (hash(vec2(row, frame + 31.0)) - 0.5) * 0.045 * b * h;
@@ -165,7 +161,6 @@ vec4 transition(vec2 uv) {
 
   color = mix(color, sliceColor, h * b * residue);
 
-  // Thin scan sparks and broken white lines, like the reference clip's bright horizontal noise.
   float hairLine = stripeY(uv, 190.0, frame + 55.0, 0.002, 0.012);
   hairLine *= step(0.70, hash(vec2(floor(uv.y * 190.0), frame + 56.0)));
   color.rgb += vec3(0.72, 0.90, 1.0) * hairLine * b * 0.28;
@@ -177,7 +172,6 @@ vec4 transition(vec2 uv) {
   float n = hash(nCell + vec2(frame * 7.0, frame * 13.0));
   color.rgb += (n - 0.5) * noiseAmount * b * (0.55 + glitch);
 
-  // Slight desaturation during the damage peak makes it feel more like broadcast/video signal corruption.
   float luma = dot(color.rgb, vec3(0.299, 0.587, 0.114));
   color.rgb = mix(color.rgb, vec3(luma), 0.18 * b * glitch);
 

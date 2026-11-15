@@ -62,14 +62,12 @@ vec4 transition(vec2 uv) {
   vec2 P = vec2(uv.x * ratio, uv.y) * cells;
   vec3 own = owner(P);
   float px = cells / 200.0; // crack width scales with the frame height
-  // first the cracks run down the picture
   float crack = smoothstep(0.0, 0.1, progress - 0.1 * (1.0 - uv.y));
   float core = 1.0 - smoothstep(0.6 * px, 1.6 * px, own.z);
   float rim = (1.0 - smoothstep(1.6 * px, 3.2 * px, own.z)) - core;
   vec4 from = getFromColor(uv);
   vec4 col = vec4(from.rgb * (1.0 - 0.85 * core * crack) * (1.0 + 0.2 * rim * crack), from.a);
   if (localTime(own.xy, seedOf(own.xy)) > 0.0) {
-    // the hole left behind: the incoming picture, shaded until most pieces are gone
     vec4 to = getToColor(uv);
     col = vec4(to.rgb * (1.0 - 0.5 * (1.0 - smoothstep(0.45, 1.0, progress))), to.a);
   }
@@ -80,7 +78,6 @@ vec4 transition(vec2 uv) {
     vec2 s = seedOf(c);
     float t = localTime(c, s);
     if (t <= 0.0 || t >= 1.0 || t >= top) continue;
-    // it sags out of its socket, then drops, tumbles and shrinks away
     float loose = smoothstep(0.0, 0.18, t);
     float f = max(t - 0.15, 0.0) / 0.85;
     float g = f * f;
@@ -93,7 +90,6 @@ vec4 transition(vec2 uv) {
     if (qu.x < 0.0 || qu.x > 1.0 || qu.y < 0.0 || qu.y > 1.0 || !mayOwn(q, c)) continue;
     vec3 o = owner(q);
     if (any(notEqual(o.xy, c))) continue;
-    // beveled edge, lit from above; darker as it falls away
     float bev = 1.0 - smoothstep(0.0, 0.1, o.z);
     vec2 n = rot(-a) * normalize(q - s + 1e-4);
     vec4 fc = getFromColor(qu);

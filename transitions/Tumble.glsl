@@ -15,17 +15,14 @@ uniform float perspective; // = 0.6
 uniform float shading; // = 0.7
 
 const float PI = 3.141592653589793;
-// width of the anti-aliased card edges, in frame heights
 const float EDGE = 0.0015;
 // direction toward the light: above, to the right, in front
 const vec3 LIGHT = vec3(0.348, 0.696, -0.628);
 
-// rotates v around the line of sight
 vec3 roll(vec3 v, float c, float s) {
   return vec3(c * v.x - s * v.y, s * v.x + c * v.y, v.z);
 }
 
-// signed distance to the card's rectangle, in its plane
 float cardDistance(vec2 q) {
   vec2 e = abs(q) - vec2(0.5 * ratio, 0.5);
   return max(e.x, e.y);
@@ -46,12 +43,9 @@ vec2 cardUv(vec2 q) {
 }
 
 vec4 transition(vec2 uv) {
-  // the card is gone a little before the end
   float t = clamp(progress / 0.95, 0.0, 1.0);
-  // its size on screen shrinks faster and faster, down to a few percent
   float size = exp(-2.8 * t * t * (0.4 + 0.6 * t));
   float away = 1.0 - size;
-  // it spins at its own pace, starting smoothly
   float turn = t * t * (3.0 - 2.0 * t);
   float a = 2.0 * PI * flips * turn;
   float r = 2.0 * PI * spin * turn;
@@ -63,7 +57,6 @@ vec4 transition(vec2 uv) {
 
   // the camera, at dist in front of the plane z = 0, sees the frame at rest on it
   float dist = 1.0 / clamp(perspective, 0.1, 1.0);
-  // the card's center, seen at direction * away on screen while it goes away, with a slight rise
   vec2 seen = direction * away + vec2(0.0, 0.12 * t * (1.0 - t));
   vec3 rel = vec3(seen / size, dist / size);
   float fade = 1.0 - smoothstep(0.8, 1.0, t);
@@ -72,7 +65,6 @@ vec4 transition(vec2 uv) {
   vec2 p = vec2((uv.x - 0.5) * ratio, uv.y - 0.5);
   vec4 color = getToColor(uv);
 
-  // the soft shadow on the incoming image, cast down and to the left, shrinking with the card
   if (shadowAmount > 0.0) {
     vec3 ds = vec3(p - vec2(-0.05, -0.08) * min(4.0 * t, 1.0) * size, dist);
     vec3 hs = castOnCard(ds, rel, U, V, N);
@@ -84,7 +76,6 @@ vec4 transition(vec2 uv) {
     }
   }
 
-  // cast the ray onto the card
   vec3 d = vec3(p, dist);
   vec3 hit = castOnCard(d, rel, U, V, N);
   if (hit.z <= 0.0) return color;
@@ -102,7 +93,6 @@ vec4 transition(vec2 uv) {
   float lit = min((0.35 + 0.65 * max(dot(facing, LIGHT), 0.0)) / (0.35 + 0.65 * -LIGHT.z), 1.0);
   float shade = mix(1.0, lit * (front ? 1.0 : 0.55), shading);
   if (!front) card.rgb = mix(card.rgb, vec3(dot(card.rgb, vec3(0.299, 0.587, 0.114))), 0.4 * shading);
-  // a glint as the card turns through the light, a light added to the image
   float glint = pow(max(dot(facing, normalize(LIGHT - normalize(d))), 0.0), 60.0);
   card.rgb = card.rgb * shade + 0.35 * shading * glint * smoothstep(0.0, 0.2, t);
   if (m >= 1.0) return card;

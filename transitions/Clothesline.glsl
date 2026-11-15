@@ -17,17 +17,16 @@ uniform vec4 lineColor; // = vec4(0.42, 0.34, 0.26, 1.0)
 uniform vec4 pinColor; // = vec4(0.84, 0.68, 0.47, 1.0)
 
 const float FOCAL = 2.0; // distance from the camera to a print when it fills the frame
-const float GAP = 0.35; // space between two prints on the line, in frame heights
-const float WALL = 0.14; // distance from the line to the wall behind it
-const float ROPE = 0.0055; // half thickness of the line
-const vec2 PIN = vec2(0.021, 0.072); // half size of a clothespin
+const float GAP = 0.35;
+const float WALL = 0.14;
+const float ROPE = 0.0055;
+const vec2 PIN = vec2(0.021, 0.072);
 const float PIN_Y = -0.01; // center of a clothespin below the top edge of its print
-const float AA = 0.0015; // width of the antialiased edges, in frame heights
+const float AA = 0.0015;
 const vec3 LIGHT = vec3(-0.28, 0.48, 0.83); // toward the light: above, a bit on the left, in front
 const float PIN_X = 0.32; // clothespins from the center of their print, in print widths
-const int STEPS = 32; // steps of the swing simulation over the whole transition
+const int STEPS = 32;
 
-// the line moves between these progress values
 const float SLIDE_START = 0.1;
 const float SLIDE_END = 0.86;
 
@@ -35,17 +34,14 @@ vec4 premultiply(vec4 c) {
   return vec4(c.rgb * c.a, c.a);
 }
 
-// time of the line's move at p, from 0 to 1
 float slideTime(float p) {
   return clamp((p - SLIDE_START) / (SLIDE_END - SLIDE_START), 0.0, 1.0);
 }
 
-// part of its travel done (smootherstep of the time)
 float slideAmount(float u) {
   return u * u * u * (u * (u * 6.0 - 15.0) + 10.0);
 }
 
-// acceleration of the travel at p, per progress squared
 float slideAccel(float p) {
   float u = slideTime(p);
   float dur = SLIDE_END - SLIDE_START;
@@ -68,11 +64,9 @@ float swing(float p) {
     v += a * dt;
     x += v * dt;
   }
-  // it settles as the camera moves back in
   return x * (1.0 - smoothstep(0.7, 1.0, p));
 }
 
-// signed distance to a rounded box of half size b and corner radius r
 float roundedBox(vec2 q, vec2 b, float r) {
   vec2 d = abs(q) - b + r;
   return length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - r;
@@ -89,25 +83,21 @@ vec3 printHit(vec3 o, vec3 d, float cx, float psi) {
   return vec3(q.x, dot(q, dn), t);
 }
 
-// the bottom of the print bends sideways by bend frame heights
 float bendShift(float v, float bend) {
   float h = clamp(v, 0.0, 1.0);
   return bend * h * (0.6 + 0.4 * h);
 }
 
-// signed distance to the paper (negative inside), in frame heights
 float paperDist(vec2 uv, float bend) {
   vec2 q = abs(vec2(uv.x - bendShift(uv.y, bend), uv.y - 0.5)) - vec2(0.5 * ratio, 0.5);
   return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
 }
 
-// signed distance to the two clothespins of a print
 float pinDist(vec2 uv) {
   vec2 q = vec2(abs(uv.x) - PIN_X * ratio, uv.y - PIN_Y);
   return roundedBox(q, PIN, 0.012);
 }
 
-// the print hanging at cx over col (premultiplied), then its clothespins
 vec4 drawPrint(vec4 col, vec3 h, bool isFrom, float bend, float psi, float aa, float vis) {
   vec2 lp = h.xy;
   float d = paperDist(lp, bend);
@@ -115,7 +105,6 @@ vec4 drawPrint(vec4 col, vec3 h, bool isFrom, float bend, float psi, float aa, f
   if (cov > 0.0) {
     vec2 st = clamp(vec2((lp.x - bendShift(lp.y, bend)) / ratio + 0.5, 1.0 - lp.y), 0.0, 1.0);
     vec4 c = premultiply(isFrom ? getFromColor(st) : getToColor(st));
-    // the paper darkens as it swings back and bends, and under the clothespins
     float shade = 1.0 - 1.2 * abs(sin(psi)) * lp.y - 0.35 * abs(bend) * lp.y;
     float ps = pinDist(lp - vec2(0.006, 0.01));
     shade -= 0.35 * vis * (1.0 - smoothstep(-0.004, 0.012, ps));
@@ -130,13 +119,11 @@ vec4 drawPins(vec4 col, vec3 h, float aa, float vis) {
   float d = pinDist(lp);
   float cov = vis * clamp(0.5 - d / (h.z * aa), 0.0, 1.0);
   if (cov > 0.0) {
-    // rounded wood, with the steel spring across it
     float k = clamp((abs(lp.x) - PIN_X * ratio) / PIN.x, -1.0, 1.0);
     vec3 c = pinColor.rgb * (0.62 + 0.45 * sqrt(1.0 - k * k));
     float y = lp.y - PIN_Y;
     float spring = 1.0 - smoothstep(0.004, 0.007, abs(y + 0.02));
     c = mix(c, vec3(0.3, 0.31, 0.33) * (0.6 + 0.8 * sqrt(1.0 - k * k)), spring);
-    // the groove that grips the paper
     c *= 1.0 - 0.3 * (1.0 - smoothstep(0.002, 0.005, abs(y - 0.012)));
     vec4 pc = premultiply(vec4(c, pinColor.a));
     col = pc * cov + col * (1.0 - pc.a * cov);
@@ -149,7 +136,6 @@ vec4 transition(vec2 uv) {
   float s = direction < 0.0 ? -1.0 : 1.0;
   float sw = clamp(sway, 0.0, 1.0);
 
-  // the camera pulls back, then moves back in on the incoming print
   float back = smoothstep(0.0, 0.3, p) * (1.0 - smoothstep(0.6, 1.0, p));
   float zoom = mix(1.0, clamp(size, 0.1, 1.0), back);
   float vis = smoothstep(0.0, 0.35, back);
@@ -157,22 +143,18 @@ vec4 transition(vec2 uv) {
   vec3 d = vec3((uv - 0.5) * vec2(ratio, 1.0), -FOCAL);
   float aa = max(AA * min(1.0, 40.0 * back), 1e-6);
 
-  // the line carries the prints along
   float u = slideTime(p);
   float m = slideAmount(u);
   float speed = 16.0 * u * u * (1.0 - u) * (1.0 - u);
   float spacing = ratio + GAP;
   float cFrom = -s * spacing * m;
   float cTo = s * spacing * (1.0 - m);
-  // the bottoms lag behind and overshoot, and swing back in the wind of the move
   float bend = s * 0.65 * sw * swing(p);
   float psi = 0.45 * sw * speed;
 
   vec3 hf = printHit(o, d, cFrom, psi);
   vec3 ht = printHit(o, d, cTo, psi);
 
-  // the wall, seen around the prints (only behind their transparent parts at the ends),
-  // with the soft shadows of the prints, the pins and the line
   vec4 col = premultiply(background);
   float cover = max(
     clamp(0.5 - paperDist(hf.xy, bend) / (hf.z * aa), 0.0, 1.0),
@@ -187,7 +169,6 @@ vec4 transition(vec2 uv) {
     sh = max(sh, 1.0 - smoothstep(-0.012, 0.02, min(pinDist(sf.xy), pinDist(st.xy))));
     float ry = w.y + LIGHT.y * (WALL / LIGHT.z) - (0.5 - 0.012);
     sh = max(sh, 0.8 * (1.0 - smoothstep(0.0, 0.012, abs(ry))));
-    // and a soft falloff of the light away from the top left
     float fall = 0.1 * clamp(length(w.xy - vec2(-0.4 * ratio, 0.6)) / (1.2 * ratio + 0.6), 0.0, 1.0);
     col.rgb *= (1.0 - 0.42 * vis * sh) * (1.0 - fall * vis);
   }
@@ -195,14 +176,12 @@ vec4 transition(vec2 uv) {
   col = drawPrint(col, hf, true, bend, psi, aa, vis);
   col = drawPrint(col, ht, false, bend, psi, aa, vis);
 
-  // the line, in front of the top of the prints
   if (vis > 0.0) {
     float tl = (o.z - 0.004) / FOCAL;
     float ly = o.y + d.y * tl - (0.5 - 0.012);
     float lc = vis * clamp(0.5 - (abs(ly) - ROPE) / (tl * aa), 0.0, 1.0);
     if (lc > 0.0) {
       float k = clamp(ly / ROPE, -1.0, 1.0);
-      // twisted strands, carried along with the line, lit from above
       float lx = o.x + d.x * tl + s * spacing * m;
       float strand = 0.88 + 0.12 * sin((lx + ly * 0.6) * 360.0);
       vec3 c = lineColor.rgb * (0.7 + 0.45 * sqrt(1.0 - k * k) + 0.15 * k) * strand;

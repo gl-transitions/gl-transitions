@@ -19,15 +19,12 @@ vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
   float p = progress;
-  if (p <= 0.0) return a;
-  if (p >= 1.0) return b;
 
   // the card only shows where the images are: it takes the alpha of the outgoing image, then the incoming one's
   float split = mix(0.1, 0.7, clamp(wash, 0.0, 1.0));
   float cardAlpha = card.a * mix(a.a, b.a, smoothstep(0.6 * split, split + 0.1, p));
   vec3 cardColor = card.rgb * cardAlpha;
 
-  // the outgoing image fades and loses its contrast into the card, its lights first
   float w = smoothstep(0.0, split, p);
   float fromLum = dot(a.rgb, vec3(0.2126, 0.7152, 0.0722));
   float wl = clamp(w * (1.0 + 0.5 * fromLum), 0.0, 1.0);
@@ -35,14 +32,11 @@ vec4 transition(vec2 uv) {
   vec3 outgoing = mix(washed, cardColor, wl);
   float outAlpha = mix(a.a, cardAlpha, wl);
 
-  // development of the incoming image: quick at first, then slowly settling
   float x = clamp((p - split) / max(1.0 - split, 1e-3), 0.0, 1.0);
   float d = 1.0 - pow(1.0 - x, 1.5);
   float lum = dot(b.rgb, vec3(0.2126, 0.7152, 0.0722));
-  // the shadows develop first, the highlights last
   float dev = clamp((d - 0.45 * lum) / 0.55, 0.0, 1.0);
   dev = dev * dev * (3.0 - 2.0 * dev);
-  // low contrast and nearly no colors at first, with a cast: cyan in the shadows, magenta in the lights
   float early = 1.0 - smoothstep(0.2, 0.95, d);
   vec3 tinted = saturation(b.rgb, smoothstep(0.3, 1.0, d));
   tinted = mix(vec3(0.6), tinted, mix(0.55, 1.0, d));

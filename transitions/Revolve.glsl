@@ -2,7 +2,6 @@
 // License: MIT
 // Description: The outgoing image swirls and zooms with motion blur into the incoming one
 // Tags: swirl, zoom, rotate, blur
-// gl-transitions v1 compatible
 
 // @param Center of the swirl
 uniform vec2 center;       // = vec2(0.46, 0.52)
@@ -67,9 +66,6 @@ vec4 sampleRevolve(vec2 uv, float t) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
-
   float e = revolveEnvelope(progress);
   float span = 0.060 * motionBlur * e;
 

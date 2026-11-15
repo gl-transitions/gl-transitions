@@ -14,7 +14,6 @@ uniform vec4 borderColor; // = vec4(1.0, 0.95, 0.8, 1.0)
 // @param Random seed: another value gives other cells, switching in another order
 uniform float seed; // = 0.0
 
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0015;
 
 vec2 hash22(vec2 p) {
@@ -26,8 +25,6 @@ vec2 hash22(vec2 p) {
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   float n = max(cells, 1.0);
   // measured in square pixels, so the cells are not stretched
@@ -36,7 +33,6 @@ vec4 transition(vec2 uv) {
   vec2 f = p - i;
   vec2 offset = vec2(17.31, 41.97) * seed;
 
-  // nearest cell point
   vec2 mg = vec2(0.0);
   vec2 mr = vec2(0.0);
   float md = 8.0;
@@ -66,10 +62,8 @@ vec4 transition(vec2 uv) {
       }
     }
   }
-  // in frame heights
   edge /= n;
 
-  // the cell's own switch time, from its hash
   float h = hash22(i + mg + offset + 97.13).x;
   float w = clamp(smoothness, 0.0, 1.0);
   float start = h * (1.0 - w);
@@ -78,7 +72,6 @@ vec4 transition(vec2 uv) {
   // mixed premultiplied, so transparent images do not bleed their color
   vec4 c = mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
 
-  // the cracks open at the start and close at the end
   float open = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
   float bw = max(border, 0.0) * open;
   if (bw > 0.0) {

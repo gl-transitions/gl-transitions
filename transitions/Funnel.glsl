@@ -10,24 +10,19 @@ uniform float curvature; // = 0.8
 // @range(0, 1) Strength of the shading of the bent image and of the shadow it casts
 uniform float shadow; // = 0.5
 
-// width of the funnel's neck, as a part of the frame's height
 const float NECK = 0.04;
 // how far below the bottom edge the image's top ends, so it is gone at the end
 const float OVERSHOOT = 0.03;
-// width of the anti-aliased edges, as a part of the frame's height
 const float EDGE = 0.0015;
-// reach of the soft shadow, as a part of the frame's height
 const float SOFT = 0.06;
 
 vec4 transition(vec2 uv) {
   float t = progress;
-  // one eased timing: the funnel forms from the very start while the slide accelerates into it
   float f = smoothstep(0.0, 1.0, 1.0 - (1.0 - t) * (1.0 - t) * (1.0 - t));
   float slide = (1.0 + OVERSHOOT) * t * t * (1.5 - 0.5 * t);
 
   float r = max(ratio, 1e-4);
   float nh = 0.5 * NECK / r;
-  // the whole neck stays in the frame
   float tx = clamp(target, nh, 1.0 - nh);
   float c = clamp(curvature, 0.0, 1.0);
 
@@ -53,14 +48,12 @@ vec4 transition(vec2 uv) {
     float width = R - L;
     vec2 src = clamp(vec2((uv.x - L) / width, v), 0.0, 1.0);
     img = getFromColor(src);
-    // the squeezed rows round like a bent sheet, darker on their sides and toward the neck
     float across = 2.0 * src.x - 1.0;
     img.rgb *= 1.0 - s * (1.0 - width) * (0.5 * across * across + 0.3 * (1.0 - w));
     if (cov >= 1.0) return img;
   }
 
   vec4 bg = getToColor(uv);
-  // soft shadow of the funnel cast on the incoming image
   float ox = max(L - uv.x, uv.x - R) * r;
   float oy = uv.y - (1.0 - slide);
   float dist = length(max(vec2(ox, oy), 0.0));

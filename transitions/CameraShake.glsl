@@ -26,13 +26,11 @@ vec2 mirror(vec2 v) {
 
 // the camera position at jolt key k: offset (x, y) and roll, each in -1..1
 vec3 jolt(float k) {
-  // successive jolts go in nearly opposite directions
   float a = 2.4 * k + 1.2 * hash12(vec2(k, 11.0));
   float m = 0.55 + 0.45 * hash12(vec2(k, 23.0));
   return vec3(m * cos(a), m * sin(a), 2.0 * hash12(vec2(k, 37.0)) - 1.0);
 }
 
-// how strong the shake is at time t: it builds up quickly, peaks around the cut, then settles
 float envelope(float t) {
   float h = clamp(1.6 * (1.0 - abs(2.0 * t - 1.0)), 0.0, 1.0);
   return h * h * (3.0 - 2.0 * h);
@@ -45,7 +43,7 @@ vec4 shot(vec2 uv, float t, bool incoming) {
   float s = (t - 0.5) * jolts;
   float k = floor(s);
   float g = 1.0 - (s - k);
-  float e = 1.0 - g * g * g; // snaps to the next key, then holds
+  float e = 1.0 - g * g * g;
   vec3 j = mix(jolt(k), jolt(k + 1.0), e) * env;
   float omax = 0.14 * strength * env;
   float rmax = 0.07 * strength * env;
@@ -61,11 +59,9 @@ vec4 shot(vec2 uv, float t, bool incoming) {
 }
 
 vec4 transition(vec2 uv) {
-  // the exposure follows the shake: no blur at the very ends
   float open = envelope(progress);
   float shutter = 0.8 * blur / jolts * open;
   float lag = 0.2 * split / jolts * open;
-  // each channel, premultiplied, and its alpha
   vec2 sumR = vec2(0.0);
   vec2 sumG = vec2(0.0);
   vec2 sumB = vec2(0.0);
@@ -73,11 +69,9 @@ vec4 transition(vec2 uv) {
   for (int i = 0; i < TAPS; i++) {
     float u = (float(i) + 0.5) / float(TAPS) - 0.5;
     float t = progress + u * shutter;
-    // the trails fade out at both ends of the exposure
     float w = 1.0 - 1.4 * abs(u);
     // the cut happens during the exposure: the channels of a tap show the same image
     bool incoming = t >= 0.5;
-    // red leads and blue trails the motion, so they split by the speed of the jolt
     vec4 r = shot(uv, t + lag, incoming);
     vec4 c = shot(uv, t, incoming);
     vec4 b = shot(uv, t - lag, incoming);

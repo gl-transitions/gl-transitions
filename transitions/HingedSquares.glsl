@@ -11,7 +11,6 @@ uniform float shading; // = 0.6
 uniform float zoom; // = 0.5
 
 const float PI = 3.141592653589793;
-// half width of the anti-aliased edges, as a part of the frame's height
 const float EDGE = 0.0012;
 
 // turns v clockwise by the angle whose cosine and sine are cs
@@ -19,12 +18,10 @@ vec2 rot(vec2 v, vec2 cs) {
   return vec2(cs.x * v.x + cs.y * v.y, -cs.y * v.x + cs.x * v.y);
 }
 
-// one of the 4 lattice nodes around a point
 vec2 node(float i) {
   return vec2(mod(i, 2.0), floor(i * 0.5));
 }
 
-// alternate squares turn in opposite directions
 float parity(vec2 n) {
   return mod(n.x + n.y, 2.0) < 0.5 ? 1.0 : -1.0;
 }
@@ -71,14 +68,11 @@ vec2 toUV(vec2 c, float n) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   float n = max(float(cells), 1.0);
   float e = progress * progress * (3.0 - 2.0 * progress);
   float a = 0.5 * PI * e;
   // turn of the squares in front: 0 to 45 degrees for the outgoing ones, then 45 to 0 for the incoming ones
   float th = min(a, 0.5 * PI - a);
-  // the hinged lattice spreads while it opens
   vec2 cs = vec2(cos(th), sin(th));
   float spacing = cs.x + cs.y;
   float scale = n * mix(1.0, spacing, clamp(zoom, 0.0, 1.0));
@@ -98,15 +92,12 @@ vec4 transition(vec2 uv) {
   vec4 colF = first ? getFromColor(uvF) : getToColor(uvF);
   vec4 colB = first ? getToColor(uvB) : getFromColor(uvB);
 
-  // relief: none when the sheet is closed or fully open, strongest in between
   float depth = clamp(shading, 0.0, 1.0) * sin(4.0 * th);
-  // soft shadow cast by the front squares toward the lower right
   if (depth > 0.0) {
     vec2 ws = w - vec2(0.12, -0.12) * depth;
     vec4 sh = nearest(ws, floor(ws / spacing - offF), spacing, offF, cs);
     colB.rgb *= 1.0 - 0.75 * depth * (1.0 - smoothstep(-0.12, 0.25, sh.z));
   }
-  // bevel lit from the upper left, along each square's nearest side
   vec2 side = abs(f.x) > abs(f.y) ? vec2(sign(f.x), 0.0) : vec2(0.0, sign(f.y));
   float facing = dot(rot(side, vec2(cs.x, -parity(nf) * cs.y)), vec2(-0.7071, 0.7071));
   float rim = smoothstep(-0.07, -0.01, f.z);

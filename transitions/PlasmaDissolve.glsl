@@ -19,26 +19,21 @@ const float PI = 3.14159265;
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   // measured in square pixels, so the waves are not stretched
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0) * max(scale, 0.0) * 2.0 * PI;
   // the phase of the waves; the folded plasma below then changes by at most 0.9 * flow per
   // unit of progress, slower than the threshold, so the reveal never goes back
   float t = clamp(flow, 0.0, 1.0) * progress * 0.5;
-  // the classic plasma: sines of x, y, a diagonal and the distance to an off-center point
   float v = sin(p.x * 0.6 + t)
     + sin(p.y * 0.8 - t * 0.8)
     + sin((p.x * 0.5 + p.y * 0.7) * 0.7 + t * 0.6)
     + sin(length(p - vec2(0.15, -0.1) * max(scale, 0.0) * 2.0 * PI) * 0.9 - t * 1.2);
-  // folded into bands in [0, 1]
   v = abs(fract(v * 0.25 + 0.5) * 2.0 - 1.0);
 
   // the soft edge is fully below every band at the start and above every band at the end
   float s = max(smoothness, 0.001);
   float threshold = mix(-s, 1.0 + s, progress);
-  // > 0 where the incoming image shows
   float m = 1.0 - smoothstep(threshold - s, threshold + s, v);
 
   // mixed premultiplied, so transparent images do not bleed their color

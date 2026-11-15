@@ -22,7 +22,6 @@ float hash12(vec2 v) {
   return fract((v3.x + v3.y) * v3.z);
 }
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
@@ -42,7 +41,6 @@ vec4 image(vec2 st, float m) {
   return mix(vec4(a.rgb * a.a, a.a), vec4(b.rgb * b.a, b.a), m);
 }
 
-// the light of a pixel (premultiplied): its color above the knee, full well before white
 vec3 glow(vec4 c, float knee) {
   float lum = dot(c.rgb, vec3(0.2126, 0.7152, 0.0722));
   return c.rgb * smoothstep(knee, knee + max(0.3 * (1.0 - knee), 1e-3), lum);
@@ -50,21 +48,16 @@ vec3 glow(vec4 c, float knee) {
 
 vec4 transition(vec2 uv) {
   float p = progress;
-  // the glow blooms on the outgoing image, and subsides on the incoming one
   float amount = 4.0 * p * (1.0 - p);
   float peak = amount * amount;
-  // around the middle, the whole frame catches the light and floods with glow
   float flood = peak * peak * peak;
-  // the switch, under the glow at its brightest
   float m = smoothstep(0.44, 0.56, p);
   if (amount <= 0.0) return m < 0.5 ? getFromColor(uv) : getToColor(uv);
 
-  // the image stays sharp underneath (premultiplied colors, only the images on screen are read)
   vec4 c = image(uv, m);
   if (c.a <= 0.0) return vec4(0.0);
   c.rgb /= c.a;
 
-  // more and more of the image catches the light as the glow grows
   float knee = threshold * (1.0 - 0.3 * peak) * (1.0 - flood);
   float radius = spread * amount;
   // a rotation and a radial shift of the spiral for each pixel blend the taps into a smooth glow;
@@ -88,10 +81,8 @@ vec4 transition(vec2 uv) {
     vec3 l = glow(i0, knee) + glow(i1, knee);
     // the sparse outer taps weigh less, so the tail of the glow stays smooth
     float w = 1.0 - 0.75 * s;
-    // white at the core, tinted toward the edges
     bloom += w * mix(vec3(1.0), tint, smoothstep(0.0, 0.5, r)) * l;
     total += w;
-    // a closer blur of the image, to soften it
     float sw = (1.0 - s) * (1.0 - s);
     soft += sw * (i0 + i1);
   }

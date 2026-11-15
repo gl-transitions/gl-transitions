@@ -14,7 +14,6 @@ uniform vec4 borderColor; // = vec4(1.0, 1.0, 1.0, 1.0)
 // @param The outgoing image shrinks into the rectangle instead, toward the anchor
 uniform bool reverse; // = false
 
-// half width of the antialiased edge, in frame heights
 const float AA = 0.001;
 
 vec4 premultiplied(vec4 c) {
@@ -24,8 +23,6 @@ vec4 premultiplied(vec4 c) {
 vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
-  if (progress <= 0.0) return a;
-  if (progress >= 1.0) return b;
 
   vec2 an = clamp(anchor, 0.0, 1.0);
   vec2 sq = vec2(ratio, 1.0);
@@ -44,7 +41,6 @@ vec4 transition(vec2 uv) {
   // signed distance to the rectangle's edge, square-cornered, < 0 inside
   float e = max(d.x - size.x, d.y - size.y);
 
-  // the rectangle shows the incoming image, or the outgoing one in reverse
   vec4 inside = reverse ? a : b;
   vec4 c = premultiplied(reverse ? b : a);
   if (bw > 0.0) {

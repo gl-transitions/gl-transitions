@@ -8,7 +8,6 @@ uniform float colorSeparation; // = 0.3
 const float PI = 3.14159265358979323846264;
 float compute(vec2 p, float progress, vec2 center) {
 vec2 o = p*sin(progress * amplitude)-center;
-// horizontal vector
 vec2 h = vec2(1., 0.);
 // butterfly polar function (don't ask me why this one :))
 float theta = acos(dot(o, h)) * waves;
@@ -17,8 +16,6 @@ float s2 = s * s;
 return (exp(cos(theta)) - 2.*cos(4.*theta) + s2 * s2 * s) / 10.;
 }
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   vec2 p = uv;
   float inv = 1. - progress;
   float disp = compute(p, progress, vec2(0.5, 0.5));

@@ -14,7 +14,6 @@ uniform vec4 inkColor; // = vec4(0.07, 0.07, 0.07, 1.0)
 
 const float PI = 3.141592653589793;
 const float TAU = 6.283185307179586;
-// anti-aliasing width, in frame heights
 const float AA = 0.0015;
 
 float hash11(float n) {
@@ -84,32 +83,25 @@ vec3 leaderFrame(vec2 q, float n, float px) {
   float ink = 1.0 - smoothstep(0.003 - aa, 0.003 + aa, abs(r - 0.31));
   ink = max(ink, 1.0 - smoothstep(0.0045 - aa, 0.0045 + aa, abs(r - 0.37)));
   ink = max(ink, 1.0 - smoothstep(0.0015 - aa, 0.0015 + aa, min(abs(q.x), abs(q.y))));
-  // the number, 0.4 frame heights tall
   float d = numeral(q / 0.21, n) * 0.21 - 0.031;
   float num = 1.0 - smoothstep(-aa, aa, d);
-  // the number sits on a plain disc that hides the crosshair
   float disc = 1.0 - smoothstep(0.31 - 0.003 - aa, 0.31 - 0.003, r);
   ink = max(ink * (1.0 - disc), num);
-  // the disc is a little lighter, like the hot spot of a lamp
   c *= 1.0 + 0.06 * disc;
   return mix(c, inkColor.rgb, ink * inkColor.a);
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
   vec4 from = getFromColor(uv);
   vec4 to = getToColor(uv);
 
   float n = clamp(float(count), 1.0, 5.0);
   float sweeps = n + 1.0;
-  // the hand turns a little slower on the first and last sweeps
   float e = progress - 0.35 * sin(TAU * progress) / TAU;
   float t = e * sweeps;
   float k = min(floor(t), sweeps - 1.0);
   float f = t - k;
 
-  // film frames, for the wear that changes from one frame to the next
   float frame = floor(progress * 12.0 * sweeps);
   float weave = wear * 0.0015;
   vec2 jitter = vec2(hash11(frame * 1.3 + 0.7) - 0.5, hash11(frame * 2.1 + 5.3) - 0.5) * weave;
@@ -138,8 +130,6 @@ vec4 transition(vec2 uv) {
   float swept = k + 1.0;
   bool aheadLeader = ahead > 0.5;
   bool sweptLeader = swept < sweeps - 0.5;
-  // the countdown darkens in the wake of the hand, and the wake goes on around the dial into the
-  // part still ahead of the hand, left by the previous sweep
   float ang = dot(p, p) > 0.0 ? fract(atan(p.x, p.y) / TAU + 1.0) : 0.0;
   float nearCenter = smoothstep(0.0, 0.05, length(p) / s);
   vec3 aheadColor = from.rgb;
@@ -158,13 +148,10 @@ vec4 transition(vec2 uv) {
   float a = mix(aheadAlpha, sweptAlpha, behind);
   float onLeader = mix(aheadLeader ? 1.0 : 0.0, sweptLeader ? 1.0 : 0.0, behind);
 
-  // film wear: strongest on the countdown, lighter over the images in the middle of the transition
   float env = smoothstep(0.0, 0.1, progress) * (1.0 - smoothstep(0.9, 1.0, progress));
   float amount = wear * mix(0.35 * env, 1.0, onLeader);
-  // grain
   vec2 cell = floor(uv * vec2(ratio, 1.0) * 300.0);
   c += (hash12(cell + frame * 37.0) - 0.5) * 0.09 * amount;
-  // scratches running down the film, each one shows on some frames only
   for (int i = 0; i < 4; i++) {
     float fi = float(i);
     float seg = floor(frame / 3.0);
@@ -175,19 +162,16 @@ vec4 transition(vec2 uv) {
     float fade = 0.6 + 0.4 * sin(uv.y * (5.0 + fi) + fi * 2.0 + seg);
     c = mix(c, vec3(1.0), line * on * fade * 0.55 * amount);
   }
-  // dust: a few dark specks in different places on every frame
   vec2 grid = vec2(9.0, 6.0);
   vec2 dc = floor(uv * grid);
   float h = hash12(dc + frame * 17.0);
   vec2 center = (dc + 0.2 + 0.6 * vec2(h, hash12(dc.yx + frame * 11.0 + 3.0))) / grid;
   float speck = 1.0 - smoothstep(0.0015, 0.0015 + AA, length((uv - center) * vec2(ratio, 1.0)) - 0.002 * h);
   c *= 1.0 - speck * step(0.9, h) * 0.85 * amount;
-  // flicker and the lamp's vignette, on the countdown only
   float lamp = 1.0 - 0.06 * (hash11(frame + 0.5) - 0.5) * wear;
   lamp *= 1.0 - 0.35 * smoothstep(0.35, 0.95, length(q));
   c *= mix(1.0, lamp, onLeader);
 
-  // the clock hand, with a soft shadow on its trailing side
   float handOn = smoothstep(0.0, 0.03, progress) * (1.0 - smoothstep(0.97, 1.0, progress));
   float handW = 0.0022 * s;
   float hand = (1.0 - smoothstep(handW - AA, handW + AA, abs(across))) * step(0.0, along);

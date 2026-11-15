@@ -28,7 +28,7 @@ float getGradient(float r, float dist) {
 }
 
 float getWave(vec2 p){
-  vec2 _p = p - center; // offset from center
+  vec2 _p = p - center;
   float rads = atan(_p.y, _p.x);
   float degs = degrees(rads) + 180.0;
   vec2 range = vec2(0.0, M_PI * 30.0);

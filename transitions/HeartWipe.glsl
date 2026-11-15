@@ -22,7 +22,6 @@ uniform float glow; // = 0.3
 
 float dot2(vec2 v) { return dot(v, v); }
 
-// Exact signed distance to the heart
 float sdHeart(vec2 p) {
   p.x = abs(p.x);
   if (p.x + p.y > 1.0) return sqrt(dot2(p - LOBE)) - LOBE_R;
@@ -60,7 +59,6 @@ vec4 transition (vec2 uv) {
   // Margin so the soft edge is past the frame at progress = 1
   full += 4.0 * sm;
 
-  // Eased growth with two heartbeats riding on it: the heart surges, then almost stops
   float p = progress;
   float e = p * p * (2.0 - p);
   float env = max(sin(3.14159265 * p), 0.0);

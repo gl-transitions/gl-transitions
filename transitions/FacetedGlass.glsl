@@ -14,7 +14,6 @@ uniform vec4 highlight; // = vec4(1.0, 0.98, 0.92, 1.0)
 // @param Random seed: another value gives other facets, turning in another order
 uniform float seed; // = 0.0
 
-// half width of the antialiased seams, in frame heights
 const float AA = 0.0015;
 
 vec2 hash22(vec2 p) {
@@ -23,16 +22,11 @@ vec2 hash22(vec2 p) {
   return fract((p3.xx + p3.yz) * p3.zy);
 }
 
-// mirror the coordinates back into the frame
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
-
-  // 0 at both ends, 1 in the middle: the glass builds up, then flattens out
   float h = 1.0 - abs(2.0 * progress - 1.0);
   float amount = h * h * (3.0 - 2.0 * h);
 
@@ -43,10 +37,8 @@ vec4 transition(vec2 uv) {
   vec2 i = floor(p);
   vec2 f = p - i;
   vec2 offset = vec2(17.31, 41.97) * seed;
-  // width of the bevels, in facet sizes
   float bw = 0.18 * amount;
 
-  // nearest facet center
   vec2 mg = vec2(0.0);
   vec2 mr = vec2(0.0);
   float md = 8.0;
@@ -84,7 +76,6 @@ vec4 transition(vec2 uv) {
   float nl = length(normal);
   normal = nl > 0.0 ? normal / nl : vec2(0.0);
 
-  // the facet's own random cut: a shift, a zoom and a tilt
   vec2 id = i + mg + offset;
   vec2 h1 = hash22(id + 31.7);
   vec2 h2 = hash22(id + 59.3);
@@ -95,17 +86,13 @@ vec4 transition(vec2 uv) {
   float zoom = (h2.x - 0.5) * 6.0 * refraction;
   float tilt = (h2.y - 0.5) * 2.0 * refraction;
 
-  // from the facet center to the pixel, in frame heights
   vec2 q = -mr / n;
   vec2 view = -q * zoom + vec2(-q.y, q.x) * sin(tilt) + q * (cos(tilt) - 1.0);
 
-  // the bevel along the facet's edge: 1 on the edge, 0 inside
   float bv = 1.0 - smoothstep(0.0, bw, edge);
   bv *= bv;
-  // the bevel bends the image outward, more strongly than the flat facet
   vec2 bend = normal * bv * 0.4 * refraction;
 
-  // the facet turns to the incoming image at its own time, and its view turns over with it
   float start = 0.15 + 0.5 * h3.x;
   float m = smoothstep(start, start + 0.2, progress);
   vec2 d = amount * (view + bend);
@@ -115,19 +102,15 @@ vec4 transition(vec2 uv) {
   // mixed premultiplied, so transparent images do not bleed their color
   vec4 c = mix(vec4(ca.rgb * ca.a, ca.a), vec4(cb.rgb * cb.a, cb.a), m);
 
-  // light from the top left: each flat facet catches it a little differently
   vec2 light = normalize(vec2(-0.6, 0.8));
   vec2 slope = dir * (0.4 + 0.6 * h1.y);
   float facetLight = 0.12 * amount * dot(slope, light);
-  // the bevels catch it strongly on one side and shade the other
   float lit = dot(normal, light);
   float k = clamp(bevel, 0.0, 1.0);
   float glow = k * bv * max(lit, 0.0) * 1.1 * amount;
   float shade = k * bv * max(-lit, 0.0) * 0.6 * amount;
-  // a glint as the facet turns over
   float turn = sin(3.14159265 * m);
   glow += k * 0.15 * amount * turn * turn;
-  // thin dark seams between the facets
   float seam = 0.6 * amount * (1.0 - smoothstep(0.0, 2.0 * AA, edge / n - 0.5 * AA));
 
   c.rgb *= (1.0 + facetLight) * (1.0 - shade) * (1.0 - seam);

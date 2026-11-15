@@ -17,10 +17,8 @@ uniform float smoothness; // = 0.05
 float spiralIndex(vec2 c, vec2 n) {
   // ring: distance to the border, in cells
   float k = min(min(c.x, c.y), min(n.x - 1.0 - c.x, n.y - 1.0 - c.y));
-  // size of the ring, and the cell's position in it
   vec2 s = n - 2.0 * k;
   vec2 l = c - k;
-  // the outer rings come first
   float before = n.x * n.y - s.x * s.y;
   float along;
   if (l.y == 0.0) along = l.x; // top side, to the right
@@ -31,11 +29,7 @@ float spiralIndex(vec2 c, vec2 n) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
-
   vec2 n = max(vec2(grid), vec2(1.0));
-  // the cell, counted from the top left corner
   vec2 c = min(floor(vec2(uv.x, 1.0 - uv.y) * n), n - 1.0);
   // the transposed spiral turns the other way from the same corner; walking the spiral
   // outward reverses it too

@@ -16,9 +16,7 @@ const float PI = 3.141592653589793;
 
 vec4 transition (vec2 uv) {
   float p = progress;
-  // the fabric gathers early, then the cords pull it up
   float f = 1.0 - (1.0 - p) * (1.0 - p) * (1.0 - p);
-  // the cords start pulling at once and are fastest midway
   float e = mix(p, p * p * (3.0 - 2.0 * p), 0.4);
   float s = sag * f;
   float lift = mix(-0.01, 1.0 + sag + 0.08, e);
@@ -39,30 +37,23 @@ vec4 transition (vec2 uv) {
     // as the curtain shortens, its ruffles merge so none gets thinner than 2% of the frame
     float m = min(max(1.0, floor(ruffles + 0.5)), h / 0.02);
     float a = 2.0 * PI * m * q;
-    // the ruffles puff out most in the middle of each swag
     float g = 0.85 * f * min(1.0, 0.3 + 5.0 * (1.0 - h)) * (0.6 + 0.4 * bump);
     float v = clamp(q + g * sin(a) / (2.0 * PI * m), 0.0, 1.0);
-    // the fabric is also pulled in toward the cords near the hem
     float pull = 0.25 * f * q * q * sin(PI * u) / (PI * n);
     c = getFromColor(vec2(uv.x - pull, 1.0 - v));
 
-    // light from the front and a bit above
     float slope = 2.5 * g * cos(a);
     float diffuse = (1.0 - 0.35 * slope) / sqrt(1.0 + slope * slope);
     float crease = 0.5 + 0.5 * sin(a);
     float light = mix(1.0, diffuse * (1.0 - 0.45 * crease * crease), shading * g);
-    // a soft sheen on the crest of each ruffle
     light += 0.18 * shading * g * smoothstep(0.4, 1.0, -cos(a));
-    // each swag bulges toward the light in its middle and is pinched dark along the cords
     float depth = f * q * (0.3 + 0.7 * q);
     light *= 1.0 - shading * depth * (0.35 * u * u + 0.5 * exp(-(1.0 - abs(u)) * 14.0));
-    // the hem rolls under a little
     light *= 1.0 - 0.35 * shading * f * exp(-(uv.y - hem) * 120.0);
     c.rgb *= light;
     if (inside >= 1.0) return c;
   }
   vec4 to = getToColor(uv);
-  // soft shadow of the curtain just under its hem
   float below = max(hem - uv.y, 0.0);
   float shadow = 0.6 * shading * exp(-below * 22.0) * smoothstep(0.0, 0.05, lift) * (1.0 - smoothstep(1.0, 1.06, lift - s));
   to.rgb *= 1.0 - shadow;

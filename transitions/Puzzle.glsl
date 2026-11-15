@@ -60,7 +60,6 @@ vec4 transition(vec2 uv) {
   const float aa = 0.01; // soft edges, in cells
   float boardSum = 0.0;
   float allSum = 0.0;
-  // the two top moving pieces under this point
   float prio1 = -1.0, prio2 = -1.0, cov1 = 0.0, cov2 = 0.0, shade1 = 1.0, shade2 = 1.0;
   vec2 uv1 = uv, uv2 = uv;
   float shadowAll = 0.0;
@@ -71,12 +70,10 @@ vec4 transition(vec2 uv) {
     vec2 center = c + 0.5;
     vec2 local = (g - center) * vec2(aspect, 1.0);
     float h = hash(c + vec2(13.0, 7.0));
-    // diagonal order from the top left, a little shuffled
     float diag = (c.x / max(cols - 1.0, 1.0) + (rows - 1.0 - c.y) / max(rows - 1.0, 1.0)) * 0.5;
     float delay = (diag + 1.2 * (h - 0.5) * diag * (1.0 - diag)) * 0.6;
     float t = clamp((progress - delay) / 0.4, 0.0, 1.0);
 
-    // where the piece was: the board keeps the outgoing image where pieces are still in place
     float d0 = pieceDist(local, c, grid, aspect);
     float w = 1.0 - smoothstep(-aa, aa, d0);
     allSum += w;
@@ -85,8 +82,8 @@ vec4 transition(vec2 uv) {
       seam = min(seam, abs(d0));
       continue;
     }
-    // lift, then fall away: shrink, spin, drift down and darken
     float lift = smoothstep(0.0, 0.25, t);
+    boardSum += w * (1.0 - smoothstep(0.0, 0.1, t));
     float fall = clamp((t - 0.2) / 0.8, 0.0, 1.0);
     fall *= fall;
     float s = max(1.0 - fall, 0.001);
@@ -96,13 +93,10 @@ vec4 transition(vec2 uv) {
     vec2 pl = rot * (local - off) / s;
     float dp = pieceDist(pl, c, grid, aspect);
     float cov = (1.0 - smoothstep(-aa, aa, dp * s)) * min(s * 20.0, 1.0); // fades when tiny
-    // darker when falling, and on its edges when lifted
     float shade = (1.0 - 0.5 * fall) * (1.0 - 0.3 * lift * (1.0 - smoothstep(0.0, 0.035, -dp)));
     vec2 puv = (center + pl / vec2(aspect, 1.0)) / grid;
-    // soft shadow, offset to the bottom right while lifted
     vec2 sl = rot * (local - off - vec2(0.08, -0.1) * lift) / s;
     float sh = (1.0 - smoothstep(-0.05, 0.12, pieceDist(sl, c, grid, aspect) * s)) * lift * (1.0 - fall) * shadow;
-    // the hole it leaves is in its shadow too
     shadowAll = max(shadowAll, max(sh, w * lift * (1.0 - smoothstep(0.2, 0.5, t)) * shadow));
     float prio = delay;
     if (cov > 0.0 && prio > prio1) {
@@ -113,7 +107,6 @@ vec4 transition(vec2 uv) {
     }
   }
   vec4 base = mix(getToColor(uv), getFromColor(uv), boardSum / max(allSum, 0.001));
-  // the cuts show on the board as the transition starts
   base.rgb *= (1.0 - shadowAll) * (1.0 - 0.4 * smoothstep(0.0, 0.1, progress) * (1.0 - smoothstep(0.0, 0.015, seam)));
   vec4 p2 = getFromColor(uv2);
   p2.rgb *= shade2;

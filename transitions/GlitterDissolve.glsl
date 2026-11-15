@@ -18,9 +18,7 @@ uniform vec4 backColor; // = vec4(0.04, 0.04, 0.05, 1.0)
 
 // share of the transition each tile takes to flip over
 const float FLIP = 0.28;
-// how much a tile grows as it lifts toward the viewer, halfway through its flip
 const float LIFT = 0.3;
-// width of the soft edge of the tiles, in tiles
 const float EDGE = 0.04;
 // the grid is shifted off the pixel centers, so that no pixel sits right on the border of two tiles
 const vec2 SHIFT = vec2(0.37, 0.21);
@@ -38,13 +36,11 @@ vec2 mirrored(vec2 v) {
   return mix(m, 2.0 - m, step(1.0, m));
 }
 
-// how far the tile has flipped, 0 before it starts and 1 once it has landed
 float flipOf(vec2 id) {
   float t = clamp((progress - hash12(id) * (1.0 - FLIP)) / FLIP, 0.0, 1.0);
   return t * t * (3.0 - 2.0 * t);
 }
 
-// the direction perpendicular to the axis the tile turns around
 vec2 axisOf(vec2 id) {
   float a = 2.0 * PI * hash12(id + 41.7);
   return vec2(cos(a), sin(a));
@@ -63,27 +59,23 @@ float shape(vec2 v) {
   return hexagons ? max(v.y, dot(v, vec2(0.8660254, 0.5))) : v.x + v.y;
 }
 
-// the id of the tile centered at center
 vec2 idOf(vec2 center) {
   // the centers sit on multiples of (0.866, 0.5) for hexagons, of (0.5, 0.5) for diamonds
   vec2 grid = hexagons ? vec2(1.1547005, 2.0) : vec2(2.0);
   return floor(center * grid + 0.5) + vec2(13.0, 7.0) * floor(seed) + 3.0;
 }
 
-// how much of the flipping tile centered at center covers the point p, with an edge soft on screen
 float coverOf(vec2 p, vec2 center) {
   vec2 id = idOf(center);
   float f = flipOf(id);
   if (f <= 0.0 || f >= 1.0) return 0.0;
   float z = sin(PI * f);
-  // the tile is foreshortened by |cos| along its axis and grown by the lift
   float onScreen = (1.0 + LIFT * z) * max(abs(cos(PI * f)), 0.15);
   // the edge softens in as the tile starts turning, so that nothing pops
   float edge = EDGE * min(1.0, 4.0 * z) + 1e-4;
   return clamp((0.5 - shape(unproject(p - center, axisOf(id), f))) * onScreen / edge, 0.0, 1.0);
 }
 
-// the flipping tile centered at center, seen at the point p: shaded, with its glint
 vec4 tileColor(vec2 p, vec2 center) {
   vec2 id = idOf(center);
   float f = flipOf(id);
@@ -93,11 +85,9 @@ vec4 tileColor(vec2 p, vec2 center) {
   vec2 s0 = unproject(p - center, n, f);
   vec2 suv = mirrored((center + s0 - SHIFT) / tiles / vec2(ratio, 1.0) + 0.5);
   vec4 col = c > 0.0 ? getFromColor(suv) : getToColor(suv);
-  // the face turned to the viewer, slightly cupped like a sequin, lit from the top left
   vec3 nrm = normalize(vec3(n * z * (c < 0.0 ? -1.0 : 1.0) + 0.5 * s0, abs(c)));
   vec3 L = normalize(vec3(-0.3, 0.4, 1.0));
   float shade = 0.45 + 0.55 * clamp(dot(nrm, L) / L.z, 0.0, 1.6);
-  // a glint where the face mirrors the light toward the viewer, and on the rim when edge-on
   vec3 H = normalize(vec3(-0.45, 0.55, 1.0));
   float spec = smoothstep(0.94, 0.995, dot(nrm, H)) * 2.0 + pow(1.0 - abs(c), 6.0) * 0.6;
   vec3 light = clamp(glint * sparkle * spec * z, 0.0, 1.0);
@@ -106,12 +96,8 @@ vec4 tileColor(vec2 p, vec2 center) {
 }
 
 vec4 transition(vec2 uv) {
-  if (progress <= 0.0) return getFromColor(uv);
-  if (progress >= 1.0) return getToColor(uv);
-
   // in units where the tiles are one unit tall
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0) * tiles + SHIFT;
-  // the center of the tile of the pixel
   vec2 home;
   if (hexagons) {
     vec2 s = vec2(1.7320508, 1.0);
@@ -119,7 +105,6 @@ vec4 transition(vec2 uv) {
     vec2 b = mod(p - 0.5 * s, s) - 0.5 * s;
     home = dot(a, a) < dot(b, b) ? p - a : p - b;
   } else {
-    // a square grid turned by 45 degrees
     vec2 q = floor(vec2(p.x + p.y, p.y - p.x)) + 0.5;
     home = vec2(q.x - q.y, q.x + q.y) * 0.5;
   }

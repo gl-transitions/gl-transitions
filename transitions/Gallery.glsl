@@ -18,8 +18,8 @@ uniform vec4 background; // = vec4(0.07, 0.07, 0.08, 1.0)
 
 const float FOCAL = 1.6; // distance from the camera to a slide when it fills the frame
 const float MAX_ANGLE = 1.4; // turn of a side slide at tilt = 1, in radians
-const float NEIGHBOUR = 0.3; // how visible the repeats beyond the two images are
-const float AA = 0.002; // width of the antialiased slide edges, in frame heights
+const float NEIGHBOUR = 0.3;
+const float AA = 0.002;
 
 vec4 premultiply(vec4 c) {
   return vec4(c.rgb * c.a, c.a);
@@ -33,10 +33,9 @@ float offset(float k, float camQ, float spacing) {
 // the ray o + t d against slide k of the row (a plane turned around its vertical axis):
 // returns (u, v, t, coverage), coverage antialiased over aa frame heights at the slide's edges
 vec4 slideHit(vec3 o, vec3 d, float k, float s, float camQ, float spacing, float aa) {
-  // a side slide turns away from the center: its outer edge goes back into the wall
   float a = -s * MAX_ANGLE * tilt * offset(k, camQ, spacing);
   vec3 c = vec3(s * k * spacing, 0.0, 0.0);
-  vec3 tg = vec3(cos(a), 0.0, sin(a)); // along the slide, left to right
+  vec3 tg = vec3(cos(a), 0.0, sin(a));
   vec3 n = vec3(-tg.z, 0.0, tg.x);
   float dn = dot(d, n);
   if (abs(dn) < 1e-5) return vec4(0.0, 0.0, -1.0, 0.0);
@@ -58,10 +57,8 @@ vec4 slideColor(vec4 h, float k, float camQ, float spacing, float refl, vec4 bg)
   if (h.w <= 0.0) return vec4(0.0);
   vec2 st = clamp(h.xy, 0.0, 1.0);
   vec4 c = premultiply(k < 0.5 ? getFromColor(st) : getToColor(st));
-  // turned away from the light as it turns away from the center
   c.rgb *= 1.0 - 0.3 * tilt * abs(offset(k, camQ, spacing));
   if (k < -0.5 || k > 1.5) c = mix(bg, c, NEIGHBOUR);
-  // the reflection fades out below the bottom of the slide
   float f = refl > 0.0 ? refl * (1.0 - smoothstep(0.0, 0.6, st.y)) : 1.0;
   return c * (h.w * f);
 }
@@ -77,7 +74,6 @@ float sceneCover(vec3 o, vec3 d, float s, float camQ, float spacing, float aa) {
 
 // the slides seen along the ray, composited back to front (premultiplied)
 vec4 scene(vec3 o, vec3 d, float s, float camQ, float spacing, float aa, float refl, vec4 bg) {
-  // the slide in front of which the ray crosses the wall, and its two neighbours
   float wallQ = s * (o.x + d.x * o.z / -d.z);
   float kc = floor(wallQ / spacing + 0.5);
   vec4 h0 = slideHit(o, d, kc - 1.0, s, camQ, spacing, aa);
@@ -105,7 +101,6 @@ vec4 transition(vec2 uv) {
   float p = progress;
   float s = direction < 0.0 ? -1.0 : 1.0;
   float spacing = ratio * (1.0 + gap);
-  // the camera pulls back, glides along the row, and moves back in
   float back = smoothstep(0.0, 0.42, p) * (1.0 - smoothstep(0.58, 1.0, p));
   float m = clamp((p - 0.18) / 0.64, 0.0, 1.0);
   float glide = m * m * m * (m * (m * 6.0 - 15.0) + 10.0);
@@ -119,7 +114,6 @@ vec4 transition(vec2 uv) {
   vec4 col = scene(o, d, s, camQ, spacing, aa, 0.0, bg);
   if (col.a < 1.0) {
     vec4 under = bg;
-    // the floor, below the slides, reflects them
     if (d.y < 0.0 && reflection > 0.0) {
       vec4 r = scene(vec3(o.x, -1.0 - o.y, o.z), vec3(d.x, -d.y, d.z), s, camQ, spacing, aa, reflection, bg);
       under = r + bg * (1.0 - r.a);

@@ -26,15 +26,12 @@ vec4 transition(vec2 uv) {
   float offset = period * fract(float(rolls) * s);
   float speed = 4.0 * progress * (1.0 - progress); // 0 at both ends, 1 in the middle
   float m = smoothstep(0.42, 0.58, progress); // the channel changes at full speed
-  // the horizontal sync wobbles a little
   vec2 p = uv + vec2(0.004 * speed * sin(uv.y * 9.0 + progress * 30.0), 0.0);
-  // vertical motion blur
   vec4 c = vec4(0.0);
   for (int i = 0; i < 5; i++) {
     c += picture(p, p.y + offset - 0.0015 * float(rolls) * speed * float(i), m);
   }
   c /= 5.0;
-  // scanlines and a flickering brightness
   float scan = 0.5 + 0.5 * sin(uv.y * 400.0);
   float flicker = 0.08 * (0.5 + 0.5 * sin(progress * 97.0));
   c.rgb *= 1.0 - speed * (0.08 * scan + flicker);

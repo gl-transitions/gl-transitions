@@ -13,13 +13,9 @@ uniform float shading; // = 0.6
 uniform vec4 paper; // = vec4(0.95, 0.94, 0.9, 1.0)
 
 const float PI = 3.141592653589793;
-// width of the anti-aliased edges, as a part of the frame's height
 const float EDGE = 0.0015;
-// how much the print shows through the back of the paper
 const float SHOW = 0.1;
-// width of the shaded crease, in frame heights
 const float CREASE = 0.02;
-// direction of the light, from the top left and the front
 const vec3 LIGHT = vec3(-0.3995, 0.4494, 0.799);
 
 vec4 front(vec2 st) {
@@ -67,7 +63,6 @@ float shadowAt(vec3 q, vec3 l, float h, float k, vec3 n, vec3 along) {
   if (hit.x > 0.0) {
     float height = hit.x * l.z;
     float soft = 0.004 + 0.3 * height;
-    // the flap's shadow appears as it lifts and vanishes as it lands
     sh = max(sh, min(4.0 * n.x * n.x, 1.0) * smoothstep(-soft, soft, inside(hit.yz, h, k)) / (1.0 + 3.0 * height));
   }
   return sh;
@@ -84,15 +79,12 @@ vec3 toSheet(vec3 v, vec2 yaw, vec2 pitch, vec2 spin) {
 vec4 transition(vec2 uv) {
   float w = ratio;
   float shade = clamp(shading, 0.0, 1.0);
-  // the two folds, one right after the other, then the flight of the packet
   float s = 2.0 * smoothstep(0.0, 0.62, progress);
   bool second = s > 1.0;
   float x = second ? s - 1.0 : s;
   float a = PI * mix(x, x * x * (3.0 - 2.0 * x), 0.6);
   float f = clamp((progress - 0.5) / 0.47, 0.0, 1.0);
 
-  // the sheet tilts and recedes while it folds, so that the folds are seen in 3D, and lies flat
-  // again as the packet flies off
   float turn = clamp(tilt, 0.0, 1.0) * (smoothstep(0.0, 0.25, progress) - smoothstep(0.4, 0.8, progress));
   vec2 yaw = vec2(cos(0.45 * turn), sin(0.45 * turn));
   vec2 pitch = vec2(cos(0.55 * turn), -sin(0.55 * turn));
@@ -102,7 +94,6 @@ vec4 transition(vec2 uv) {
   vec2 dir = length(direction) > 0.0 ? normalize(direction) : vec2(1.0, 0.0);
   // the point of the sheet held in the middle of the frame slides to the middle of the packet
   vec2 c = vec2(0.5 * w - 0.25 * w * min(s, 1.0), 0.5 - 0.25 * max(s - 1.0, 0.0));
-  // far enough for the packet and its shadow to leave the frame
   float reach = 0.5 * (abs(dir.x) * w + abs(dir.y)) + length(vec2(0.25 * w, 0.25)) + 0.4;
   float lift = 0.3 * smoothstep(0.0, 0.5, f);
   float turned = (dir.x < 0.0 ? 0.7 : -0.7) * f * f;
@@ -129,11 +120,9 @@ vec4 transition(vec2 uv) {
   vec4 col = getToColor(uv);
   if (d.z < 0.0) {
     vec3 g = e + d * (e.z + lift) / -d.z;
-    // the shadow fades as the packet flies higher
     col.rgb *= 1.0 - 0.7 * shade * (1.0 - f * f) * shadowAt(g, l, h, k, n, along);
   }
 
-  // the flat part
   float t = d.z < 0.0 ? e.z / -d.z : -1.0;
   vec3 p = e + t * d;
   float m = clamp(inside(p.xy, h, k) / (EDGE * t) + 1.0, 0.0, 1.0);
@@ -144,7 +133,6 @@ vec4 transition(vec2 uv) {
     col = mix(col, img, m);
   }
 
-  // the flap
   vec3 hit = hitFlap(e, d, h, n, along);
   if (hit.x > 0.0) {
     float r = hit.y;

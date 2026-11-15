@@ -19,10 +19,8 @@ const float BLACK = 0.6;
 const float BEAD = 0.03;
 const float RUBBER = 0.009;
 const float HOLDER = 0.075;
-// how far the squeegee's shadow falls to the side, and its softness, in frame heights
 const float SHADOW = 0.018;
 const float SHADOW_SOFT = 0.02;
-// half width of the antialiased edges, in frame heights
 const float AA = 0.0015;
 
 float spHash(vec2 p) {
@@ -55,7 +53,6 @@ float separation(vec3 c, float i) {
   return clamp((1.0 - channel - k) / (1.0 - k), 0.0, 1.0);
 }
 
-// filter of a full coat of ink of pass i over white paper
 vec3 inkFilter(float i) {
   if (i < 0.5) return vec3(1.0, 1.0, 0.0);
   if (i < 1.5) return vec3(1.0, 0.0, 1.0);
@@ -63,7 +60,6 @@ vec3 inkFilter(float i) {
   return vec3(0.0);
 }
 
-// how the ink of pass i looks in the bead, wet and opaque
 vec3 inkColor(float i) {
   if (i < 0.5) return vec3(1.0, 0.84, 0.05);
   if (i < 1.5) return vec3(0.86, 0.06, 0.48);
@@ -82,7 +78,6 @@ vec4 transition(vec2 uv) {
   vec4 to = getToColor(uv);
   vec3 col = from.rgb;
   float alpha = from.a;
-  // tint of the squeegee's shadow and of the squeegee itself, laid over the print at the end
   float shade = 1.0;
   vec4 tool = vec4(0.0);
 
@@ -91,7 +86,6 @@ vec4 transition(vec2 uv) {
     float t = clamp((progress - i * PRINTED / 4.0) / (PRINTED / 4.0), 0.0, 1.0);
     // the passes run one after another: none of the next ones has started yet
     if (t <= 0.0) break;
-    // back and forth, the blade a little slanted, the other way on each pass
     float dir = mod(i, 2.0) < 0.5 ? 1.0 : -1.0;
     float tilt = mod(i, 2.0) < 0.5 ? 0.05 : 0.07;
     float m = dir * p.x + tilt * p.y;
@@ -105,17 +99,14 @@ vec4 transition(vec2 uv) {
     float v = dir * p.y - tilt * p.x;
     float cover = smoothstep(-AA, AA, u);
 
-    // the ink layer, out of register until it settles
     float a = 2.4 * i + 0.7;
     vec2 offset = misregistration * (1.0 - settle) * vec2(cos(a), sin(a)) * (0.6 + 0.4 * mod(i * 3.0, 4.0) / 3.0);
     vec4 s = getToColor(spMirror(uv + offset / aspect));
     float amount = separation(s.rgb, i);
-    // streaks dragged by the squeegee and specks where the ink did not go through the screen
     float streak = spNoise(vec2(v * 90.0, m * 2.0 + i * 13.0));
     streak = smoothstep(0.3, 0.9, streak);
     float speck = step(spHash(floor(p * 260.0) + i * 17.3), 0.07 * rough);
     amount *= 1.0 - rough * (0.3 * streak + speck);
-    // halftone dots on a grid turned differently for each ink
     float ga = radians(i < 0.5 ? 0.0 : (i < 1.5 ? 75.0 : (i < 2.5 ? 15.0 : 45.0)));
     vec2 g = mat2(cos(ga), sin(ga), -sin(ga), cos(ga)) * p * cells;
     // a dot grows from each cell's center (and a hole shrinks at its corners past half): the ink covers
@@ -128,7 +119,6 @@ vec4 transition(vec2 uv) {
     float dotted = smoothstep(-w, w, level * (1.0 + 2.0 * w) - w - spot);
     float c = mix(dotted, amount, settle) * mix(s.a, 1.0, settle);
     vec3 ink = 1.0 - c * (1.0 - inkFilter(i));
-    // fresh ink is wet just behind the blade, and dries by the end of the pass: a little darker, with a faint streaky sheen
     float wet = (1.0 - smoothstep(0.75, 1.0, t)) * exp(-max(u, 0.0) / 0.1) * cover * c;
     ink *= 1.0 - 0.12 * wet;
     vec3 printed = (n == 0 ? vec3(1.0) : col) * ink + 0.06 * wet * streak;
@@ -136,18 +126,15 @@ vec4 transition(vec2 uv) {
     if (n == 0) alpha = mix(from.a, to.a, cover);
 
     if (t > 0.0 && t < 1.0) {
-      // soft shadow of the squeegee, cast toward the right of the frame
       float us = u + dir * SHADOW;
       shade *= 1.0 - 0.35 * smoothstep(-BEAD - SHADOW_SOFT, -BEAD + SHADOW_SOFT, us)
         * (1.0 - smoothstep(HOLDER - SHADOW_SOFT, HOLDER + SHADOW_SOFT, us));
-      // the bead of ink rolled ahead of the blade, thicker in places
       float bead = BEAD * (0.55 + 0.6 * spNoise(vec2(v * 7.0, i * 5.0)));
       float bx = clamp((u + 0.5 * bead) / (0.5 * bead), -1.0, 1.0);
       float bz = sqrt(1.0 - bx * bx);
       float beadMask = smoothstep(-bead - AA, -bead + AA, u) * (1.0 - smoothstep(-AA, AA, u));
       vec3 bc = inkColor(i) * (0.45 + 0.55 * bz) * (0.92 + 0.16 * spNoise(vec2(v * 30.0, u * 120.0)));
       bc += 0.35 * pow(smoothstep(0.75, 1.0, bz), 3.0) * (0.6 + 0.4 * spNoise(vec2(v * 40.0, i)));
-      // rubber blade, then the metal holder, rounded, lit from above
       float rubber = smoothstep(-AA, AA, u) * (1.0 - smoothstep(RUBBER - AA, RUBBER + AA, u));
       float holder = smoothstep(RUBBER - AA, RUBBER + AA, u) * (1.0 - smoothstep(HOLDER - AA, HOLDER + AA, u));
       float hx = clamp((u - RUBBER) / (HOLDER - RUBBER) * 2.0 - 1.0, -1.0, 1.0);
