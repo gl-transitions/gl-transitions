@@ -19,8 +19,6 @@ vec4 transition(vec2 uv) {
   vec4 a = getFromColor(uv);
   vec4 b = getToColor(uv);
   float p = progress;
-  if (p <= 0.0) return a;
-  if (p >= 1.0) return b;
 
   // the card only shows where the images are: it takes the alpha of the outgoing image, then the incoming one's
   float split = mix(0.1, 0.7, clamp(wash, 0.0, 1.0));

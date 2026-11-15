@@ -45,7 +45,6 @@ float fbm(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-
   const float PI = 3.141592653589793;
   float p = progress;
   // the haze builds up then calms down

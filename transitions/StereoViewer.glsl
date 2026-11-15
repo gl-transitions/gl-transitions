@@ -187,10 +187,7 @@ vec4 transition(vec2 uv) {
   // corner is warped to represent to size after mapping to 1.0, 1.0
   vec2 corner_size = vec2(corner_radius / ratio, corner_radius);
 
-  if (progress <= 0.0) {
-    // 0.0: start with the base frame always
-    return getFromColor(p);
-  } else if (progress < 0.1) {
+  if (progress < 0.1) {
     // 0.0-0.1: zoom out and add rounded corners
     a = progress / 0.1;
     return  simple_sample_with_corners_from(p, corner_size * a, a);
@@ -202,12 +199,9 @@ vec4 transition(vec2 uv) {
     // 0.48-0.52: black
     // 0.52 - 0.9: unmask new image
     return get_cross_masked(p3, (progress - 0.52)/0.38, corner_size, ratio);
-  } else if (progress < 1.0) {
+  } else {
     // zoom out and add rounded corners
     a = (1.0 - progress) / 0.1;
     return simple_sample_with_corners_to(p, corner_size * a, a);
-  } else {
-    // 1.0 end with base frame
-    return getToColor(p);
   }
 }

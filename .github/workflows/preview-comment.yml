@@ -106,6 +106,7 @@ jobs:
             size=$(stat -c %s -- "$gif")
             if [ "$COUNT" -ge 40 ] || [ $((TOTAL + size)) -gt 100000000 ]; then
               echo "::warning::Skipping $(basename -- "$gif"): over the per-run budget"
+              basename -- "$gif" >> "$RUNNER_TEMP/over-budget.txt"
               continue
             fi
             cp -- "$gif" "$RUNNER_TEMP/gifs/${PREFIX}-$(basename -- "$gif")"
@@ -168,6 +169,11 @@ jobs:
             try {
               published = new Set(fs.readFileSync(path.join(process.env.RUNNER_TEMP, 'published.txt'), 'utf8').split('\n').filter(Boolean));
             } catch {}
+            // and the ones it skipped only for its per-run budget
+            let overBudget = new Set();
+            try {
+              overBudget = new Set(fs.readFileSync(path.join(process.env.RUNNER_TEMP, 'over-budget.txt'), 'utf8').split('\n').filter(Boolean));
+            } catch {}
             const dir = process.env.GIF_DIR;
             // Wrap untrusted strings in an inline-code span (no backticks/newlines, capped)
             // so a fork PR can't inject @mentions or Markdown into the bot comment.
@@ -219,8 +225,7 @@ jobs:
                   body += ` ![preview over black](${baseUrl}/${prefix}-${encodeURIComponent(name)}.black.gif)`;
                 }
                 body += `\n\n`;
-              } else if (isRegular(`${name}.gif`)) {
-                // rendered, but past the per-run budget of the publish step
+              } else if (overBudget.has(`${name}.gif`)) {
                 body += `⏭️ Preview rendered but not published: this run is over its budget of GIFs (too many transitions changed at once)\n\n`;
               } else {
                 body += `⚠️ Failed to render preview\n\n`;

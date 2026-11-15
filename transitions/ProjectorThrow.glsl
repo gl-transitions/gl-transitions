@@ -30,8 +30,6 @@ vec4 projected(vec2 q, vec2 r) {
 
 vec4 transition(vec2 uv) {
   float p = progress;
-  if (p <= 0.0) return getFromColor(uv);
-  if (p >= 1.0) return getToColor(uv);
   vec4 from = getFromColor(uv);
 
   // the lamp warms up as the room lights go down

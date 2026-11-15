@@ -110,11 +110,7 @@ float luminance(vec4 color){
 vec4 transition(vec2 uv) {
   vec2 center = vec2(1.0, direction);
   vec2 p = uv.xy / vec2(1.0).xy;
-  if (progress == 0.0) {
-    return getFromColor(p);
-  } else if (progress == 1.0) {
-    return getToColor(p);
-  } else {
+  {
     float x = progress;
     float dist = distance(center, p)- progress*exp(snoise(vec2(p.x, 0.0)));
     float r = x - rand(vec2(p.x, 0.1));

@@ -20,8 +20,6 @@
  }
 
  vec4 transition(vec2 uv) {
-   // Preserve perfect, undistorted source and destination frames.
-
    // Build an aspect-correct grid: square cells on wide and tall sliders.
    float size = max(tileSize, 0.008);
    vec2 grid = max(vec2(1.0), floor(vec2(ratio, 1.0) / size));

@@ -38,7 +38,6 @@ vec2 mirror(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-
   float nc = clamp(float(columns), 1.0, 40.0);
   float nr = clamp(floor(nc / ratio + 0.5), 1.0, float(MAX_ROWS));
   // a cell, and this point, in frame heights

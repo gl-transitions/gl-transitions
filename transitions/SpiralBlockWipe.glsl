@@ -31,7 +31,6 @@ float spiralIndex(vec2 c, vec2 n) {
 }
 
 vec4 transition(vec2 uv) {
-
   vec2 n = max(vec2(grid), vec2(1.0));
   // the cell, counted from the top left corner
   vec2 c = min(floor(vec2(uv.x, 1.0 - uv.y) * n), n - 1.0);

@@ -6,10 +6,7 @@
 // inspired by http://www.wolframalpha.com/input/?i=cannabis+curve
 
 vec4 transition (vec2 uv) {
-  if(progress == 0.0){
-    return getFromColor(uv);
-  }
-  vec2 leaf_uv = (uv - vec2(0.5))/10./pow(progress,3.5);
+  vec2 leaf_uv = (uv - vec2(0.5))/10./max(pow(progress,3.5), 1e-6);
 	leaf_uv.y += 0.35;
 	float r = 0.18;
 	float o = atan(leaf_uv.y, leaf_uv.x);

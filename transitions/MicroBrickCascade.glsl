@@ -35,8 +35,6 @@ float hash12(vec2 p) {
 // getToColor(uv)   = next slide image
 // ------------------------------------------------------------
 vec4 transition(vec2 uv) {
-  // Exact source/target at the boundaries
-
   // ----------------------------------------------------------
   // 1) Build a dense square grid that stays visually square
   // even when the slider is wide

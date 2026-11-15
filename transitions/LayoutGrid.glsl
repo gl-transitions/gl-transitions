@@ -76,7 +76,6 @@ float boxDist(vec2 p, vec2 lo, vec2 hi) {
 }
 
 vec4 transition(vec2 uv) {
-
   bool portrait = ratio < 1.0;
   // frame coordinates, in shorter sides
   vec2 aspect = vec2(ratio, 1.0) / min(ratio, 1.0);

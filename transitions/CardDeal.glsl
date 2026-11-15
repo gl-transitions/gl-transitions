@@ -58,7 +58,6 @@ float cardDist(vec2 q, vec2 size) {
 }
 
 vec4 transition(vec2 uv) {
-
   vec2 g = gridSize();
   float n = g.x * g.y;
   vec2 asp = vec2(ratio, 1.0);

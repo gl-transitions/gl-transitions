@@ -39,7 +39,6 @@ vec4 source(vec2 uv, float m) {
 }
 
 vec4 transition(vec2 uv) {
-
   float p = progress;
   // how much of the hologram shows, and how broken up it is (peaking mid-transition)
   float h = smoothstep(0.0, 0.3, p) * (1.0 - smoothstep(0.7, 1.0, p));

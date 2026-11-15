@@ -13,7 +13,6 @@ uniform float smoothness; // = 0.01
 uniform vec2 center; // = vec2(0.5)
 
 vec4 transition (vec2 uv) {
-  // At the end, float PI rounds above pi and sin(spread) can turn slightly negative
   // Measured in square pixels, so the angles are not stretched
   vec2 q = (uv - center) * vec2(ratio, 1.0);
   float a = radians(angle);
@@ -21,7 +20,8 @@ vec4 transition (vec2 uv) {
   vec2 p = vec2(abs(q.x * cos(a) - q.y * sin(a)), q.x * sin(a) + q.y * cos(a));
   // Each hand has turned by half a turn at the end
   float spread = PI * progress;
-  vec2 hand = vec2(sin(spread), cos(spread));
+  // (float PI rounds above pi, so sin(spread) would turn slightly negative at the end)
+  vec2 hand = vec2(max(sin(spread), 0.0), cos(spread));
   // Signed distance to the wedge: the nearest hand, negative inside
   float l = length(p);
   float d = length(p - hand * clamp(dot(p, hand), 0.0, l)) * sign(hand.y * p.x - hand.x * p.y);

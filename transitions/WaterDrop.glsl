@@ -27,7 +27,6 @@ float wave(float s, float k, float lambda, float t) {
 }
 
 vec4 transition(vec2 uv) {
-
   float k = 2.0 * max(amplitude, 1.0);
   float lambda = 6.2831853 / k;
   // measured in square pixels, so the ripples are round

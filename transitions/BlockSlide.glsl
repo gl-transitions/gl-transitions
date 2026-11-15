@@ -24,7 +24,6 @@ float hash(vec2 p) {
 }
 
 vec4 transition(vec2 uv) {
-
   bool vertical = abs(direction.y) > abs(direction.x);
   bool backward = vertical ? direction.y < 0.0 : direction.x < 0.0;
   vec2 g = max(vec2(grid), 1.0);

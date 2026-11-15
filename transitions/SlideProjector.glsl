@@ -87,8 +87,6 @@ vec4 gate(vec2 q, float yf, float yt, float light, float shade) {
 
 vec4 transition(vec2 uv) {
   float p = progress;
-  if (p <= 0.0) return getFromColor(uv);
-  if (p >= 1.0) return getToColor(uv);
 
   float yf = liftOut(p);
   float yt = dropIn(p);

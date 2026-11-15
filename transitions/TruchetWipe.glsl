@@ -37,7 +37,6 @@ float vnoise(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-
   float n = max(floor(cells + 0.5), 1.0);
   // aspect-correct square tiles, centered on the frame
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);

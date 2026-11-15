@@ -88,14 +88,7 @@ vec4 transition (vec2 uv) {
     }
     else
     {
-      if (progress > 0.0)
-      {
-        return getToColor(uv);
-      }
-      else
-      {
-        return getFromColor(uv);
-      }
+      return getToColor(uv);
     }    
   }
   else if (in_right_triangle(uv))

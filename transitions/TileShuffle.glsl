@@ -126,7 +126,6 @@ vec4 tileColor(vec4 src, float w, float lift, float e, float sh) {
 }
 
 vec4 transition(vec2 uv) {
-
   // at least two tiles along each side, so that the tiles move along both
   float nl = clamp(float(tiles), 2.0, MAX_TILES);
   vec2 n = ratio >= 1.0

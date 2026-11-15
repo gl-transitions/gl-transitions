@@ -106,7 +106,6 @@ vec4 tileColor(vec2 p, vec2 center) {
 }
 
 vec4 transition(vec2 uv) {
-
   // in units where the tiles are one unit tall
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0) * tiles + SHIFT;
   // the center of the tile of the pixel

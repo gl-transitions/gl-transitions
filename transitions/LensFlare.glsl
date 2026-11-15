@@ -39,8 +39,6 @@ vec3 highlight(vec4 c) {
 
 vec4 transition(vec2 uv) {
   float p = progress;
-  if (p <= 0.0) return getFromColor(uv);
-  if (p >= 1.0) return getToColor(uv);
 
   // 0 at both ends, 1 at the peak
   float env = 4.0 * p * (1.0 - p);

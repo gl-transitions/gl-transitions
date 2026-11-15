@@ -105,10 +105,11 @@ float blockMask(vec2 uv, float f) {
 }
 
 vec4 transition(vec2 uv) {
-
   float f = floor(progress * frameRate);
-  float reveal = frameReveal(f);
-  float glitch = frameGlitch(f) * (1.0 - smoothstep(0.96, 1.0, progress));
+  // the 24-step tables are read in step with the frames, whatever frameRate is
+  float step24 = f * 24.0 / max(frameRate, 1.0);
+  float reveal = frameReveal(step24);
+  float glitch = frameGlitch(step24) * (1.0 - smoothstep(0.96, 1.0, progress));
 
   float rnd = hash12(vec2(f, 9.13));
   vec2 jitter = vec2(

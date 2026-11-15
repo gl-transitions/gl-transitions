@@ -102,7 +102,6 @@ vec2 rotateUv(vec2 uv, float angle, vec2 anchor, float zDirection) {
 
 
 vec4 transition (vec2 uv) {
-    
     vec2 myst = uv;
     float animationTime = progress; //getAnimationTime();
     float easingTime = KeySpline(animationTime, .68,.01,.17,.98);

@@ -29,7 +29,6 @@ vec2 mirror(vec2 v) {
 }
 
 vec4 transition(vec2 uv) {
-
   // 0 at both ends, 1 in the middle: the glass builds up, then flattens out
   float h = 1.0 - abs(2.0 * progress - 1.0);
   float amount = h * h * (3.0 - 2.0 * h);

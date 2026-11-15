@@ -31,7 +31,6 @@ float bandMask(float i, float n, float a, float l, float s) {
 }
 
 vec4 transition(vec2 uv) {
-
   float n = float(bands < 1 ? 1 : bands);
   // along: position along the bands, in frame heights; across: position across them (0..1)
   float along = vertical ? uv.y : uv.x * ratio;
