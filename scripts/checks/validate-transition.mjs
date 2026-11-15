@@ -72,8 +72,10 @@ if (/\bgl_FragCoord\b/.test(glslNoComments)) {
 }
 // An early return at the ends (`if (progress <= 0.0) return getFromColor(uv);`) only makes
 // progress 0 and 1 exact and hides a jump on the next frame; it also branches every pixel.
-if (/\bif\s*\(\s*progress\s*(<=|>=|==|<|>)\s*(0|1)(\.0*)?\s*\)\s*return\b/.test(glslNoComments) ||
-    /\bif\s*\(\s*(0|1)(\.0*)?\s*(<=|>=|==|<|>)\s*progress\s*\)\s*return\b/.test(glslNoComments)) {
+if (
+  /\bif\s*\(\s*progress\s*(<=|>=|==|<|>)\s*(0|1)(\.0*)?\s*\)\s*return\b/.test(glslNoComments) ||
+  /\bif\s*\(\s*(0|1)(\.0*)?\s*(<=|>=|==|<|>)\s*progress\s*\)\s*return\b/.test(glslNoComments)
+) {
   errors.push(
     "Early return on progress 0 or 1 (`if (progress <= 0.0) return ...`): remove it and make the transition itself start exactly on getFromColor(uv) and end on getToColor(uv)",
   );
@@ -288,10 +290,12 @@ if (!p1Matches.every(Boolean)) {
 // through an early return (`if (progress <= 0.0) return getFromColor(uv);`) jumps on its first
 // and last frames, so every pixel is compared here, not just a few picks.
 // (Skipped for transitions that read an extra texture, which this check does not provide.)
-for (const [p, expected, label] of /\buniform\s+sampler2D\b/.test(glslNoComments) ? [] : [
-  [0.00001, expectedFromColor, "outgoing"],
-  [0.99999, expectedToColor, "incoming"],
-]) {
+for (const [p, expected, label] of /\buniform\s+sampler2D\b/.test(glslNoComments)
+  ? []
+  : [
+      [0.00001, expectedFromColor, "outgoing"],
+      [0.99999, expectedToColor, "incoming"],
+    ]) {
   drawAndRead(p);
   let bad = 0;
   for (let y = 0; y < height; y++) {

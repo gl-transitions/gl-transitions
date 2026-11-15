@@ -219,6 +219,9 @@ jobs:
                   body += ` ![preview over black](${baseUrl}/${prefix}-${encodeURIComponent(name)}.black.gif)`;
                 }
                 body += `\n\n`;
+              } else if (isRegular(`${name}.gif`)) {
+                // rendered, but past the per-run budget of the publish step
+                body += `⏭️ Preview rendered but not published: this run is over its budget of GIFs (too many transitions changed at once)\n\n`;
               } else {
                 body += `⚠️ Failed to render preview\n\n`;
               }
