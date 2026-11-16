@@ -124,7 +124,7 @@ jobs:
   pack:
     needs: release-mode
     if: needs.release-mode.outputs.mode == 'publish'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       pack-dir-artifact-id: ${{ steps.pack.outputs.pack-dir-artifact-id }}
     steps:
