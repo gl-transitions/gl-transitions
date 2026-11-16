@@ -33,9 +33,9 @@ vec2 sdMirror(vec2 v) {
   return 1.0 - abs(1.0 - mod(v, 2.0));
 }
 
-// offset keeps atan defined at the drop's exact center
+// atan(0, 0) is undefined at the drop's exact center
 float sdAngle(vec2 q) {
-  return atan(q.y, q.x + 1e-9) / TAU + 0.5;
+  return atan(q.y, dot(q, q) > 0.0 ? q.x : 1.0) / TAU + 0.5;
 }
 
 float sdFront(float th, float R) {
