@@ -11,15 +11,15 @@
   },
   "dependencies": {
     "@gl-transitions/remotion": "workspace:*",
-    "@remotion/bundler": "4.0.543",
-    "@remotion/cli": "4.0.543",
-    "@remotion/google-fonts": "4.0.543",
-    "@remotion/renderer": "4.0.543",
-    "@remotion/transitions": "4.0.543",
+    "@remotion/bundler": "4.0.545",
+    "@remotion/cli": "4.0.545",
+    "@remotion/google-fonts": "4.0.545",
+    "@remotion/renderer": "4.0.545",
+    "@remotion/transitions": "4.0.545",
     "gl-transitions": "workspace:*",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "remotion": "4.0.543"
+    "remotion": "4.0.545"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
