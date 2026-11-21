@@ -46,7 +46,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
+      - uses: jdx/mise-action@90f833d396d0cc3674b631d2d225e306476c303a # v5.2.10
 
       # With the optional dependencies: pnpm records the optional peers of the example's copy of
       # the package (gl-transitions, Reanimated) as such.
@@ -75,7 +75,7 @@ jobs:
       - name: Generate the Android project
         run: pnpm exec expo prebuild --platform android --no-install
 
-      - uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
         with:
           distribution: zulu
           java-version: "17"
