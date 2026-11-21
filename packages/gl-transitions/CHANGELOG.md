@@ -1,5 +1,185 @@
 # gl-transitions
 
+## 3.4.0
+
+### Minor Changes
+
+- [#490](https://github.com/gl-transitions/gl-transitions/pull/490) [`0709a36`](https://github.com/gl-transitions/gl-transitions/commit/0709a364a32b06976df2041b82d96209542992f3) Thanks [@gre](https://github.com/gre)! - New transition: `BeadUp` by gre.
+
+- [#522](https://github.com/gl-transitions/gl-transitions/pull/522) [`a3218cd`](https://github.com/gl-transitions/gl-transitions/commit/a3218cd85c7530627e2e576b6428555a5e22f4e2) Thanks [@gre](https://github.com/gre)! - New transition: `BillowWipe` by gre.
+
+- [#571](https://github.com/gl-transitions/gl-transitions/pull/571) [`dfd0c7d`](https://github.com/gl-transitions/gl-transitions/commit/dfd0c7dd0e5e7571b0230676ad626da230bced18) Thanks [@gre](https://github.com/gre)! - New transition: `Bite` by gre.
+
+- [#578](https://github.com/gl-transitions/gl-transitions/pull/578) [`9ea3ab1`](https://github.com/gl-transitions/gl-transitions/commit/9ea3ab180aeaf685eccef86eb772fc8fe53e85a6) Thanks [@gre](https://github.com/gre)! - New transition: `Blossom` by gre.
+
+- [#560](https://github.com/gl-transitions/gl-transitions/pull/560) [`328510d`](https://github.com/gl-transitions/gl-transitions/commit/328510de609e4b2b8f156c361edfbd54933a1a6e) Thanks [@gre](https://github.com/gre)! - New transition: `Bottleneck` by gre.
+
+- [#557](https://github.com/gl-transitions/gl-transitions/pull/557) [`0dac111`](https://github.com/gl-transitions/gl-transitions/commit/0dac11150a45e55a2918b30c7efe134f1b8f57a7) Thanks [@gre](https://github.com/gre)! - New transition: `BrickCollapse` by gre.
+
+- [#530](https://github.com/gl-transitions/gl-transitions/pull/530) [`b5f4ec3`](https://github.com/gl-transitions/gl-transitions/commit/b5f4ec3650d0b655711ceeae7b12c1096e84cc40) Thanks [@gre](https://github.com/gre)! - New transition: `Cleave` by gre.
+
+- [#548](https://github.com/gl-transitions/gl-transitions/pull/548) [`e4266c8`](https://github.com/gl-transitions/gl-transitions/commit/e4266c89df90d75476bc1084e87b49a66508e0be) Thanks [@gre](https://github.com/gre)! - New transition: `CoinSettle` by gre.
+
+- [#559](https://github.com/gl-transitions/gl-transitions/pull/559) [`ad83de5`](https://github.com/gl-transitions/gl-transitions/commit/ad83de58a1e768757d582d587839eae3e49562fe) Thanks [@gre](https://github.com/gre)! - New transition: `CornerPin` by gre.
+
+- [#577](https://github.com/gl-transitions/gl-transitions/pull/577) [`12ea630`](https://github.com/gl-transitions/gl-transitions/commit/12ea630647a95cb36e5c10f7108c534c4def9581) Thanks [@gre](https://github.com/gre)! - New transition: `Crankshaft` by gre.
+
+- [#564](https://github.com/gl-transitions/gl-transitions/pull/564) [`a987e37`](https://github.com/gl-transitions/gl-transitions/commit/a987e371f8bac77f30849ce946c9930e20ae0128) Thanks [@gre](https://github.com/gre)! - New transition: `Craze` by gre.
+
+- [#525](https://github.com/gl-transitions/gl-transitions/pull/525) [`d7662cb`](https://github.com/gl-transitions/gl-transitions/commit/d7662cb3ec816b5b2cd77b60d1148bbdb15e2ae2) Thanks [@gre](https://github.com/gre)! - New transition: `Cymatics` by gre.
+
+- [#541](https://github.com/gl-transitions/gl-transitions/pull/541) [`ab0d2eb`](https://github.com/gl-transitions/gl-transitions/commit/ab0d2eb737f52465d310353f913e81de4d7c8328) Thanks [@gre](https://github.com/gre)! - New transition: `DamBreak` by gre.
+
+- [#554](https://github.com/gl-transitions/gl-transitions/pull/554) [`43e1b69`](https://github.com/gl-transitions/gl-transitions/commit/43e1b693c0b791d4da3ad3c9891fe12240a91f6c) Thanks [@gre](https://github.com/gre)! - New transition: `Deinterleave` by gre.
+
+- [#509](https://github.com/gl-transitions/gl-transitions/pull/509) [`41a839f`](https://github.com/gl-transitions/gl-transitions/commit/41a839f65838fa0a1287a19e0df70a901b41a10b) Thanks [@gre](https://github.com/gre)! - New transition: `DiffuseDissolve` by gre.
+
+- [#555](https://github.com/gl-transitions/gl-transitions/pull/555) [`1e6a892`](https://github.com/gl-transitions/gl-transitions/commit/1e6a89245c2a5ce325ca58a65e92c5f748464d23) Thanks [@gre](https://github.com/gre)! - New transition: `DiscCascade` by gre.
+
+- [#579](https://github.com/gl-transitions/gl-transitions/pull/579) [`b92f419`](https://github.com/gl-transitions/gl-transitions/commit/b92f419586cd22eec75f27cce5ff930aded9d676) Thanks [@gre](https://github.com/gre)! - New transition: `Donut` by gre.
+
+- [#576](https://github.com/gl-transitions/gl-transitions/pull/576) [`b45d130`](https://github.com/gl-transitions/gl-transitions/commit/b45d1302630cbd0854e355c5020fd4c2ee9fc363) Thanks [@gre](https://github.com/gre)! - New transition: `DropHop` by gre.
+
+- [#501](https://github.com/gl-transitions/gl-transitions/pull/501) [`8c49181`](https://github.com/gl-transitions/gl-transitions/commit/8c491814f259f7cd1c95cb592b94a17fa6aeaff5) Thanks [@gre](https://github.com/gre)! - New transition: `EqualizerWipe` by gre.
+
+- [#487](https://github.com/gl-transitions/gl-transitions/pull/487) [`c4ee910`](https://github.com/gl-transitions/gl-transitions/commit/c4ee910d8adfaea6c043034c9a956b63ef6b3f95) Thanks [@gre](https://github.com/gre)! - New transition: `Faint` by gre.
+
+- [#505](https://github.com/gl-transitions/gl-transitions/pull/505) [`fa834d3`](https://github.com/gl-transitions/gl-transitions/commit/fa834d3deb0a52c074635e151c8b4afc8144fcb9) Thanks [@gre](https://github.com/gre)! - New transition: `FilmLeader` by gre.
+
+- [#545](https://github.com/gl-transitions/gl-transitions/pull/545) [`48f82de`](https://github.com/gl-transitions/gl-transitions/commit/48f82deaabb3d7659d5f05cfff5ba4275812ed29) Thanks [@gre](https://github.com/gre)! - New transition: `FlowDissolve` by gre.
+
+- [#544](https://github.com/gl-transitions/gl-transitions/pull/544) [`2a81175`](https://github.com/gl-transitions/gl-transitions/commit/2a811758d8f0cfc8d5ff75311ba50957840aa74c) Thanks [@gre](https://github.com/gre)! - New transition: `Flutter` by gre.
+
+- [#574](https://github.com/gl-transitions/gl-transitions/pull/574) [`fdeb408`](https://github.com/gl-transitions/gl-transitions/commit/fdeb40893712221de2f11126e1da14ea0345f8ee) Thanks [@gre](https://github.com/gre)! - New transition: `Gape` by gre.
+
+- [#531](https://github.com/gl-transitions/gl-transitions/pull/531) [`ae92575`](https://github.com/gl-transitions/gl-transitions/commit/ae925756e0d84c8c0e01b0d0004de7d824cc801c) Thanks [@gre](https://github.com/gre)! - New transition: `GlassRelief` by gre.
+
+- [#540](https://github.com/gl-transitions/gl-transitions/pull/540) [`8e3eef1`](https://github.com/gl-transitions/gl-transitions/commit/8e3eef1b78be349271a3b3dc05b46d204d135dfa) Thanks [@gre](https://github.com/gre)! - New transition: `HerringboneFold` by gre.
+
+- [#547](https://github.com/gl-transitions/gl-transitions/pull/547) [`fb938ee`](https://github.com/gl-transitions/gl-transitions/commit/fb938eecfe81fa981cd0679f1bdf50d5a31d27a6) Thanks [@gre](https://github.com/gre)! - New transition: `HoneyDrip` by gre.
+
+- [#572](https://github.com/gl-transitions/gl-transitions/pull/572) [`1546f74`](https://github.com/gl-transitions/gl-transitions/commit/1546f7459f64988070a73dee4fd0923630be0f50) Thanks [@gre](https://github.com/gre)! - New transition: `HyperbolicMosaic` by gre.
+
+- [#537](https://github.com/gl-transitions/gl-transitions/pull/537) [`776a1b0`](https://github.com/gl-transitions/gl-transitions/commit/776a1b08e7f0e8b17d5a5e354df52a08496c3d67) Thanks [@gre](https://github.com/gre)! - New transition: `Inchworm` by gre.
+
+- [#493](https://github.com/gl-transitions/gl-transitions/pull/493) [`d924b9e`](https://github.com/gl-transitions/gl-transitions/commit/d924b9e2db2917bd2d8d60df7bdbc8e98239f42d) Thanks [@gre](https://github.com/gre)! - New transition: `InterlaceWipe` by gre.
+
+- [#529](https://github.com/gl-transitions/gl-transitions/pull/529) [`8b5d3e2`](https://github.com/gl-transitions/gl-transitions/commit/8b5d3e2ee83d4ce751681a40145ca6c54c0a51f2) Thanks [@gre](https://github.com/gre)! - New transition: `IrisFold` by gre.
+
+- [#539](https://github.com/gl-transitions/gl-transitions/pull/539) [`acabff7`](https://github.com/gl-transitions/gl-transitions/commit/acabff772cc8e2d71beb2b2a49efa739ff335289) Thanks [@gre](https://github.com/gre)! - New transition: `Knead` by gre.
+
+- [#488](https://github.com/gl-transitions/gl-transitions/pull/488) [`dee204e`](https://github.com/gl-transitions/gl-transitions/commit/dee204ebcb7d33d3e8efbdf36dcda1ffc426aadc) Thanks [@gre](https://github.com/gre)! - New transition: `LensPush` by gre.
+
+- [#504](https://github.com/gl-transitions/gl-transitions/pull/504) [`9c0e597`](https://github.com/gl-transitions/gl-transitions/commit/9c0e597a1e02f1890aff9f3ba673c59f4e68adb9) Thanks [@gre](https://github.com/gre)! - New transition: `LensWipe` by gre.
+
+- [#569](https://github.com/gl-transitions/gl-transitions/pull/569) [`61c2342`](https://github.com/gl-transitions/gl-transitions/commit/61c23421b2644a4c6e56afb19de268b0a268890d) Thanks [@gre](https://github.com/gre)! - New transition: `LichtenbergBurn` by gre.
+
+- [#565](https://github.com/gl-transitions/gl-transitions/pull/565) [`4c8078c`](https://github.com/gl-transitions/gl-transitions/commit/4c8078ca514f0d1ed3d5f57318cd12fc2d7dfd07) Thanks [@gre](https://github.com/gre)! - New transition: `LightningRift` by gre.
+
+- [#515](https://github.com/gl-transitions/gl-transitions/pull/515) [`5ce5285`](https://github.com/gl-transitions/gl-transitions/commit/5ce528520864e7732c85542d599aa2067efd8303) Thanks [@gre](https://github.com/gre)! - New transition: `MarblingDissolve` by gre.
+
+- [#498](https://github.com/gl-transitions/gl-transitions/pull/498) [`f492974`](https://github.com/gl-transitions/gl-transitions/commit/f4929740ac65a6f8c307fa879bca50348362f943) Thanks [@Giladx](https://github.com/Giladx)! - New transition: `MicroBrickCascade` by Gilad Levi.
+
+- [#532](https://github.com/gl-transitions/gl-transitions/pull/532) [`cc7ab7c`](https://github.com/gl-transitions/gl-transitions/commit/cc7ab7c5465ce7429f962229694204ceb64d3113) Thanks [@gre](https://github.com/gre)! - New transition: `Nightfall` by gre.
+
+- [#491](https://github.com/gl-transitions/gl-transitions/pull/491) [`e7ad9b5`](https://github.com/gl-transitions/gl-transitions/commit/e7ad9b5a0d094ce294207f11d8afae93647996b9) Thanks [@gre](https://github.com/gre)! - New transition: `OutlineCrumble` by gre.
+
+- [#527](https://github.com/gl-transitions/gl-transitions/pull/527) [`f955642`](https://github.com/gl-transitions/gl-transitions/commit/f955642b2edee9e6d2b8dfbb6325bcd7057aee0d) Thanks [@gre](https://github.com/gre)! - New transition: `OutlineFill` by gre.
+
+- [#551](https://github.com/gl-transitions/gl-transitions/pull/551) [`b17c9df`](https://github.com/gl-transitions/gl-transitions/commit/b17c9df3eb4a0494288d57ac675258b58a5c822e) Thanks [@gre](https://github.com/gre)! - New transition: `OutlineTear` by gre.
+
+- [#514](https://github.com/gl-transitions/gl-transitions/pull/514) [`5406328`](https://github.com/gl-transitions/gl-transitions/commit/54063285ee9df3777fec89160db82195c222942a) Thanks [@gre](https://github.com/gre)! - New transition: `PaintDissolve` by gre.
+
+- [#494](https://github.com/gl-transitions/gl-transitions/pull/494) [`9fb6bc5`](https://github.com/gl-transitions/gl-transitions/commit/9fb6bc5c227011ec97afb26b3bd91af2bd512188) Thanks [@gre](https://github.com/gre)! - New transition: `PaperLayers` by gre.
+
+- [#520](https://github.com/gl-transitions/gl-transitions/pull/520) [`7b65d63`](https://github.com/gl-transitions/gl-transitions/commit/7b65d63c1add8671963a8ab435ebec299cb833f5) Thanks [@gre](https://github.com/gre)! - New transition: `ParallaxPush` by gre.
+
+- [#566](https://github.com/gl-transitions/gl-transitions/pull/566) [`c29e857`](https://github.com/gl-transitions/gl-transitions/commit/c29e857254ddf71009951bd32a6d6770256d47e3) Thanks [@gre](https://github.com/gre)! - New transition: `Perforate` by gre.
+
+- [#500](https://github.com/gl-transitions/gl-transitions/pull/500) [`c91d5b3`](https://github.com/gl-transitions/gl-transitions/commit/c91d5b31ff5656c34ec150f3a6d89c3938c0104e) Thanks [@gre](https://github.com/gre)! - New transition: `PinchLift` by gre.
+
+- [#519](https://github.com/gl-transitions/gl-transitions/pull/519) [`4b49394`](https://github.com/gl-transitions/gl-transitions/commit/4b4939414429533f908c797bed61331fe87c5493) Thanks [@gre](https://github.com/gre)! - New transition: `PosterPaste` by gre.
+
+- [#542](https://github.com/gl-transitions/gl-transitions/pull/542) [`4b79865`](https://github.com/gl-transitions/gl-transitions/commit/4b79865748b247e77a4683faa81a7891fdacf2c0) Thanks [@gre](https://github.com/gre)! - New transition: `QuadTurn` by gre.
+
+- [#503](https://github.com/gl-transitions/gl-transitions/pull/503) [`650fd09`](https://github.com/gl-transitions/gl-transitions/commit/650fd09de90933fef428b9944683956d8cb3b36a) Thanks [@gre](https://github.com/gre)! - New transition: `QuadtreeBlocks` by gre.
+
+- [#528](https://github.com/gl-transitions/gl-transitions/pull/528) [`9f30051`](https://github.com/gl-transitions/gl-transitions/commit/9f300517915ae6aaaac40cff5712020883af6939) Thanks [@gre](https://github.com/gre)! - New transition: `ReededGlass` by gre.
+
+- [#558](https://github.com/gl-transitions/gl-transitions/pull/558) [`0e16ebe`](https://github.com/gl-transitions/gl-transitions/commit/0e16ebec91e9cd8c70160738b150d58084593598) Thanks [@gre](https://github.com/gre)! - New transition: `Reflow` by gre.
+
+- [#518](https://github.com/gl-transitions/gl-transitions/pull/518) [`388a90b`](https://github.com/gl-transitions/gl-transitions/commit/388a90b1cd8da07df696a01410e8579ef7236685) Thanks [@gre](https://github.com/gre)! - New transition: `ScreenPrintWipe` by gre.
+
+- [#575](https://github.com/gl-transitions/gl-transitions/pull/575) [`bc9a42d`](https://github.com/gl-transitions/gl-transitions/commit/bc9a42de12852855e6391f0085be022b2875c644) Thanks [@gre](https://github.com/gre)! - New transition: `SequinStroke` by gre.
+
+- [#502](https://github.com/gl-transitions/gl-transitions/pull/502) [`3c14724`](https://github.com/gl-transitions/gl-transitions/commit/3c14724431860b6188e92e1ce8eecf27f3eee06d) Thanks [@gre](https://github.com/gre)! - New transition: `SlashSplit` by gre.
+
+- [#517](https://github.com/gl-transitions/gl-transitions/pull/517) [`11123c0`](https://github.com/gl-transitions/gl-transitions/commit/11123c0963228210000410d079d59bf473ad6f6a) Thanks [@gre](https://github.com/gre)! - New transition: `SlideProjector` by gre.
+
+- [#489](https://github.com/gl-transitions/gl-transitions/pull/489) [`e7fbc33`](https://github.com/gl-transitions/gl-transitions/commit/e7fbc3395ec0997b3d28c0568751ac808b5445bc) Thanks [@gre](https://github.com/gre)! - New transition: `SlitStretch` by gre.
+
+- [#580](https://github.com/gl-transitions/gl-transitions/pull/580) [`91c7a13`](https://github.com/gl-transitions/gl-transitions/commit/91c7a1304d2859551d0aa4aafe07291024dfc1b2) Thanks [@gre](https://github.com/gre)! - New transition: `SlitThread` by gre.
+
+- [#562](https://github.com/gl-transitions/gl-transitions/pull/562) [`eea20cf`](https://github.com/gl-transitions/gl-transitions/commit/eea20cfc637e46615d7e479d0411fb0db4f0b221) Thanks [@gre](https://github.com/gre)! - New transition: `Snap` by gre.
+
+- [#567](https://github.com/gl-transitions/gl-transitions/pull/567) [`1e5c94e`](https://github.com/gl-transitions/gl-transitions/commit/1e5c94eca82ff87f799e8ea0e4012dbf1f249a9d) Thanks [@gre](https://github.com/gre)! - New transition: `Snowflake` by gre.
+
+- [#563](https://github.com/gl-transitions/gl-transitions/pull/563) [`7b5dc5a`](https://github.com/gl-transitions/gl-transitions/commit/7b5dc5a7761132f45e29285593943b0fbe51ad32) Thanks [@gre](https://github.com/gre)! - New transition: `Soak` by gre.
+
+- [#535](https://github.com/gl-transitions/gl-transitions/pull/535) [`5c2d418`](https://github.com/gl-transitions/gl-transitions/commit/5c2d418724fb77f0a1237bd68c3800180358642f) Thanks [@gre](https://github.com/gre)! - New transition: `SoapDrop` by gre.
+
+- [#556](https://github.com/gl-transitions/gl-transitions/pull/556) [`7fcc08b`](https://github.com/gl-transitions/gl-transitions/commit/7fcc08b4353ab81d6bf6bb05c05cffaf08c915f0) Thanks [@gre](https://github.com/gre)! - New transition: `SourceSink` by gre.
+
+- [#499](https://github.com/gl-transitions/gl-transitions/pull/499) [`5a8788c`](https://github.com/gl-transitions/gl-transitions/commit/5a8788c96c45966ce4667e206df6415d494917cc) Thanks [@gre](https://github.com/gre)! - New transition: `SpeedLines` by gre.
+
+- [#582](https://github.com/gl-transitions/gl-transitions/pull/582) [`79b6c78`](https://github.com/gl-transitions/gl-transitions/commit/79b6c78421321e3a7996f08bcf5b63b9db1e1cca) Thanks [@gre](https://github.com/gre)! - New transition: `SpinningTop` by gre.
+
+- [#568](https://github.com/gl-transitions/gl-transitions/pull/568) [`ef4ffab`](https://github.com/gl-transitions/gl-transitions/commit/ef4ffabec179dac8d064ae40e24c65ca0ef71453) Thanks [@gre](https://github.com/gre)! - New transition: `Steamroll` by gre.
+
+- [#533](https://github.com/gl-transitions/gl-transitions/pull/533) [`1409e38`](https://github.com/gl-transitions/gl-transitions/commit/1409e389ac309ce32e8da378ffa504b8ab77a6e7) Thanks [@gre](https://github.com/gre)! - New transition: `StickySplit` by gre.
+
+- [#573](https://github.com/gl-transitions/gl-transitions/pull/573) [`1b02b37`](https://github.com/gl-transitions/gl-transitions/commit/1b02b372c834f31b7aa7ef873ad5a2b9834856e6) Thanks [@gre](https://github.com/gre)! - New transition: `Stratify` by gre.
+
+- [#581](https://github.com/gl-transitions/gl-transitions/pull/581) [`2fc460e`](https://github.com/gl-transitions/gl-transitions/commit/2fc460ecfbe64aa49f6d228cf88c949c98069151) Thanks [@gre](https://github.com/gre)! - New transition: `StrobeToss` by gre.
+
+- [#546](https://github.com/gl-transitions/gl-transitions/pull/546) [`7fce9bb`](https://github.com/gl-transitions/gl-transitions/commit/7fce9bbcb7423290371b23d80903aabcf2a5c16c) Thanks [@gre](https://github.com/gre)! - New transition: `Subdivide` by gre.
+
+- [#538](https://github.com/gl-transitions/gl-transitions/pull/538) [`98de6fb`](https://github.com/gl-transitions/gl-transitions/commit/98de6fbe103ec859e64c4d90fa64c41228afc3c2) Thanks [@gre](https://github.com/gre)! - New transition: `Swim` by gre.
+
+- [#495](https://github.com/gl-transitions/gl-transitions/pull/495) [`7be56c9`](https://github.com/gl-transitions/gl-transitions/commit/7be56c9bd236586aa33879283dc6b7ea88b2779a) Thanks [@gre](https://github.com/gre)! - New transition: `TileBlast` by gre.
+
+- [#534](https://github.com/gl-transitions/gl-transitions/pull/534) [`f36ee14`](https://github.com/gl-transitions/gl-transitions/commit/f36ee1499be3c6ddd82a818536864e83b29747a4) Thanks [@gre](https://github.com/gre)! - New transition: `TileConveyor` by gre.
+
+- [#550](https://github.com/gl-transitions/gl-transitions/pull/550) [`97216ce`](https://github.com/gl-transitions/gl-transitions/commit/97216ce84fdc2160fa74af81f4a2bfa31a53064e) Thanks [@gre](https://github.com/gre)! - New transition: `TileRings` by gre.
+
+- [#496](https://github.com/gl-transitions/gl-transitions/pull/496) [`020c099`](https://github.com/gl-transitions/gl-transitions/commit/020c0990f77dd6103da1a140d3d3440bf4ae982b) Thanks [@gre](https://github.com/gre)! - New transition: `TileShuffle` by gre.
+
+- [#508](https://github.com/gl-transitions/gl-transitions/pull/508) [`11d4865`](https://github.com/gl-transitions/gl-transitions/commit/11d48655e0b309c51dafd946ec7fe39da2d47759) Thanks [@gre](https://github.com/gre)! - New transition: `TriangleFlip` by gre.
+
+- [#549](https://github.com/gl-transitions/gl-transitions/pull/549) [`99f2706`](https://github.com/gl-transitions/gl-transitions/commit/99f2706b07c43e42a6758a905fcf6235a4be9d97) Thanks [@gre](https://github.com/gre)! - New transition: `Unbox` by gre.
+
+- [#553](https://github.com/gl-transitions/gl-transitions/pull/553) [`e9beab9`](https://github.com/gl-transitions/gl-transitions/commit/e9beab9c1df209b386e5110086b4c9c6122cf252) Thanks [@gre](https://github.com/gre)! - New transition: `Unstack` by gre.
+
+- [#536](https://github.com/gl-transitions/gl-transitions/pull/536) [`9b2798f`](https://github.com/gl-transitions/gl-transitions/commit/9b2798f9d3f617e0d393475ff40c4926f926df77) Thanks [@gre](https://github.com/gre)! - New transition: `ViscousFingers` by gre.
+
+- [#516](https://github.com/gl-transitions/gl-transitions/pull/516) [`d655aa6`](https://github.com/gl-transitions/gl-transitions/commit/d655aa6c87ee2b5e01515384b38cef3c1131cf86) Thanks [@gre](https://github.com/gre)! - New transition: `WatercolorDissolve` by gre.
+
+- [#507](https://github.com/gl-transitions/gl-transitions/pull/507) [`818449d`](https://github.com/gl-transitions/gl-transitions/commit/818449dd001bc35f0a3f1e1936db6837093b8758) Thanks [@gre](https://github.com/gre)! - New transition: `WaterfallWipe` by gre.
+
+- [#570](https://github.com/gl-transitions/gl-transitions/pull/570) [`c32488c`](https://github.com/gl-transitions/gl-transitions/commit/c32488ca23a511cd96256c6afdb532c71a007b44) Thanks [@gre](https://github.com/gre)! - New transition: `Whirlwind` by gre.
+
+- [#561](https://github.com/gl-transitions/gl-transitions/pull/561) [`5fc5942`](https://github.com/gl-transitions/gl-transitions/commit/5fc594212249797b98eb1c6dc6c8e3b7a877ba55) Thanks [@gre](https://github.com/gre)! - New transition: `Whittle` by gre.
+
+- [#552](https://github.com/gl-transitions/gl-transitions/pull/552) [`f66a2dd`](https://github.com/gl-transitions/gl-transitions/commit/f66a2dd7fb6a2bc0dae8639fe2def75dba982358) Thanks [@gre](https://github.com/gre)! - New transition: `XorWipe` by gre.
+
+- [#521](https://github.com/gl-transitions/gl-transitions/pull/521) [`22c12e7`](https://github.com/gl-transitions/gl-transitions/commit/22c12e70e85bdabe424c823d6a50a875c2e597c3) Thanks [@gre](https://github.com/gre)! - Updated 43 transitions.
+
+- [#521](https://github.com/gl-transitions/gl-transitions/pull/521) [`3f6f3d1`](https://github.com/gl-transitions/gl-transitions/commit/3f6f3d1cc19ec7fc699a5f0d42a9221b36726d5e) Thanks [@gre](https://github.com/gre)! - Updated 25 transitions.
+
+- [#523](https://github.com/gl-transitions/gl-transitions/pull/523) [`7f48be1`](https://github.com/gl-transitions/gl-transitions/commit/7f48be1e2c09a54f74cfdd927bb0f512a652c051) Thanks [@gre](https://github.com/gre)! - Updated 146 transitions.
+
+- [#521](https://github.com/gl-transitions/gl-transitions/pull/521) [`82c2970`](https://github.com/gl-transitions/gl-transitions/commit/82c297026e14c8a611da7fcc6f8204fa6da32c0c) Thanks [@gre](https://github.com/gre)! - Updated `Pinwheel`.
+
 ## 3.3.0
 
 ### Minor Changes
