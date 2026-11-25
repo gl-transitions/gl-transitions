@@ -27,19 +27,14 @@ test("a trio has one photo of each group", () => {
   }
 });
 
-test("a seed always has the same trio", () => {
-  assert.deepEqual(choosePreviewImages(1), [
-    "preview-images/zeus-temple.jpg",
-    "sample-images/3.jpg",
-    "preview-images/camels.jpg",
-  ]);
-  assert.deepEqual(choosePreviewImages(2 ** 32 - 1), choosePreviewImages((2 ** 32 - 1) % 288));
-});
-
-test("consecutive seeds go through every trio, in every order", () => {
+test("consecutive seeds go through every trio", () => {
   const trios = PREVIEW_IMAGES.reduce((count, group) => count * group.length, 1);
   const sorted = SEEDS.map((seed) => choosePreviewImages(seed).sort().join());
   for (const seed of SEEDS.slice(0, -trios)) assert.equal(new Set(sorted.slice(seed, seed + trios)).size, trios);
-  const ordered = SEEDS.slice(0, trios * 6).map((seed) => choosePreviewImages(seed).join());
-  assert.equal(new Set(ordered).size, trios * 6);
+});
+
+test("every photo can come first, second or third", () => {
+  for (const i of [0, 1, 2]) {
+    assert.deepEqual(new Set(SEEDS.map((seed) => choosePreviewImages(seed)[i])), new Set(IMAGES));
+  }
 });

@@ -1,6 +1,7 @@
 // The photos of the preview GIFs, credited in preview-images/CREDITS.md.
 
 import path from "node:path";
+import { createHash } from "node:crypto";
 
 // A trio takes one photo of each group, so that its photos contrast.
 export const PREVIEW_IMAGES = [
@@ -22,18 +23,17 @@ const ORDERS = [
 
 export const previewImagePath = (image) => path.join(import.meta.dirname, image);
 
+const sha256 = (text) => createHash("sha256").update(text).digest();
+
+// Every trio, in a fixed shuffled order.
 const TRIOS = PREVIEW_IMAGES.reduce(
   (trios, group) => trios.flatMap((trio) => group.map((image) => [...trio, image])),
   [[]],
-);
-// Coprime with the number of trios (48), so that consecutive seeds go through all of them, and
-// far enough apart to change all three photos.
-const STRIDE = 29;
+).sort((a, b) => Buffer.compare(sha256(a.join()), sha256(b.join())));
 
-// The trio (A, B, C) of a seed (an integer >= 0): consecutive seeds have different trios.
+// The photos A, B and C of a seed (an integer >= 0): consecutive seeds have different trios.
 export function choosePreviewImages(seed) {
-  const trio = TRIOS[((seed % TRIOS.length) * STRIDE) % TRIOS.length];
-  // Each round of trios shifts the orders: 288 seeds go through every trio in every order.
-  const order = ORDERS[((seed % ORDERS.length) + Math.floor(seed / TRIOS.length)) % ORDERS.length];
+  const trio = TRIOS[seed % TRIOS.length];
+  const order = ORDERS[sha256(String(seed)).readUInt32BE() % ORDERS.length];
   return order.map((i) => trio[i]);
 }

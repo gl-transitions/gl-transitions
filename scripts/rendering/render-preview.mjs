@@ -33,13 +33,13 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === "--transition" || args[i] === "-t") transitionPath = args[++i];
   else if (args[i] === "--output" || args[i] === "-o") outputPath = args[++i];
   else if (args[i] === "--output-black") blackOutputPath = args[++i];
-  else if (args[i] === "--seed") seed = Number(args[++i]);
+  else if (args[i] === "--seed") seed = /^\d+$/.test(args[++i]) ? Number(args[i]) : NaN;
   else if (args[i] === "--width" || args[i] === "-w") width = parseInt(args[++i]);
   else if (args[i] === "--height") height = parseInt(args[++i]);
   else if (args[i] === "--frames" || args[i] === "-f") frames = parseInt(args[++i]);
 }
 
-if (!transitionPath || !Number.isSafeInteger(seed) || seed < 0) {
+if (!transitionPath || !Number.isSafeInteger(seed)) {
   console.error("Usage: pnpm run render:preview --transition <file.glsl> [--output <out.gif>] [--seed <integer>]");
   process.exit(1);
 }
@@ -188,8 +188,17 @@ for (const [fromIdx, toIdx] of segments) {
   }
 }
 
-// The frames of a hold are the same: the GIF has the first one, shown longer.
-const filters = `select=not(between(mod(n\\,${framesPerSegment})\\,1\\,${delay})),scale=320:-1:flags=lanczos`;
+// Frames equal to the previous one (the holds) are left out: the GIF shows the previous one longer.
+// The last frame stays, for the length of the loop.
+const frameAt = (i) => allFrames.subarray(i * width * height * 4, (i + 1) * width * height * 4);
+const repeats = []; // ranges: ffmpeg refuses an expression with a term per frame
+for (let i = 1; i < totalFrames - 1; i++) {
+  if (!frameAt(i).equals(frameAt(i - 1))) continue;
+  if (repeats.at(-1)?.[1] === i - 1) repeats.at(-1)[1] = i;
+  else repeats.push([i, i]);
+}
+const isRepeat = repeats.map(([first, last]) => `between(n\\,${first}\\,${last})`).join("+") || "0";
+const filters = `select=not(${isRepeat}),scale=320:-1:flags=lanczos`;
 const encode = (output, background) => {
   const input = background
     ? `-filter_complex "color=c=${background}:s=${width}x${height}:r=${fps}[bg];[bg][0]overlay=shortest=1:format=auto,`

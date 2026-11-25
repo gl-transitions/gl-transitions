@@ -19,10 +19,15 @@ Cropped and resized to 512×400. They are CC0 or in the public domain.
 
 ## `sample-images/`
 
-Older images, whose origin and license are not confirmed.
+Cropped and resized to 512×400.
 
-| File | Origin |
-|---|---|
-| `../sample-images/1.jpg` | Not confirmed |
-| `../sample-images/2.jpg` | To be confirmed: it looks like a frame of [Big Buck Bunny](https://peach.blender.org), © Blender Foundation, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
-| `../sample-images/3.jpg` | Not confirmed |
+| File | Title | Author | Source | License |
+|---|---|---|---|---|
+| `../sample-images/1.jpg` | White Sands | [Fré Sonneveld](http://www.chasin-pigeons.com) | [Unsplash, 11 May 2014](https://tumblr.unsplash.com/post/85385387844) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) ([Unsplash license in 2014](https://web.archive.org/web/20141010144613/https://unsplash.com/license)) |
+| `../sample-images/2.jpg` | Frame of [Big Buck Bunny](https://peach.blender.org) (`bigbuckbunny_snapshot1.jpg`) | © 2008 Blender Foundation | [peach.blender.org](https://peach.blender.org/about/) | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `../sample-images/3.jpg` | Street | [Afroz Nawaf](http://www.afroznawaf.com) | [Unsplash, 10 April 2014](https://tumblr.unsplash.com/post/82305038686) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) ([Unsplash license in 2014](https://web.archive.org/web/20141010144613/https://unsplash.com/license)) |
+
+The originals, in [gre/gl-transition-libs](https://github.com/gre/gl-transition-libs/tree/master/packages/website/src/images/raw), have the same SHA-1 as the Wayback copies of the files Unsplash linked:
+
+- `1.jpg`: `2853419caec15f8730f8363178ddfb50c2412b97`, [bit.ly/1oD1RG1](https://bit.ly/1oD1RG1) → `hBd6EPoQT2C8VQYv65ys_White Sands.jpg`
+- `3.jpg`: `61da36b9d9d155458191edab4d3ac9278723ac89`, [bit.ly/1ep03jt](https://bit.ly/1ep03jt) → `a1mV1egnQwOqxZZZvhVo_street.jpg`

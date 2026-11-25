@@ -70,7 +70,7 @@ jobs:
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
             PREVIEWS=6
             count=0
-            # Random photos on each run, and different ones for each transition of the run.
+            # Random photos on each run, and a different trio for each transition of the run.
             SEED=$((RANDOM * 32768 + RANDOM))
             for file in $FILES; do
               name=$(basename "$file" .glsl)
