@@ -1,5 +1,16 @@
 # gl-transitions-crate
 
+## 2.1.0
+
+### Minor Changes
+
+- [#616](https://github.com/gl-transitions/gl-transitions/pull/616) [`b32a79c`](https://github.com/gl-transitions/gl-transitions/commit/b32a79c22932ce4f89ee8b52751dd211a32753df) Thanks [@gre](https://github.com/gre)! - Add `Transition::preview()`, the progress of the frame that best represents the transition as a still image.
+
+### Patch Changes
+
+- Updated dependencies [[`b32a79c`](https://github.com/gl-transitions/gl-transitions/commit/b32a79c22932ce4f89ee8b52751dd211a32753df)]:
+  - gl-transitions@3.4.0
+
 ## 2.0.3
 
 ### Patch Changes
