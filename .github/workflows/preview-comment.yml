@@ -1,6 +1,6 @@
 name: Preview Comment
 
-# Trusted companion to preview.yml: consumes the artifact (GIFs, validation JSON,
+# Trusted companion to preview.yml: consumes the artifact (GIFs, validation and cost JSON,
 # PR number) to publish GIFs and comment. Runs with write perms but never executes PR code.
 on:
   workflow_run:
@@ -212,6 +212,24 @@ jobs:
               } catch {}
               return null;
             };
+            // Untrusted artifact: only finite numbers and the known levels end up in the comment.
+            const costs = new Map();
+            try {
+              const costPath = path.join(dir, 'cost.json');
+              if (isRegular('cost.json') && fs.statSync(costPath).size <= 1000000) {
+                for (const { name, relative, level } of JSON.parse(fs.readFileSync(costPath, 'utf8')).transitions) {
+                  costs.set(name, Number.isFinite(relative) && relative >= 0 ? { relative, level } : {});
+                }
+              }
+            } catch {}
+            const costLine = name => {
+              const { relative, level } = costs.get(name) ?? {};
+              if (relative === undefined) return 'GPU cost: not measured.';
+              const cost = `${Math.round(Math.min(Math.max(relative, 1), 9999))}x Fade`;
+              if (level === 'very high') return `⚠️ **GPU cost: ${cost}, very high** (estimate, ±15%): among the heaviest of the collection, likely over 8 ms per 1080p frame on an Apple M1 Pro. Please reduce texture reads and loop iterations.`;
+              if (level === 'high') return `⚠️ **GPU cost: ${cost}, high** (estimate, ±15%): clearly above the collection, likely over 4 ms per 1080p frame on an Apple M1 Pro. Can it do with fewer texture reads or loop iterations?`;
+              return `GPU cost: ${cost} (estimate, ±15%).`;
+            };
             const rendered = all.filter(name => isRegular(`${name}.gif`));
             const names = (rendered.length ? rendered : all).slice(0, PREVIEWS);
             const rest = all.filter(name => !names.includes(name));
@@ -250,6 +268,8 @@ jobs:
                   body += `Shader validation passed.\n\n`;
                 }
               }
+
+              body += `${costLine(name)}\n\n`;
             }
 
             if (rest.length) {
@@ -258,7 +278,9 @@ jobs:
                 const validation = readValidation(name);
                 const icon = validation?.valid === true ? '✅' : validation?.valid === false ? '❌' : '⚠️';
                 const firstError = Array.isArray(validation?.errors) && validation.errors.length ? `: ${code(validation.errors[0])}` : '';
-                body += `- ${icon} ${code(name)}${firstError}\n`;
+                const level = costs.get(name)?.level;
+                const heavy = level === 'high' || level === 'very high' ? ` (⚠️ ${level} GPU cost)` : '';
+                body += `- ${icon} ${code(name)}${firstError}${heavy}\n`;
               }
               body += `\n`;
             }

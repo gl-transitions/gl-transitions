@@ -98,6 +98,21 @@ The file name, without `.glsl`, is the transition's identifier in every package 
 
 Reviewers, human and Copilot (`.github/instructions/transitions.instructions.md`), check these rules on every pull request that adds or renames a transition.
 
+### GPU cost
+
+Transitions run on phones and in full-screen video: the whole frame should stay well below the 16.7 ms of 60 fps. Most transitions take less than 1 ms per 1080p frame on an Apple M1 Pro. To measure yours with an installed Chrome:
+
+```sh
+pnpm run bench -t MyWipe
+```
+
+- The cost is that of the worst frame. Loops multiply everything inside them: keep the iteration counts as low as the look allows, and avoid nested ones, particularly around noise.
+- Texture reads (`getFromColor`, `getToColor`) are costly too: for a blur, a few well-spaced samples, offset per pixel, look as good as many.
+- Both sides of an `if` or `?:` may run on every pixel. Compute once what several iterations share.
+- When a parameter sets the number of samples or layers, bound it with `@range`.
+
+The preview comment of a pull request shows an estimate, relative to Fade, with a warning from about 4 ms (high) and 8 ms (very high). It never fails the pull request: lower the cost if you can, or say why the effect needs it.
+
 ### Before submitting
 
 - Check that your transition is not a duplicate of an existing one

@@ -70,6 +70,11 @@ jobs:
               --output /tmp/test-previews/Bounce.gif
           '
 
+      - name: Measure the frame cost of test transitions
+        run: |
+          xvfb-run -a -s "-ac -screen 0 1280x1024x24" node scripts/checks/benchmark-transitions.mjs --software --timeout 180 \
+            transitions/CrossWarp.glsl transitions/Bounce.glsl
+
       - name: Verify GIFs
         run: |
           for gif in /tmp/test-previews/*.gif; do

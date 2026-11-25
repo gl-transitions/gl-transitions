@@ -13,7 +13,7 @@ pnpm run build       # the gl-transitions package, in packages/gl-transitions/di
 | Folder | What it does |
 |---|---|
 | `catalog/` | Parses each `.glsl` (header metadata, uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
-| `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults), `validate-transition.mjs` (spec checks shown in PR previews) and `check-changesets.mjs` (a pull request that changes a published package adds a changeset) |
+| `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults), `validate-transition.mjs` (spec checks shown in PR previews), `benchmark-transitions.mjs` (GPU cost, see below) and `check-changesets.mjs` (a pull request that changes a published package adds a changeset) |
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`), which loop through three photos of `preview-images/` and `sample-images/`, drawn at random on each render (`--seed` reproduces one) |
 | `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
@@ -28,6 +28,26 @@ The reference renders are the ground truth for every other target: each target r
 pnpm run render:references --out /tmp/refs
 pnpm run build:sksl --out /tmp/sksl --refs /tmp/refs --renders /tmp/sksl-renders --report /tmp/sksl.json
 pnpm run build:glsl3 --out /tmp/glsl3 --report /tmp/glsl3.json
+```
+
+## Cost benchmark
+
+`checks/benchmark-transitions.mjs` measures what a frame of each transition costs, at 5 progress values, worst frame first, in ms and relative to Fade. It draws with an installed Chrome or Chromium (`CHROME_PATH` when it is not found).
+
+```sh
+pnpm run bench                                    # all of them, at 1080p on the GPU, several minutes
+pnpm run bench -t MyWipe -t Fade --json /tmp/cost.json
+xvfb-run -a pnpm run bench --software -t MyWipe   # what the PR preview measures (Linux, Mesa)
+```
+
+Close what else uses the GPU: the times are those of a shared machine. `--json` also writes the measures.
+
+The **Preview** workflow measures the transitions a PR changes with `--software`: 320x180 frames drawn on the CPU by headless gl on Mesa's llvmpipe. The preview comment shows the cost relative to Fade, measured in the same run, with a warning when it is `high` (about 4 ms per 1080p frame on an Apple M1 Pro) or `very high` (about 8 ms). It is an estimate, so it never fails a PR: on the 359 transitions measured on both, it ranks them like the GPU (Spearman correlation 0.95, against 0.94 for SwiftShader, which separates the heavy ones less well, 0.81 for counting texture reads and loop iterations, and 0.27 for texture reads alone), `very high` finds 10 of the 13 transitions over 8 ms without a wrong warning, and `high` 26 of the 37 over 4 ms with 7 wrong ones (1.3 to 3.7 ms). Transitions heavy in ways a CPU is not sensitive to, such as `BloomDissolve`, are missed: measure on a GPU when in doubt.
+
+The limits are in `checks/frame-cost.mjs`. To check them again, measure the whole collection on a GPU, and on CI runners with `--software`, then:
+
+```sh
+node scripts/checks/calibrate-cost.mjs gpu.json software-1.json software-2.json
 ```
 
 ## SkSL
