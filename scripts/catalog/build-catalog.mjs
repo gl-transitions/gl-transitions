@@ -25,7 +25,11 @@ function getGitDatesMap(dir) {
 
   try {
     Object.assign(created, getCreationDates(dir));
+  } catch (e) {
+    process.stderr.write(`Warning: could not retrieve creation dates: ${e.message}\n`);
+  }
 
+  try {
     // Single git command for all last-modified dates
     const updatedLog = execSync(`git log --format="%aD" --name-only -- "${dir}"/*.glsl`, {
       encoding: "utf8",
@@ -42,8 +46,8 @@ function getGitDatesMap(dir) {
         if (!updated[basename]) updated[basename] = currentDate;
       }
     }
-  } catch {
-    process.stderr.write("Warning: could not retrieve git dates\n");
+  } catch (e) {
+    process.stderr.write(`Warning: could not retrieve update dates: ${e.message}\n`);
   }
 
   return { created, updated };

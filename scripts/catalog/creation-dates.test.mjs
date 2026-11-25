@@ -16,7 +16,9 @@ test("creation dates follow renames, moves and edits", (t) => {
     fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
     fs.writeFileSync(path.join(dir, file), text);
   };
-  const git = (...args) => execFileSync("git", args, { cwd: root });
+  // In a git hook, GIT_DIR points to the real repository.
+  const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.startsWith("GIT_")));
+  const git = (...args) => execFileSync("git", args, { cwd: root, env });
   // Each commit replaces the whole directory: git finds the renames by content.
   const commit = (year, files) => {
     fs.rmSync(dir, { recursive: true, force: true });
