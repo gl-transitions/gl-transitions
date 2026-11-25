@@ -7,6 +7,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
+import { getCreationDates } from "./creation-dates.mjs";
 import { parseTransition } from "./parse-transition.mjs";
 
 const args = process.argv.slice(2);
@@ -23,29 +24,18 @@ function getGitDatesMap(dir) {
   const updated = {};
 
   try {
-    // Single git command for all creation dates
-    const createdLog = execSync(`git log --diff-filter=A --format="%aD" --name-only -- "${dir}"/*.glsl`, {
-      encoding: "utf8",
-      maxBuffer: 10 * 1024 * 1024,
-    });
-    let currentDate = null;
-    for (const line of createdLog.split("\n")) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      if (!trimmed.includes("/")) {
-        currentDate = trimmed;
-      } else {
-        const basename = path.basename(trimmed);
-        if (!created[basename]) created[basename] = currentDate;
-      }
-    }
+    Object.assign(created, getCreationDates(dir));
+  } catch (e) {
+    process.stderr.write(`Warning: could not retrieve creation dates: ${e.message}\n`);
+  }
 
+  try {
     // Single git command for all last-modified dates
     const updatedLog = execSync(`git log --format="%aD" --name-only -- "${dir}"/*.glsl`, {
       encoding: "utf8",
       maxBuffer: 10 * 1024 * 1024,
     });
-    currentDate = null;
+    let currentDate = null;
     for (const line of updatedLog.split("\n")) {
       const trimmed = line.trim();
       if (!trimmed) continue;
@@ -56,8 +46,8 @@ function getGitDatesMap(dir) {
         if (!updated[basename]) updated[basename] = currentDate;
       }
     }
-  } catch {
-    process.stderr.write("Warning: could not retrieve git dates\n");
+  } catch (e) {
+    process.stderr.write(`Warning: could not retrieve update dates: ${e.message}\n`);
   }
 
   return { created, updated };
