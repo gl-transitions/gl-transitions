@@ -13,6 +13,7 @@
     "pretest": "pnpm -r --filter '!gl-transitions' --if-present run build",
     "test": "node --test \"**/*.test.mjs\"",
     "validate": "node scripts/checks/validate-transition.mjs",
+    "bench": "node scripts/checks/benchmark-transitions.mjs",
     "build": "pnpm --filter gl-transitions run build",
     "render:references": "node scripts/rendering/render-references.mjs",
     "render:preview": "node scripts/rendering/render-preview.mjs",

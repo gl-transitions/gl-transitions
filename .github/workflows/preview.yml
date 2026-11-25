@@ -90,6 +90,18 @@ jobs:
             done
           '
 
+      # The GPU cost of the changed transitions, relative to Fade, measured on the CPU
+      # (llvmpipe): an estimate, so it only warns in the comment and never fails the job.
+      - name: Measure the frame cost
+        if: steps.detect.outputs.files != ''
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          FILES: ${{ steps.detect.outputs.files }}
+        run: |
+          xvfb-run -a -s "-ac -screen 0 1280x1024x24" node scripts/checks/benchmark-transitions.mjs --software --timeout 180 \
+            --json /tmp/previews/cost.json $FILES
+
       - name: Upload previews as artifact
         if: steps.detect.outputs.files != ''
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -98,5 +110,6 @@ jobs:
           path: |
             /tmp/previews/*.gif
             /tmp/previews/*.validation.json
+            /tmp/previews/cost.json
             /tmp/previews/pr.txt
           if-no-files-found: warn
