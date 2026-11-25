@@ -37,54 +37,57 @@ vec4 transition(vec2 uv) {
   vec4 b = getToColor(uv);
   bool late = progress > 0.5;
 
-  vec4 ca[N];
-  vec4 cb[N];
   vec3 ma = vec3(0.0);
   vec3 mb = vec3(0.0);
   vec3 va = vec3(0.0);
   vec3 vb = vec3(0.0);
   vec2 sum = vec2(1e-4);
   for (int i = 0; i < N; i++) {
-    ca[i] = progress < CAUGHT ? getFromColor(spot(i)) : vec4(0.0);
-    cb[i] = progress > FREED ? getToColor(spot(i)) : vec4(0.0);
-    vec3 ka = axes(ca[i].rgb);
-    vec3 kb = axes(cb[i].rgb);
-    sum += vec2(ca[i].a, cb[i].a);
-    ma += ka * ca[i].a;
-    mb += kb * cb[i].a;
-    va += ka * ka * ca[i].a;
-    vb += kb * kb * cb[i].a;
+    vec4 ca = progress < CAUGHT ? getFromColor(spot(i)) : vec4(0.0);
+    vec4 cb = progress > FREED ? getToColor(spot(i)) : vec4(0.0);
+    vec3 ka = axes(ca.rgb);
+    vec3 kb = axes(cb.rgb);
+    sum += vec2(ca.a, cb.a);
+    ma += ka * ca.a;
+    mb += kb * cb.a;
+    va += ka * ka * ca.a;
+    vb += kb * kb * cb.a;
   }
   ma /= sum.x;
   mb /= sum.y;
   va = sqrt(max(va / sum.x - ma * ma, 0.0)) + 0.03;
   vb = sqrt(max(vb / sum.y - mb * mb, 0.0)) + 0.03;
 
-  float soft = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
   vec4 here = late ? b : a;
-  vec4 acc = vec4(axes(here.rgb), 1.0) * here.a;
-  if (progress < FREED || progress > CAUGHT) {
-    for (int i = 0; i < N; i++) {
-      float r = 0.055 * soft * sqrt((float(i) + 0.5) / float(N));
-      float g = 2.39996 * float(i);
-      vec2 q = fold(uv + r * vec2(cos(g), sin(g)) / vec2(ratio, 1.0));
-      vec4 c = late ? getToColor(q) : getFromColor(q);
-      acc += vec4(axes(c.rgb), 1.0) * c.a;
-    }
-  }
-
   // the inks come free, and later set, one after another
   vec3 lag = vec3(0.0, 0.06, 0.12);
   vec3 bend = smoothstep(0.0, 1.0, (late ? vec3(0.96) - lag.zyx - progress : vec3(progress) - 0.04 - lag) / 0.2);
-  // fine detail melts into a broad field before the shapes move, so their edges do not tear
-  vec4 broad = vec4(late ? mb : ma, 1.0) * 1e-3;
-  for (int i = 0; i < N; i++) {
-    vec2 q = (uv - spot(i)) * vec2(ratio, 1.0);
-    vec4 c = late ? cb[i] : ca[i];
-    broad += vec4(axes(c.rgb), 1.0) * c.a * exp(-26.0 * dot(q, q));
+  vec3 y = vec3(0.0);
+  if (min(bend.x, min(bend.y, bend.z)) < 1.0) {
+    // fine detail melts into a broad field before the shapes move, so their edges do not tear
+    vec3 melt = smoothstep(0.0, 0.55, bend);
+    vec4 acc = vec4(axes(here.rgb), 1.0) * here.a;
+    vec4 broad = vec4(late ? mb : ma, 1.0) * 1e-3;
+    if (min(melt.x, min(melt.y, melt.z)) < 1.0) {
+      float soft = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
+      for (int i = 0; i < N; i++) {
+        float r = 0.055 * soft * sqrt((float(i) + 0.5) / float(N));
+        float g = 2.39996 * float(i);
+        vec2 q = fold(uv + r * vec2(cos(g), sin(g)) / vec2(ratio, 1.0));
+        vec4 c = late ? getToColor(q) : getFromColor(q);
+        acc += vec4(axes(c.rgb), 1.0) * c.a;
+      }
+    }
+    if (max(melt.x, max(melt.y, melt.z)) > 0.0) {
+      for (int i = 0; i < N; i++) {
+        vec2 q = (uv - spot(i)) * vec2(ratio, 1.0);
+        vec4 c = late ? getToColor(spot(i)) : getFromColor(spot(i));
+        broad += vec4(axes(c.rgb), 1.0) * c.a * exp(-26.0 * dot(q, q));
+      }
+    }
+    y = mix(acc.rgb / max(acc.a, 1e-4), broad.rgb / broad.a, melt);
+    y = (y - (late ? mb : ma)) / (late ? vb : va) * 0.22;
   }
-  vec3 y = mix(acc.rgb / max(acc.a, 1e-4), broad.rgb / broad.a, smoothstep(0.0, 0.55, bend));
-  y = (y - (late ? mb : ma)) / (late ? vb : va) * 0.22;
 
   vec2 p = (uv - 0.5) * vec2(ratio, 1.0);
   float t = progress * 3.14159;
@@ -107,12 +110,18 @@ vec4 transition(vec2 uv) {
   vec4 pa = vec4(0.0);
   vec4 pb = vec4(0.0);
   for (int i = 0; i < N; i++) {
-    vec3 da = ca[i].rgb - col;
-    vec3 db = cb[i].rgb - col;
-    pa += vec4(ca[i].rgb, 1.0) * (ca[i].a * exp(-30.0 * dot(da, da)) + 1e-5);
-    pb += vec4(cb[i].rgb, 1.0) * (cb[i].a * exp(-30.0 * dot(db, db)) + 1e-5);
+    if (turn < 1.0) {
+      vec4 q = getFromColor(spot(i));
+      vec3 d = q.rgb - col;
+      pa += vec4(q.rgb, 1.0) * (q.a * exp(-30.0 * dot(d, d)) + 1e-5);
+    }
+    if (turn > 0.0) {
+      vec4 q = getToColor(spot(i));
+      vec3 d = q.rgb - col;
+      pb += vec4(q.rgb, 1.0) * (q.a * exp(-30.0 * dot(d, d)) + 1e-5);
+    }
   }
-  vec3 near = axes(mix(pa.rgb / pa.a, pb.rgb / pb.a, turn));
+  vec3 near = axes(mix(pa.rgb / max(pa.a, 1e-5), pb.rgb / max(pb.a, 1e-5), turn));
   k.yz = mix(k.yz, near.yz, 0.6) * (1.0 + 0.6 * vivid);
   col = clamp(colorOf(k), 0.0, 1.0);
 

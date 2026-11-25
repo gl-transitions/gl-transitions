@@ -41,22 +41,20 @@ vec4 transition(vec2 uv) {
   vec4 b = getToColor(uv);
   bool late = progress > 0.5;
 
-  vec4 ca[N];
-  vec4 cb[N];
   vec2 ma = vec2(0.0);
   vec2 mb = vec2(0.0);
   vec3 ta = vec3(0.0);
   vec3 tb = vec3(0.0);
   vec2 sum = vec2(1e-4);
   for (int i = 0; i < N; i++) {
-    ca[i] = progress < CAUGHT ? getFromColor(spot(i)) : vec4(0.0);
-    cb[i] = progress > FREED ? getToColor(spot(i)) : vec4(0.0);
-    vec2 l = vec2(luma(ca[i].rgb), luma(cb[i].rgb));
-    sum += vec2(ca[i].a, cb[i].a);
-    ma += vec2(l.x, l.x * l.x) * ca[i].a;
-    mb += vec2(l.y, l.y * l.y) * cb[i].a;
-    ta += (ca[i].rgb - l.x) * ca[i].a;
-    tb += (cb[i].rgb - l.y) * cb[i].a;
+    vec4 ca = progress < CAUGHT ? getFromColor(spot(i)) : vec4(0.0);
+    vec4 cb = progress > FREED ? getToColor(spot(i)) : vec4(0.0);
+    vec2 l = vec2(luma(ca.rgb), luma(cb.rgb));
+    sum += vec2(ca.a, cb.a);
+    ma += vec2(l.x, l.x * l.x) * ca.a;
+    mb += vec2(l.y, l.y * l.y) * cb.a;
+    ta += (ca.rgb - l.x) * ca.a;
+    tb += (cb.rgb - l.y) * cb.a;
   }
   ma /= sum.x;
   mb /= sum.y;
@@ -65,24 +63,26 @@ vec4 transition(vec2 uv) {
   ma.y = sqrt(max(ma.y - ma.x * ma.x, 0.0)) + 0.03;
   mb.y = sqrt(max(mb.y - mb.x * mb.x, 0.0)) + 0.03;
 
-  float soft = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
   vec4 here = late ? b : a;
-  vec2 acc = vec2(luma(here.rgb) * here.a, here.a);
-  if (progress < FREED || progress > CAUGHT) {
-    for (int i = 0; i < N; i++) {
-      float r = 0.055 * soft * sqrt((float(i) + 0.5) / float(N));
-      float g = 2.39996 * float(i);
-      vec2 q = fold(uv + r * vec2(cos(g), sin(g)) / vec2(ratio, 1.0));
-      vec4 c = late ? getToColor(q) : getFromColor(q);
-      acc += vec2(luma(c.rgb) * c.a, c.a);
-    }
-  }
-
   vec3 ha = vec3(0.5, 0.5, 1.0) * 1e-4;
   vec3 hb = ha;
+  vec4 zs = (vec4(1.0, 2.0, 3.0, 4.0) - 2.0) * 0.62 - 0.31;
+  vec4 shareA = vec4(0.0);
+  vec4 shareB = vec4(0.0);
   for (int i = 0; i < N; i++) {
-    ha += vec3(spot(i), 1.0) * ca[i].a * exp(2.5 * (luma(ca[i].rgb) - ma.x) / ma.y);
-    hb += vec3(spot(i), 1.0) * cb[i].a * exp(2.5 * (luma(cb[i].rgb) - mb.x) / mb.y);
+    vec3 at = vec3(spot(i), 1.0);
+    if (progress < CAUGHT) {
+      vec4 q = getFromColor(at.xy);
+      float d = (luma(q.rgb) - ma.x) / ma.y;
+      ha += at * q.a * exp(2.5 * d);
+      shareA += smoothstep(-0.5, 0.5, d - zs) * q.a / sum.x;
+    }
+    if (progress > FREED) {
+      vec4 q = getToColor(at.xy);
+      float d = (luma(q.rgb) - mb.x) / mb.y;
+      hb += at * q.a * exp(2.5 * d);
+      shareB += smoothstep(-0.5, 0.5, d - zs) * q.a / sum.y;
+    }
   }
   vec2 asp = vec2(ratio, 1.0);
   vec2 sun = 0.8 * asp * (mix(ha.xy / ha.z, hb.xy / hb.z, smoothstep(FREED, CAUGHT, progress)) - 0.5);
@@ -91,45 +91,68 @@ vec4 transition(vec2 uv) {
   float away = clamp(length(p - sun) / (0.6 * length(asp)), 0.0, 1.0);
   float when = late ? 0.84 + 0.12 * away - progress : progress - 0.04 - 0.12 * (1.0 - away);
   float bend = smoothstep(0.0, 1.0, when / 0.2);
-  // fine detail melts into a broad field before the shapes move, so their edges do not tear
-  vec2 broad = vec2(late ? mb.x : ma.x, 1.0) * 1e-3;
-  for (int i = 0; i < N; i++) {
-    vec2 q = (uv - spot(i)) * vec2(ratio, 1.0);
-    vec4 c = late ? cb[i] : ca[i];
-    broad += vec2(luma(c.rgb), 1.0) * c.a * exp(-26.0 * dot(q, q));
+  float y = 0.0;
+  if (bend < 1.0) {
+    // fine detail melts into a broad field before the shapes move, so their edges do not tear
+    float melt = smoothstep(0.0, 0.55, bend);
+    vec2 acc = vec2(luma(here.rgb) * here.a, here.a);
+    vec2 broad = vec2(late ? mb.x : ma.x, 1.0) * 1e-3;
+    if (melt < 1.0) {
+      float soft = smoothstep(0.0, 0.2, progress) * (1.0 - smoothstep(0.8, 1.0, progress));
+      for (int i = 0; i < N; i++) {
+        float r = 0.055 * soft * sqrt((float(i) + 0.5) / float(N));
+        float g = 2.39996 * float(i);
+        vec2 q = fold(uv + r * vec2(cos(g), sin(g)) / vec2(ratio, 1.0));
+        vec4 c = late ? getToColor(q) : getFromColor(q);
+        acc += vec2(luma(c.rgb) * c.a, c.a);
+      }
+    }
+    if (melt > 0.0) {
+      for (int i = 0; i < N; i++) {
+        vec2 q = (uv - spot(i)) * vec2(ratio, 1.0);
+        vec4 c = late ? getToColor(spot(i)) : getFromColor(spot(i));
+        broad += vec2(luma(c.rgb), 1.0) * c.a * exp(-26.0 * dot(q, q));
+      }
+    }
+    y = mix(acc.x / max(acc.y, 1e-4), broad.x / broad.y, melt);
+    y = (y - (late ? mb.x : ma.x)) / (late ? mb.y : ma.y);
   }
-  float y = mix(acc.x / max(acc.y, 1e-4), broad.x / broad.y, smoothstep(0.0, 0.55, bend));
-  y = (y - (late ? mb.x : ma.x)) / (late ? mb.y : ma.y);
   float aa = mix(0.03, 0.002, bend);
   float swing = 2.4 - 4.0 * progress;
   vec3 col = vec3(0.0);
-  for (int j = 0; j < 5; j++) {
+  float left = 1.0;
+  for (int j = 4; j >= 0; j--) {
     float k = float(j);
     // the tone, in deviations from the mean
     float z = (k - 2.0) * 0.62;
-    vec4 pa = vec4(0.0);
-    vec4 pb = vec4(0.0);
-    for (int i = 0; i < N; i++) {
-      pa += vec4(ca[i].rgb, 1.0) * weight(ca[i], ma, ta, z);
-      pb += vec4(cb[i].rgb, 1.0) * weight(cb[i], mb, tb, z);
-    }
     float turn = smoothstep(0.0, 1.0, (progress - (0.45 - 0.02 * k)) / 0.18);
-    vec3 c = mix(pa.rgb / pa.a, pb.rgb / pb.a, turn);
-    float goal = mix(ma.x + 1.2 * z * ma.y, mb.x + 1.2 * z * mb.y, turn);
-    c = clamp(goal + (c - luma(c)) * vivid, 0.0, 1.0);
-    float h = 1.0;
+    float cover = 1.0;
     if (j > 0) {
-      vec2 share = vec2(0.0);
-      for (int i = 0; i < N; i++) {
-        vec2 d = (vec2(luma(ca[i].rgb), luma(cb[i].rgb)) - vec2(ma.x, mb.x)) / vec2(ma.y, mb.y);
-        share += smoothstep(-0.5, 0.5, d - z + 0.31) * vec2(ca[i].a, cb[i].a) / sum;
-      }
+      vec2 share = j == 4 ? vec2(shareA.w, shareB.w) : j == 3 ? vec2(shareA.z, shareB.z) : j == 2 ? vec2(shareA.y, shareB.y) : vec2(shareA.x, shareB.x);
       float r = size * sqrt(mix(share.x, share.y, turn) * ratio / 2.4) + 0.025 * (5.0 - k);
       // the lighter discs ride round the rim of the darker ones
       vec2 c0 = sun * (0.4 + 0.15 * k) + 0.035 * k * vec2(cos(swing), sin(swing));
-      h = mix(0.22 * (y - z + 0.31), r - length(p - c0), bend);
+      cover = smoothstep(-aa, aa, mix(0.22 * (y - z + 0.31), r - length(p - c0), bend));
     }
-    col = mix(col, c, j == 0 ? 1.0 : smoothstep(-aa, aa, h));
+    if (cover <= 0.0) continue;
+    vec4 pa = vec4(0.0);
+    vec4 pb = vec4(0.0);
+    for (int i = 0; i < N; i++) {
+      if (turn < 1.0) {
+        vec4 q = getFromColor(spot(i));
+        pa += vec4(q.rgb, 1.0) * weight(q, ma, ta, z);
+      }
+      if (turn > 0.0) {
+        vec4 q = getToColor(spot(i));
+        pb += vec4(q.rgb, 1.0) * weight(q, mb, tb, z);
+      }
+    }
+    vec3 c = mix(pa.rgb / max(pa.a, 1e-7), pb.rgb / max(pb.a, 1e-7), turn);
+    float goal = mix(ma.x + 1.2 * z * ma.y, mb.x + 1.2 * z * mb.y, turn);
+    c = clamp(goal + (c - luma(c)) * vivid, 0.0, 1.0);
+    col += left * cover * c;
+    left *= 1.0 - cover;
+    if (left <= 0.0) break;
   }
 
   float flatness = smoothstep(0.0, 0.16, progress) * (1.0 - smoothstep(0.84, 1.0, progress));
