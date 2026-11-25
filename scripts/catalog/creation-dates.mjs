@@ -12,7 +12,17 @@ export function getCreationDates(dir) {
 
   // The whole directory: limited to the current names, git would show a rename as an addition. 80%: at
   // git's default of 50%, two transitions that share helper functions can pass for a rename.
-  const log = git("log", "--topo-order", "-M80%", "-l0", "--diff-filter=AR", "--format=@%aD", "--name-status", "--", ".");
+  const log = git(
+    "log",
+    "--topo-order",
+    "-M80%",
+    "-l0",
+    "--diff-filter=AR",
+    "--format=@%aD",
+    "--name-status",
+    "--",
+    ".",
+  );
   let date;
   for (const line of log.split("\n")) {
     if (line.startsWith("@")) {
