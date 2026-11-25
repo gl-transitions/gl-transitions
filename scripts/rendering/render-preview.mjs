@@ -12,6 +12,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 import { parseTransition } from "../catalog/parse-transition.mjs";
+import { choosePreviewImages, previewImagePath } from "./preview-images.mjs";
 
 const args = process.argv.slice(2);
 let transitionPath = null;
@@ -19,8 +20,10 @@ let outputPath = "preview.gif";
 let blackOutputPath = null;
 let width = 400;
 let height = 300;
-let frames = 50;
-const delay = 10;
+let frames = 34;
+const delay = 6;
+// GIF delays are in hundredths of a second: 20 fps is exact, 30 fps is not.
+const fps = 20;
 
 for (let i = 0; i < args.length; i++) {
   if (args[i] === "--transition" || args[i] === "-t") transitionPath = args[++i];
@@ -118,45 +121,15 @@ function createTexture(rgba, w, h) {
 }
 
 function loadImage(imgPath, w, h) {
-  try {
-    const raw = execSync(
-      `ffmpeg -v fatal -i "${imgPath}" -vf "scale=${w}:${h}:force_original_aspect_ratio=increase,crop=${w}:${h}" -f rawvideo -pix_fmt rgba -`,
-      { maxBuffer: w * h * 4 + 1024 },
-    );
-    return new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength);
-  } catch {
-    return null;
-  }
+  const raw = execSync(
+    `ffmpeg -v fatal -i "${imgPath}" -vf "scale=${w}:${h}:force_original_aspect_ratio=increase,crop=${w}:${h}" -f rawvideo -pix_fmt rgba -`,
+    { maxBuffer: w * h * 4 + 1024 },
+  );
+  return new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength);
 }
 
-function generateGradient(w, h, tl, br) {
-  const data = new Uint8Array(w * h * 4);
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-      const t = (x / (w - 1) + y / (h - 1)) / 2;
-      const i = (y * w + x) * 4;
-      data[i] = Math.round(tl[0] * (1 - t) + br[0] * t);
-      data[i + 1] = Math.round(tl[1] * (1 - t) + br[1] * t);
-      data[i + 2] = Math.round(tl[2] * (1 - t) + br[2] * t);
-      data[i + 3] = 255;
-    }
-  }
-  return data;
-}
-
-const imagesDir = path.join(import.meta.dirname, "sample-images");
-const fallbackGradients = [
-  { tl: [30, 80, 180], br: [120, 40, 200] },
-  { tl: [220, 120, 30], br: [240, 60, 80] },
-  { tl: [40, 180, 80], br: [200, 120, 40] },
-];
-const textures = [1, 2, 3].map((n, i) =>
-  createTexture(
-    loadImage(path.join(imagesDir, `${n}.jpg`), width, height) ||
-      generateGradient(width, height, fallbackGradients[i].tl, fallbackGradients[i].br),
-    width,
-    height,
-  ),
+const textures = choosePreviewImages(transitionName).map((image) =>
+  createTexture(loadImage(previewImagePath(image), width, height), width, height),
 );
 
 const progressLoc = gl.getUniformLocation(program, "progress");
@@ -210,13 +183,14 @@ for (const [fromIdx, toIdx] of segments) {
   }
 }
 
-const filters = "scale=320:-1:flags=lanczos";
+// The frames of a hold are the same: the GIF has the first one, shown longer.
+const filters = `select=not(between(mod(n\\,${framesPerSegment})\\,1\\,${delay})),scale=320:-1:flags=lanczos`;
 const encode = (output, background) => {
   const input = background
-    ? `-filter_complex "color=c=${background}:s=${width}x${height}:r=30[bg];[bg][0]overlay=shortest=1:format=auto,`
+    ? `-filter_complex "color=c=${background}:s=${width}x${height}:r=${fps}[bg];[bg][0]overlay=shortest=1:format=auto,`
     : `-vf "`;
   execSync(
-    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate 30 -i pipe:0 ${input}${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse" -gifflags -offsetting-transdiff -loop 0 -y "${output}"`,
+    `ffmpeg -v fatal -f rawvideo -pix_fmt rgba -s ${width}x${height} -framerate ${fps} -i pipe:0 ${input}${filters},split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse=dither=bayer:bayer_scale=3" -fps_mode vfr -gifflags -offsetting-transdiff -loop 0 -y "${output}"`,
     { input: allFrames, maxBuffer: 100 * 1024 * 1024 },
   );
   const size = fs.statSync(output).size;

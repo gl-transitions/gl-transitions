@@ -14,7 +14,7 @@ pnpm run build       # the gl-transitions package, in packages/gl-transitions/di
 |---|---|
 | `catalog/` | Parses each `.glsl` (header metadata, uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
 | `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults), `validate-transition.mjs` (spec checks shown in PR previews) and `check-changesets.mjs` (a pull request that changes a published package adds a changeset) |
-| `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
+| `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`), which loop through three photos of `preview-images/` chosen from the transition's name |
 | `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
 | `agents/` | Documents for coding agents, generated from the catalog: `llms.txt`, `llms-full.txt` and the Agent Skill's catalog (`build-agent-docs.mjs`) |
 | `rust-crate/` | `build-crate.mjs`, which writes the sources of the [Rust crate](../crates/gl-transitions) from the built npm package (see below), and `sync-version.mjs`, which copies the crate's version from changesets into `Cargo.toml` |
