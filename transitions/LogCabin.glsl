@@ -91,11 +91,11 @@ vec4 cloth(vec4 at, vec2 q, vec2 cell, vec2 res, float mir, float unit) {
     }
     c = premultiplied(getToColor(mid + fit * flip * w));
   } else {
-    // averaged along the strip, so it does not flicker with the grain of a video
+    // averaged over a patch, so it does not flicker with the grain of a video
     c = vec4(0.0);
     for (int i = 0; i < 4; i++) {
-      float at = (float(i) - 1.5) * 0.4;
-      vec2 m = heart ? vec2(at, 0.2 * at) : quarter(vec2(at * ring - 0.5, ring + 0.2 * at), back);
+      float at = (float(i) - 1.5) * 0.12;
+      vec2 m = heart ? vec2(at, at) : quarter(vec2(at * ring - 0.5, ring + at), back);
       c += 0.25 * premultiplied(getToColor(mid + fit * flip * m));
     }
     // a block is light on one side of its diagonal and dark on the other
