@@ -23,6 +23,15 @@ bool pointInTriangle(vec2 pt, vec2 p1, vec2 p2, vec2 p3)
 
 const float height = 0.5;
 
+// Played backwards, the shape that shrinks shows the outgoing image.
+vec4 revealed(vec2 uv) {
+  return reverse ? getFromColor(uv) : getToColor(uv);
+}
+
+vec4 covering(vec2 uv) {
+  return reverse ? getToColor(uv) : getFromColor(uv);
+}
+
 vec4 transition_firstHalf( vec2 uv, float prog )
 {
   if ( uv.y < 0.5 )
@@ -31,7 +40,7 @@ vec4 transition_firstHalf( vec2 uv, float prog )
     vec2 botRight = vec2( 1., prog-height );
     vec2 tip = vec2( adjust, prog );
     if ( pointInTriangle( uv, botLeft, botRight, tip ) )
-        return getToColor(uv);
+        return revealed(uv);
     }
   else
   {
@@ -39,9 +48,9 @@ vec4 transition_firstHalf( vec2 uv, float prog )
     vec2 topRight = vec2( 1., 1.-prog+height );
     vec2 tip = vec2( adjust, 1.-prog );
     if ( pointInTriangle( uv, topLeft, topRight, tip ) )
-      return getToColor( uv );
+      return revealed( uv );
   }
-  return getFromColor( uv );
+  return covering( uv );
 }
 
 vec4 transition_secondHalf( vec2 uv, float prog )
@@ -52,7 +61,7 @@ vec4 transition_secondHalf( vec2 uv, float prog )
     vec2 bot = vec2( prog + height, -0. );
     vec2 tip = vec2( mix( adjust, 1.0, 2.0 * (prog - 0.5) ), 0.5 );
     if ( pointInTriangle( uv, top, bot, tip) )
-      return getFromColor( uv );
+      return covering( uv );
   }
   else
   {
@@ -60,9 +69,9 @@ vec4 transition_secondHalf( vec2 uv, float prog )
     vec2 bot = vec2( 1.0-prog - height, -0. );
     vec2 tip = vec2( mix( adjust, 0.0, 2.0 * (prog - 0.5)  ), 0.5 );
     if ( pointInTriangle( uv, top, bot, tip) )
-      return getFromColor( uv );
+      return covering( uv );
   }
-  return getToColor( uv );
+  return revealed( uv );
 }
 
 vec4 transition (vec2 uv) {
