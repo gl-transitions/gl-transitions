@@ -27,47 +27,85 @@ vec2 mirror(vec2 v) {
 }
 
 const int ROUNDS = 3;
+// how far around a point the slope is measured, in cells
+const float SLOPE = 0.018;
 
-// x: height of the surface, y: spread of the incoming liquid
-vec2 simmer(vec2 w) {
+// x: height of the surface, y: spread of the incoming liquid, zw: slope of the surface
+vec4 simmer(vec2 w, float reveal, float ramp) {
   float h = 0.0;
+  // right, left, up and down of w: they share the bubbles of w, each with its own 3x3 cells
+  vec4 hs = vec4(0.0);
   float cov = 0.0;
   for (int k = 0; k < ROUNDS; k++) {
     float fk = float(k);
+    // no bubble of this round was born yet
+    if (0.86 * progress <= 0.01 + 0.13 * fk) {
+      h = max(h, 0.0);
+      hs = max(hs, 0.0);
+      break;
+    }
     vec2 v = w + fk * vec2(0.37, 0.61);
     vec2 i = floor(v);
-    for (int y = -1; y <= 1; y++) {
-      for (int x = -1; x <= 1; x++) {
-        vec2 c = i + vec2(float(x), float(y));
-        vec2 r = hash2(c + 31.0 * fk);
-        vec2 d = v - c - 0.2 - 0.6 * r;
-        float s = hash2(c + 7.0 + 13.0 * fk).x;
-        float R = mix(0.24, 0.56, s) * (fk > 1.5 ? 0.8 : 1.0);
+    vec4 ix = floor(v.x + SLOPE * vec4(1.0, -1.0, 0.0, 0.0)) - i.x;
+    vec4 iy = floor(v.y + SLOPE * vec4(0.0, 0.0, 1.0, -1.0)) - i.y;
+    vec2 first = vec2(min(ix.y, 0.0), min(iy.w, 0.0)) - 1.0;
+    vec2 last = vec2(max(ix.x, 0.0), max(iy.z, 0.0)) + 1.0;
+    for (int y = 0; y < 4; y++) {
+      for (int x = 0; x < 4; x++) {
+        vec2 o = first + vec2(float(x), float(y));
+        if (o.x > last.x || o.y > last.y) continue;
+        float on = step(max(abs(o.x), abs(o.y)), 1.0);
+        vec4 ons = step(max(abs(o.x - ix), abs(o.y - iy)), vec4(1.0));
+        vec2 c = i + o;
         float born = 0.01 + 0.13 * fk + 0.26 * hash2(c + 3.0 + 5.0 * fk).y;
         float grow = clamp((0.86 * progress - born) / 0.16, 0.0, 1.0);
         float t = 0.86 * progress - born - 0.16;
-        float l = length(d);
-        float rad = R * sqrt(grow);
         if (t < 0.0) {
-          float z = max(1.0 - l * l / max(rad * rad, 1e-4), 0.0);
-          h = max(h, rad * 1.25 * sqrt(z) * smoothstep(0.0, 0.3, z));
+          h = mix(h, max(h, 0.0), on);
+          hs = mix(hs, max(hs, 0.0), ons);
+        }
+        if (grow <= 0.0) continue;
+        // once its ring is gone, a burst only spreads the incoming liquid, up to where it covers all
+        if (t > 0.2 && (on < 0.5 || cov * reveal + ramp > 0.56)) continue;
+        vec2 d = v - c - 0.2 - 0.6 * hash2(c + 31.0 * fk);
+        float l2 = dot(d, d);
+        float l = sqrt(l2);
+        if (t < 0.0 && l > 0.94) continue;
+        float s = hash2(c + 7.0 + 13.0 * fk).x;
+        float R = mix(0.24, 0.56, s) * (fk > 1.5 ? 0.8 : 1.0);
+        vec4 l2s = max(l2 + 2.0 * SLOPE * vec4(d.x, -d.x, d.y, -d.y) + SLOPE * SLOPE, 0.0);
+        if (t < 0.0) {
+          float rad = R * sqrt(grow);
+          if (l > rad * 1.1 + 0.32) continue;
+          vec4 ls = sqrt(l2s);
+          float z = max(1.0 - l2 / max(rad * rad, 1e-4), 0.0);
+          vec4 zs = max(1.0 - l2s / max(rad * rad, 1e-4), 0.0);
           float x1 = (l - rad * 1.1) / 0.08;
-          h += 0.05 * rad * exp(-x1 * x1);
+          vec4 x1s = (ls - rad * 1.1) / 0.08;
+          h = mix(h, max(h, rad * 1.25 * sqrt(z) * smoothstep(0.0, 0.3, z)) + 0.05 * rad * exp(-x1 * x1), on);
+          hs = mix(hs, max(hs, rad * 1.25 * sqrt(zs) * smoothstep(0.0, 0.3, zs)) + 0.05 * rad * exp(-x1s * x1s), ons);
         } else {
+          cov += on * exp(-l2 / (R * R * (0.35 + 6.5 * t)));
           float u = clamp(t / 0.2, 0.0, 1.0);
           float fade = (1.0 - u) * (1.0 - u);
           float ringR = R * (0.95 + 1.1 * sqrt(u));
-          float x2 = (l - ringR) / (0.1 + 0.1 * u);
-          h += R * 0.6 * fade * exp(-x2 * x2);
-          h -= R * 0.55 * fade * exp(-l * l / (R * R * 0.45));
+          float ringW = 0.1 + 0.1 * u;
+          if (fade > 0.0 && l < max(ringR + 3.2 * ringW, 2.2 * R)) {
+            float x2 = (l - ringR) / ringW;
+            vec4 x2s = (sqrt(l2s) - ringR) / ringW;
+            h += on * R * fade * (0.6 * exp(-x2 * x2) - 0.55 * exp(-l2 / (R * R * 0.45)));
+            hs += ons * R * fade * (0.6 * exp(-x2s * x2s) - 0.55 * exp(-l2s / (R * R * 0.45)));
+          }
           float jet = smoothstep(0.0, 0.25, u) * (1.0 - smoothstep(0.3, 0.6, u));
-          h += R * 1.1 * jet * exp(-l * l / (R * R * 0.06));
-          cov += exp(-l * l / (R * R * (0.35 + 6.5 * t)));
+          if (jet > 0.0 && l < R) {
+            h += on * R * 1.1 * jet * exp(-l2 / (R * R * 0.06));
+            hs += ons * R * 1.1 * jet * exp(-l2s / (R * R * 0.06));
+          }
         }
       }
     }
   }
-  return vec2(h, cov);
+  return vec4(h, cov, (hs.xz - hs.yw) / (2.0 * SLOPE));
 }
 
 vec4 transition(vec2 uv) {
@@ -77,13 +115,14 @@ vec4 transition(vec2 uv) {
   float g = smoothstep(0.0, 0.14, p) * (1.0 - smoothstep(0.8, 1.0, p));
   vec2 w = q * density;
   w += 0.12 * g * (vec2(noise(w * 1.7 + p * 5.0), noise(w * 1.7 - p * 5.0 + 9.0)) - 0.5);
-  vec2 s = simmer(w);
-  vec2 e = vec2(0.018, 0.0);
-  vec2 grad = vec2(simmer(w + e.xy).x - simmer(w - e.xy).x, simmer(w + e.yx).x - simmer(w - e.yx).x) / (2.0 * e.x);
+  float reveal = smoothstep(0.0, 0.1, p);
+  float ramp = smoothstep(0.52, 0.86, p) * 1.1;
+  vec4 s = simmer(w, reveal, ramp);
+  vec2 grad = s.zw;
   grad = grad / (1.0 + 0.25 * length(grad));
   vec3 n = normalize(vec3(-grad * g, 1.0));
 
-  float m = smoothstep(0.44, 0.56, s.y * smoothstep(0.0, 0.1, p) + smoothstep(0.52, 0.86, p) * 1.1);
+  float m = smoothstep(0.44, 0.56, s.y * reveal + ramp);
   vec2 bend = -n.xy * 0.22 / density * g;
   vec2 st = mirror((q + bend * 0.6) / asp + 0.5);
   vec4 a = getFromColor(st), b = getToColor(st);

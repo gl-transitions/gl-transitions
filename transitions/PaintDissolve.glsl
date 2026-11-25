@@ -71,24 +71,27 @@ vec4 pdStroke(vec2 p, vec2 c, vec2 cell, vec4 h, float size, float k, vec2 off, 
   float b = d.y - tilt * d.x - (h.w - 0.5) * 0.12 * a * a; // across it
   float L = 0.66 + 0.1 * h.w;
   float W = 0.17 + 0.03 * h.z;
+  float aa = 0.0025 / size;
+  float bw = b / W; // -1..1 across the core of the stroke
+  float u = clamp(a / L, -1.0, 1.0);
+  if (abs(bw) > 1.0 - 0.2 * u * u + aa / W || a > L + 0.06 + aa || a < 0.12 * bw * bw - L - aa) return vec4(0.0);
   vec2 world = (c - off) * vec2(size, size * ROW);
   float order = 0.55 * pdNoise(world * 3.0 + k * 5.0) + 0.45 * pdHash(cell * 1.7 + vec2(k * 9.0, 3.0));
   float start = t0 + spread * clamp((order - 0.15) / 0.7, 0.0, 1.0); // (order is mostly in 0.15..0.85)
   float s = clamp((progress - start) / dur, 0.0, 1.0);
+  if (s <= 0.0) return vec4(0.0);
   s = 1.0 - (1.0 - s) * (1.0 - s);
   float seed = h.x * 37.0 + k * 11.0;
-  float bw = b / W; // -1..1 across the core of the stroke
   // bristle streaks along the stroke (fewer on small strokes, so that they stay a few pixels wide)
   float hairs = clamp(size * 50.0, 3.0, 16.0);
   float br = 0.6 * pdNoise(vec2(bw * 0.4 * hairs + seed, a * 2.0)) + 0.4 * pdNoise(vec2(bw * 0.8 * hairs - seed, a * 1.2 + 5.0));
-  float aa = 0.0025 / size;
-  float u = clamp(a / L, -1.0, 1.0);
   float width = (0.8 + 0.2 * (1.0 - u * u)) * (0.92 + 0.08 * pdNoise(vec2(a * 6.0, seed))) - 0.1 * br;
   float side = 1.0 - smoothstep(width - aa / W, width + aa / W, abs(bw));
   float tail = smoothstep(-aa, aa, a + L - 0.12 * bw * bw);
   float head = mix(-L - 0.1, L + 0.2, s);
   float lay = smoothstep(0.0, 0.25, (head - a) / 0.2 - 0.6 * br);
   float lift = smoothstep(-aa, aa, L + 0.12 * (br - 0.5) - a);
+  if (side * lay * lift <= 0.0) return vec4(0.0);
   float fb = pdNoise(vec2(bw * hairs + seed, a * 0.9 - seed));
   float dryness = dry * smoothstep(0.1, 1.0, u);
   float cover = side * tail * lay * lift * (1.0 - dryness * (1.0 - smoothstep(0.3, 0.6, fb)));
@@ -102,10 +105,11 @@ float pdUnder(vec4 x, vec4 y) {
   return y.z > x.z ? 1.0 - y.x : 1.0;
 }
 
-// paints one layer of strokes over `below`, at an angle `th`.
+// paints one layer of strokes at an angle `th`, under those that let `left` of it through.
 // solid layers take the color of the incoming image under the middle of each stroke, the detail
 // layers lay down the incoming image itself (`detail`, at this pixel), with less dry gaps
-vec4 pdLayer(vec4 below, vec2 q, float size, float k, float th, float t0, float spread, float dur, bool solid, vec4 detail) {
+void pdLayer(inout vec4 acc, inout float left, vec2 q, float size, float k, float th, float t0, float spread, float dur, bool solid, vec4 detail) {
+  if (progress <= t0 || abs(left) < 0.001) return;
   size = max(size, MIN_SIZE);
   vec2 dir = vec2(cos(th), sin(th));
   vec2 off = vec2(k * 0.37, k * 0.61);
@@ -154,21 +158,24 @@ vec4 pdLayer(vec4 below, vec2 q, float size, float k, float th, float t0, float 
   k2.rgb *= 1.0 + relief * (s2.y + 0.5 * (s2.w - 0.5));
   k3.rgb *= 1.0 + relief * (s3.y + 0.5 * (s3.w - 0.5));
   float vis = v0 + v1 + v2 + v3;
-  return below * (1.0 - vis) + k0 * v0 + k1 * v1 + k2 * v2 + k3 * v3;
+  acc += left * (k0 * v0 + k1 * v1 + k2 * v2 + k3 * v3);
+  left *= 1.0 - vis;
 }
 
 vec4 transition(vec2 uv) {
   vec2 q = (uv - 0.5) * vec2(ratio, 1.0);
   vec4 to = getToColor(uv);
-  vec4 col = getFromColor(uv);
   float sz = brushSize;
   float th = angle * PI / 180.0;
   float x = crossing * 0.6;
-  col = pdLayer(col, q, sz, 0.0, th, 0.0, 0.3, 0.12, true, to);
-  col = pdLayer(col, q, sz * 0.6, 1.0, th + x, 0.2, 0.28, 0.1, true, to);
-  col = pdLayer(col, q, sz * 0.36, 2.0, th - x * 0.7, 0.38, 0.26, 0.09, true, to);
-  col = pdLayer(col, q, sz * 0.22, 3.0, th + x * 0.4, 0.56, 0.22, 0.08, false, to);
-  col = pdLayer(col, q, sz * 0.2, 4.0, th - x * 0.3, 0.68, 0.2, 0.08, false, to);
+  vec4 col = vec4(0.0);
+  float left = 1.0;
+  pdLayer(col, left, q, sz * 0.2, 4.0, th - x * 0.3, 0.68, 0.2, 0.08, false, to);
+  pdLayer(col, left, q, sz * 0.22, 3.0, th + x * 0.4, 0.56, 0.22, 0.08, false, to);
+  pdLayer(col, left, q, sz * 0.36, 2.0, th - x * 0.7, 0.38, 0.26, 0.09, true, to);
+  pdLayer(col, left, q, sz * 0.6, 1.0, th + x, 0.2, 0.28, 0.1, true, to);
+  pdLayer(col, left, q, sz, 0.0, th, 0.0, 0.3, 0.12, true, to);
+  col += left * getFromColor(uv);
   col = mix(col, to, smoothstep(0.92, 1.0, progress));
   return clamp(col, 0.0, 1.0);
 }
