@@ -1,6 +1,10 @@
 # Preview images
 
-The photos of the preview GIFs, cropped and resized to 512×400. They are CC0 or in the public domain.
+The photos of the preview GIFs.
+
+## `preview-images/`
+
+Cropped and resized to 512×400. They are CC0 or in the public domain.
 
 | File | Title | Author | Source | License |
 |---|---|---|---|---|
@@ -12,3 +16,13 @@ The photos of the preview GIFs, cropped and resized to 512×400. They are CC0 or
 | `sunflowers.jpg` | Sunflowers Flowers | Skitter Photo | [StockSnap](https://stocksnap.io/photo/sunflowers-flowers-GLFUMCCQXI) ([archived](https://web.archive.org/web/20250323032317/https://stocksnap.io/photo/sunflowers-flowers-GLFUMCCQXI)) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `water-lily.jpg` | Nymphaea alba, Alhambra, Granada, Spain | Jebulon | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Nymphaea_alba,_Alhambra,_Granada,_Spain.jpg) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | `zeus-temple.jpg` | Evening columns Zeus temple Athens | Jebulon | [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Evening_columns_Zeus_temple_Athens.jpg) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) |
+
+## `sample-images/`
+
+Older images, whose origin and license are not confirmed.
+
+| File | Origin |
+|---|---|
+| `../sample-images/1.jpg` | Not confirmed |
+| `../sample-images/2.jpg` | To be confirmed: it looks like a frame of [Big Buck Bunny](https://peach.blender.org), © Blender Foundation, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| `../sample-images/3.jpg` | Not confirmed |

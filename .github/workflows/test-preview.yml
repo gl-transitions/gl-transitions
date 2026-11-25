@@ -58,12 +58,15 @@ jobs:
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
             node scripts/rendering/render-preview.mjs \
               --transition transitions/Fade.glsl \
+              --seed 1 \
               --output /tmp/test-previews/Fade.gif &&
             node scripts/rendering/render-preview.mjs \
               --transition transitions/CrossWarp.glsl \
+              --seed 2 \
               --output /tmp/test-previews/CrossWarp.gif &&
             node scripts/rendering/render-preview.mjs \
               --transition transitions/Bounce.glsl \
+              --seed 3 \
               --output /tmp/test-previews/Bounce.gif
           '
 

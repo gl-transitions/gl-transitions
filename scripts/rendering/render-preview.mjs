@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 // Renders a gl-transition to a GIF preview.
-// Usage: pnpm run render:preview --transition path/to/Fade.glsl --output preview.gif [--output-black preview.black.gif]
+// Usage: pnpm run render:preview --transition path/to/Fade.glsl --output preview.gif [--output-black preview.black.gif] [--seed 42]
+//
+// Its three photos are drawn at random; the same seed (an integer) gives the same photos.
 //
 // GIF transparency is all or nothing, so soft shadows and reflections can't show in a transparent
 // GIF: a transition that leaves parts of the frame transparent is drawn over white in --output,
@@ -11,6 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
+import { randomInt } from "node:crypto";
 import { parseTransition } from "../catalog/parse-transition.mjs";
 import { choosePreviewImages, previewImagePath } from "./preview-images.mjs";
 
@@ -18,6 +21,7 @@ const args = process.argv.slice(2);
 let transitionPath = null;
 let outputPath = "preview.gif";
 let blackOutputPath = null;
+let seed = randomInt(2 ** 32);
 let width = 400;
 let height = 300;
 let frames = 34;
@@ -29,13 +33,14 @@ for (let i = 0; i < args.length; i++) {
   if (args[i] === "--transition" || args[i] === "-t") transitionPath = args[++i];
   else if (args[i] === "--output" || args[i] === "-o") outputPath = args[++i];
   else if (args[i] === "--output-black") blackOutputPath = args[++i];
+  else if (args[i] === "--seed") seed = Number(args[++i]);
   else if (args[i] === "--width" || args[i] === "-w") width = parseInt(args[++i]);
   else if (args[i] === "--height") height = parseInt(args[++i]);
   else if (args[i] === "--frames" || args[i] === "-f") frames = parseInt(args[++i]);
 }
 
-if (!transitionPath) {
-  console.error("Usage: pnpm run render:preview --transition <file.glsl> [--output <out.gif>]");
+if (!transitionPath || !Number.isSafeInteger(seed) || seed < 0) {
+  console.error("Usage: pnpm run render:preview --transition <file.glsl> [--output <out.gif>] [--seed <integer>]");
   process.exit(1);
 }
 
@@ -128,9 +133,9 @@ function loadImage(imgPath, w, h) {
   return new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength);
 }
 
-const textures = choosePreviewImages(transitionName).map((image) =>
-  createTexture(loadImage(previewImagePath(image), width, height), width, height),
-);
+const images = choosePreviewImages(seed);
+console.error(`Photos: ${images.join(", ")} (--seed ${seed})`);
+const textures = images.map((image) => createTexture(loadImage(previewImagePath(image), width, height), width, height));
 
 const progressLoc = gl.getUniformLocation(program, "progress");
 gl.uniform1f(gl.getUniformLocation(program, "ratio"), width / height);

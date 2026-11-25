@@ -70,6 +70,8 @@ jobs:
           xvfb-run -s "-ac -screen 0 1280x1024x24" bash -c '
             PREVIEWS=6
             count=0
+            # Random photos on each run, and different ones for each transition of the run.
+            SEED=$((RANDOM * 32768 + RANDOM))
             for file in $FILES; do
               name=$(basename "$file" .glsl)
               echo "=== Validating $name ==="
@@ -82,6 +84,7 @@ jobs:
               echo "=== Rendering $name ==="
               node scripts/rendering/render-preview.mjs \
                 --transition "$file" \
+                --seed $((SEED + count)) \
                 --output "/tmp/previews/${name}.gif" \
                 --output-black "/tmp/previews/${name}.black.gif" 2>&1 || echo "Failed: $name"
             done
