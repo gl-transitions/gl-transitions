@@ -2,6 +2,7 @@
 // License: MIT
 // Description: A black hole opens in the outgoing picture and shears it into a glowing disk of its own colors; the camera swings down to the edge of the disk, whose far side is seen bent up over the dark shadow, with the incoming picture as the sky warped all around; the disk is swallowed, the hole evaporates and the sky straightens out
 // Tags: space, black-hole, lens, 3d, distort
+// Preview: 0.58
 
 // @range(0, 1.45) How far the camera swings down towards the plane of the disk
 uniform float tilt; // = 1.36
