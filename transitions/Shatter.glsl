@@ -82,8 +82,7 @@ vec4 locate(vec2 q) {
 }
 
 // Rodrigues' rotation of v around the unit axis k
-vec3 rotate(vec3 v, vec3 k, float angle) {
-  float c = cos(angle), s = sin(angle);
+vec3 rotate(vec3 v, vec3 k, float c, float s) {
   return v * c + cross(k, v) * s + k * dot(k, v) * (1.0 - c);
 }
 
@@ -140,7 +139,8 @@ vec4 transition(vec2 uv) {
     vec4 col = getFromColor(uv);
     float crack = clamp((progress - crackTime * length(a - imp) / rch) / 0.03, 0.0, 1.0);
     // cracked shards settle at slightly different angles (no change while flat: dot(n, light) = -light.z)
-    vec3 n = rotate(vec3(0.0, 0.0, -1.0), normalize(vec3(hh.yz - 0.5, 0.0) + 1e-4), 0.06 * crack * (hh.x - 0.5));
+    float tilt = 0.06 * crack * (hh.x - 0.5);
+    vec3 n = rotate(vec3(0.0, 0.0, -1.0), normalize(vec3(hh.yz - 0.5, 0.0) + 1e-4), cos(tilt), sin(tilt));
     col.rgb *= 1.0 + 1.2 * (dot(n, light) + light.z);
     col.rgb += crack * 0.35 * pow(max(dot(n, halfway), 0.0), 400.0) * col.a;
     float line = crack * (1.0 - smoothstep(0.0, CRACK_WIDTH, here.w));
@@ -160,13 +160,18 @@ vec4 transition(vec2 uv) {
   vec2 look = a - 0.06 * progress * (a - imp) / rch - (a - eye.xy) * 0.06 * progress;
   vec2 g0 = floor(look / s) - 1.0;
   float rows = ceil(1.0 / s);
-  for (int ri = 0; ri < 11; ri++) {
-    float j = g0.y + float(ri);
-    if (j > rows) break;
-    if (j < -1.0) continue;
-    for (int ci = 0; ci < 3; ci++) {
-      vec2 c = vec2(g0.x + float(ci), j);
-      vec2 ca = corner(c), cb = corner(c + vec2(1.0, 0.0)), ccc = corner(c + 1.0), cd = corner(c + vec2(0.0, 1.0));
+  float j0 = max(g0.y, -1.0);
+  // a shard from above had no time to fall down to here
+  float highest = g0.y + min(10.5, 4.0 + (0.5 * g * progress * progress + 0.25 * progress) / s);
+  float raySq = dot(ray, ray);
+  for (int ci = 0; ci < 3; ci++) {
+    vec2 cd = corner(vec2(g0.x + float(ci), j0)), ccc = corner(vec2(g0.x + float(ci) + 1.0, j0));
+    for (int ri = 0; ri < 11; ri++) {
+      vec2 c = vec2(g0.x + float(ci), j0 + float(ri));
+      if (c.y > rows || c.y > highest) break;
+      vec2 ca = cd, cb = ccc;
+      cd = corner(c + vec2(0.0, 1.0));
+      ccc = corner(c + 1.0);
       bool up = diagonalUp(c);
       for (int k = 0; k < 2; k++) {
         vec2 p0 = (k == 1 && !up) ? cb : ca;
@@ -179,46 +184,61 @@ vec4 transition(vec2 uv) {
         float dn = clamp(dist / rch, 0.0, 1.0);
         float e = progress - releaseTime(mid, dn, h1.x, g, margin);
         if (e <= 0.0) continue;
-        vec3 h2 = hash32(c + vec2(0.73, 0.19) * float(k + 1) + seedOffset());
+        vec2 d0 = p0 - mid, d1 = p1 - mid, d2 = p2 - mid;
+        float size2 = max(dot(d0, d0), max(dot(d1, d1), dot(d2, d2)));
+        // it fell too far or not enough to be met from here, whatever its own speed and the slants of the rays
+        if (abs(mid.y - 0.5 * g * e * e - a.y) > 1.25 * sqrt(size2) + 0.36 * e) continue;
         float near = 1.0 - dn;
         vec3 vel = vec3(away / max(dist, 1e-3) * (0.03 + 0.08 * h1.y) * (0.4 + near), -(0.05 + 0.2 * near * h1.z));
         vec3 pos = vec3(mid, 0.0) + vel * e - vec3(0.0, 0.5 * g * e * e, 0.0);
         if (pos.y + 1.5 * s < -0.05) continue;
+        // neither the eye nor the light can reach the shard from here
+        vec3 missed = cross(pos - eye, ray);
+        vec3 unlit = cross(pos - vec3(a, 0.0), light);
+        bool seen = dot(missed, missed) < size2 * raySq;
+        bool lit = dot(unlit, unlit) < size2;
+        if (!seen && !lit) continue;
+        vec3 h2 = hash32(c + vec2(0.73, 0.19) * float(k + 1) + seedOffset());
         vec3 axis = normalize(vec3(h2.x - 0.5, h2.y - 0.5, 0.3 * (h2.z - 0.5)) + 1e-4);
         float angle = (3.0 + 5.0 * h2.z) * (h2.x < 0.5 ? -1.0 : 1.0) * e;
-        vec3 n = rotate(vec3(0.0, 0.0, -1.0), axis, angle);
+        float cs = cos(angle), sn = sin(angle);
+        vec3 n = rotate(vec3(0.0, 0.0, -1.0), axis, cs, sn);
         float rel = smoothstep(0.0, 0.04, e);
 
         float den = dot(ray, n);
         float t = dot(pos - eye, n) / (abs(den) > 1e-4 ? den : 1e-4);
-        vec2 q = mid + rotate(eye + t * ray - pos, axis, -angle).xy;
-        float border = min(min(q.x, ratio - q.x), min(q.y, 1.0 - q.y));
-        float inside = triangleDist(q, p0, p1, p2);
-        float ed = min(inside, border);
-        if (t > 0.0 && t < t2 && t < paneDepth && ed > 0.0) {
-          vec3 nf = den > 0.0 ? -n : n;
-          vec4 col = getFromColor(vec2(q.x / ratio, q.y));
-          col.rgb *= mix(1.0, clamp(dot(nf, light) / -light.z, 0.45, 1.1), rel);
-          float glint = max(dot(nf, halfway), 0.0);
-          col.rgb += rel * 0.3 * pow(glint, 60.0) * col.a;
-          float line = 0.85 * (1.0 - smoothstep(0.0, CRACK_WIDTH, inside)) * (1.0 - rel);
-          float bevel = 0.8 * rel * (1.0 - smoothstep(0.0, BEVEL, ed)) * (0.3 + 0.7 * pow(glint, 6.0));
-          col.rgb = mix(col.rgb, vec3(0.92, 0.97, 0.97) * col.a, max(line, bevel));
-          float cover = mix(1.0, smoothstep(0.0, 2.0 * EDGE, ed), rel);
-          if (t < t1) {
-            t2 = t1; c2 = c1; a2 = a1;
-            t1 = t; c1 = col; a1 = cover;
-          } else {
-            t2 = t; c2 = col; a2 = cover;
+        if (seen && t > 0.0 && t < t2 && t < paneDepth) {
+          vec2 q = mid + rotate(eye + t * ray - pos, axis, cs, -sn).xy;
+          float border = min(min(q.x, ratio - q.x), min(q.y, 1.0 - q.y));
+          float inside = triangleDist(q, p0, p1, p2);
+          float ed = min(inside, border);
+          if (ed > 0.0) {
+            vec3 nf = den > 0.0 ? -n : n;
+            vec4 col = getFromColor(vec2(q.x / ratio, q.y));
+            col.rgb *= mix(1.0, clamp(dot(nf, light) / -light.z, 0.45, 1.1), rel);
+            float glint = max(dot(nf, halfway), 0.0);
+            col.rgb += rel * 0.3 * pow(glint, 60.0) * col.a;
+            float line = 0.85 * (1.0 - smoothstep(0.0, CRACK_WIDTH, inside)) * (1.0 - rel);
+            float bevel = 0.8 * rel * (1.0 - smoothstep(0.0, BEVEL, ed)) * (0.3 + 0.7 * pow(glint, 6.0));
+            col.rgb = mix(col.rgb, vec3(0.92, 0.97, 0.97) * col.a, max(line, bevel));
+            float cover = mix(1.0, smoothstep(0.0, 2.0 * EDGE, ed), rel);
+            if (t < t1) {
+              t2 = t1; c2 = c1; a2 = a1;
+              t1 = t; c1 = col; a1 = cover;
+            } else {
+              t2 = t; c2 = col; a2 = cover;
+            }
           }
         }
 
         float lden = dot(light, n);
         float ts = dot(pos - vec3(a, 0.0), n) / (abs(lden) > 1e-4 ? lden : 1e-4);
-        vec2 qs = mid + rotate(vec3(a, 0.0) + ts * light - pos, axis, -angle).xy;
-        float eds = min(triangleDist(qs, p0, p1, p2), min(min(qs.x, ratio - qs.x), min(qs.y, 1.0 - qs.y)));
-        if (ts > 0.0 && eds > 0.0) {
-          shadow = max(shadow, rel * smoothstep(0.0, 0.004 + 0.08 * ts, eds) * 0.45 * (1.0 - smoothstep(0.1, 0.9, ts)));
+        if (lit && ts > 0.0) {
+          vec2 qs = mid + rotate(vec3(a, 0.0) + ts * light - pos, axis, cs, -sn).xy;
+          float eds = min(triangleDist(qs, p0, p1, p2), min(min(qs.x, ratio - qs.x), min(qs.y, 1.0 - qs.y)));
+          if (eds > 0.0) {
+            shadow = max(shadow, rel * smoothstep(0.0, 0.004 + 0.08 * ts, eds) * 0.45 * (1.0 - smoothstep(0.1, 0.9, ts)));
+          }
         }
       }
     }

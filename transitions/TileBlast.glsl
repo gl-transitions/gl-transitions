@@ -34,10 +34,11 @@ vec4 hash4(vec2 p) {
   return fract((q.xxyz + q.yzzw) * q.zywx);
 }
 
-// how far the tile of cell g is along its flight, 0 at rest to 1 gone: a kick, then it speeds up toward the eye
-float flight(vec2 g, vec2 size, vec2 c, float dmax) {
-  float d = clamp((length((g + 0.5) * size - c) - 0.7 * size.y) / dmax, 0.0, 1.0);
-  float t = (progress - WAVE * d - JITTER * hash4(g).x) / FLIGHT;
+// how far a tile is along its flight, 0 at rest to 1 gone: a kick, then it speeds up toward the eye
+// (far: its distance to the blast point)
+float flight(float far, float jitter, vec2 size, float dmax) {
+  float d = clamp((far - 0.7 * size.y) / dmax, 0.0, 1.0);
+  float t = (progress - WAVE * d - JITTER * jitter) / FLIGHT;
   t = clamp(max(t, (progress - FINAL) / (1.0 - FINAL)), 0.0, 1.0);
   return t * (0.55 + 0.45 * t);
 }
@@ -45,9 +46,10 @@ float flight(vec2 g, vec2 size, vec2 c, float dmax) {
 vec2 flyDir(vec2 g, vec2 size, vec2 c) {
   vec2 v = (g + 0.5) * size - c;
   float l = length(v);
+  if (l > 0.02 * size.y) return v / l;
   // a tile right on the blast point flies off in a direction of its own
-  vec2 a = 6.2831853 * hash4(g + 7.0).xy;
-  return l > 0.02 * size.y ? v / l : vec2(cos(a.x), sin(a.x));
+  float a = 6.2831853 * hash4(g + 7.0).x;
+  return vec2(cos(a), sin(a));
 }
 
 // Rodrigues rotation of v around the unit axis k, by the angle of cosine cb and sine sb
@@ -81,6 +83,8 @@ vec4 transition(vec2 uv) {
   // and test the 2x2 cells nearest to it
   // the steps move the start point by less than half a tile
   float dw = max(0.4 * size.y / (length(P - c) * ZEND / EYE + DRIFT), 1.0 / 31.0);
+  float reach = 0.5 * length(size) + 0.02;
+  float reach2 = reach * reach * dot(ray, ray);
   vec2 lastCell = vec2(-1e4), lastSide = vec2(0.0);
   for (int k = 0; k < 32; k++) {
     float wk = float(k) * dw;
@@ -94,18 +98,28 @@ vec4 transition(vec2 uv) {
     vec2 side = step(0.5, fract(f)) * 2.0 - 1.0;
     // consecutive steps often land on the same cells
     if (cell == lastCell && side == lastSide) continue;
+    // none of the tiles near here has come that far, or they all have passed
+    float far = length(home - c);
+    float near = 1.5 * length(size);
+    if (wk > flight(far - near, 0.0, size, dmax) + 2.0 * dw || wk < flight(far + near, 1.0, size, dmax) - 2.0 * dw) continue;
+    vec2 pastCell = lastCell, pastSide = lastSide;
     lastCell = cell;
     lastSide = side;
     for (int j = 0; j < 4; j++) {
       vec2 g = cell + vec2(j == 1 || j == 3 ? side.x : 0.0, j >= 2 ? side.y : 0.0);
       if (g.x < 0.0 || g.y < 0.0 || g.x >= grid.x || g.y >= grid.y) continue;
+      vec2 past = g - pastCell;
+      if ((past.x == 0.0 || past.x == pastSide.x) && (past.y == 0.0 || past.y == pastSide.y)) continue;
       if (g == g1 || g == g2) continue;
-      float u = flight(g, size, c, dmax);
+      float u = flight(length((g + 0.5) * size - c), hash4(g).x, size, dmax);
       if (u >= 1.0) continue;
-      vec4 h = hash4(g + 31.0);
       vec2 dir = flyDir(g, size, c);
       vec2 h0 = (g + 0.5) * size;
       vec3 tc = vec3(h0 + dir * DRIFT * u, ZEND * u);
+      // the ray passes out of reach of the tile
+      vec3 off = cross(tc - eye, ray);
+      if (dot(off, off) > reach2) continue;
+      vec4 h = hash4(g + 31.0);
       float a = spinAmt * 2.4 * (h.x - 0.5) * u;
       float b = spinAmt * (0.5 + 0.7 * h.y) * (h.z < 0.5 ? -1.0 : 1.0) * 1.8 * u;
       vec3 ax = normalize(vec3(-dir.y + 0.4 * (h.w - 0.5), dir.x, 0.0));
@@ -145,7 +159,9 @@ vec4 transition(vec2 uv) {
       for (int x = -1; x <= 1; x++) {
         vec2 g = base + vec2(float(x), float(y));
         if (g.x < 0.0 || g.y < 0.0 || g.x >= grid.x || g.y >= grid.y) continue;
-        float u = flight(g, size, c, dmax);
+        float far = length((g + 0.5) * size - c);
+        if (flight(far, 0.0, size, dmax) <= 0.0) continue;
+        float u = flight(far, hash4(g).x, size, dmax);
         float z = ZEND * u;
         // the shadow fades before it can reach beyond the next tile
         float w = smoothstep(0.0, 0.03, u) * (1.0 - smoothstep(0.1 * size.y, 0.7 * size.y, z));

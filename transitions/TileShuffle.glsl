@@ -71,22 +71,15 @@ float swapTime(vec2 c, vec2 b, float k, vec2 n, vec2 sw) {
 // the swap of the tile that cell c holds now, the first swap of the cell that is not over yet:
 // x its round (ROUNDS once the cell has no swap left), y its time, zw the partner cell
 vec4 currentSwap(vec2 c, vec2 n, vec2 sw) {
-  vec4 cur = vec4(float(ROUNDS), 0.0, c);
-  bool found = false;
   for (int i = 0; i < ROUNDS; i++) {
     float k = float(i);
-    if (!found) {
-      vec2 b = partner(c, k, n);
-      if (differ(b, c)) {
-        float u = swapTime(c, b, k, n, sw);
-        if (u < 1.0) {
-          cur = vec4(k, max(u, 0.0), b);
-          found = true;
-        }
-      }
+    vec2 b = partner(c, k, n);
+    if (differ(b, c)) {
+      float u = swapTime(c, b, k, n, sw);
+      if (u < 1.0) return vec4(k, max(u, 0.0), b);
     }
   }
-  return cur;
+  return vec4(float(ROUNDS), 0.0, c);
 }
 
 // lift of the tile of cell c during its current swap: positive for the tile that slides over,
@@ -107,6 +100,13 @@ vec2 swapPos(vec2 c, vec4 cur, float lift) {
   return mix(c, cur.zw, e) + 0.5 + SWING * max(lift, 0.0) * side;
 }
 
+// whether the tile of a cell, or its shadow, stays away from the point d, in cells from the center of the cell:
+// the tile moves by a cell along one side and swings out by SWING along the other
+bool outOfReach(vec2 d, float reach) {
+  d = abs(d);
+  return max(d.x, d.y) > 1.0 + reach || min(d.x, d.y) > SWING + reach;
+}
+
 vec2 mirror(vec2 v) {
   return 1.0 - abs(1.0 - abs(v));
 }
@@ -120,6 +120,15 @@ vec4 tileColor(vec4 src, float w, float lift, float e, float sh) {
   float rim = 0.2 * up * (1.0 - smoothstep(0.0, 0.006, e));
   c.rgb = mix(clamp(c.rgb * (1.0 + 0.06 * up + 0.1 * min(lift, 0.0)) * (1.0 - sh), 0.0, 1.0), vec3(1.0), rim);
   return c;
+}
+
+bool above(vec2 a, vec2 b) {
+  return a.x + 0.001 * a.y > b.x + 0.001 * b.y;
+}
+
+// how much a tile at height z is darkened by the shadow h
+float shadowOn(vec2 h, float z) {
+  return h.x > z + 0.01 ? h.y : 0.0;
 }
 
 vec4 transition(vec2 uv) {
@@ -141,19 +150,40 @@ vec4 transition(vec2 uv) {
   float sd = (1.0 - 2.0 * START) / (float(ROUNDS - 1) * gapK + 1.0 + WAVE * (n.x + n.y - 2.0) + JITTER);
   vec2 sw = vec2(sd, sd * gapK);
 
+  // half a lifted tile, its shadow and their soft edges, in cells
+  float reach = 0.5 * (1.0 + GROW) + 0.16 + 0.006 / min(cell.x, cell.y);
   // the two highest tiles seen here: height, coverage, lift, turn, edge distance, outgoing and incoming image points
   float z1 = -9.0, z2 = -9.0, m1 = 0.0, m2 = 0.0, l1 = 0.0, l2 = 0.0, w1 = 0.0, w2 = 0.0, e1 = 0.0, e2 = 0.0;
   vec4 s1 = vec4(0.0), s2 = vec4(0.0);
+  // the three highest shadows cast here: height of the tile, darkness
+  vec2 h1 = vec2(-9.0, 0.0), h2 = h1, h3 = h1;
+  float sh0 = 0.0;
+  vec2 light = vec2(0.45, -0.75) * min(cell.x, cell.y);
   for (int j = 0; j < 5; j++) {
     for (int i = 0; i < 5; i++) {
       vec2 o = vec2(float(i) - 2.0, float(j) - 2.0);
       vec2 c = here + o;
-      if (abs(o.x) + abs(o.y) > 3.5 || c.x < 0.0 || c.y < 0.0 || c.x >= n.x || c.y >= n.y) continue;
+      if (c.x < 0.0 || c.y < 0.0 || c.x >= n.x || c.y >= n.y || outOfReach(uv * n - c - 0.5, reach)) continue;
       vec4 cur = currentSwap(c, n, sw);
       float lift = swapLift(c, cur);
-      float sc = 1.0 + GROW * max(lift, 0.0) - SINK * max(-lift, 0.0);
-      vec2 q = (x - swapPos(c, cur, lift) * cell) / sc;
+      float up = max(lift, 0.0);
+      float sc = 1.0 + GROW * up - SINK * max(-lift, 0.0);
+      vec2 away = x - swapPos(c, cur, lift) * cell;
+      vec2 q = away / sc;
       float e = -boxDist(q, hb, rad) * sc;
+
+      vec2 d = away - light * (0.15 * g / min(cell.x, cell.y) + 0.06 * up);
+      float blur = 0.003 + 0.25 * g + 0.04 * up * min(cell.x, cell.y);
+      float sdist = boxDist(d, hb * sc, rad);
+      vec2 cs = vec2(lift, (1.0 - smoothstep(-blur, blur, sdist)) * (0.75 - 0.25 * up));
+      sh0 = max(sh0, cs.y);
+      // among shadows of tiles as high, the darkest counts
+      if (cs.y > 0.0) {
+        if (above(cs, h1)) { h3 = h2; h2 = h1; h1 = cs; }
+        else if (above(cs, h2)) { h3 = h2; h2 = cs; }
+        else if (above(cs, h3)) h3 = cs;
+      }
+
       float cov = clamp(e / EDGE + 0.5, 0.0, 1.0);
       // where resting tiles overlap at their edges, the one that covers this point fully comes first
       float z = lift + 0.001 * cov;
@@ -191,26 +221,9 @@ vec4 transition(vec2 uv) {
     }
   }
 
-  float sh0 = 0.0, sh1 = 0.0, sh2 = 0.0;
-  vec2 light = vec2(0.45, -0.75) * min(cell.x, cell.y);
-  for (int j = 0; j < 5; j++) {
-    for (int i = 0; i < 5; i++) {
-      vec2 o = vec2(float(i) - 2.0, float(j) - 2.0);
-      vec2 c = here + o;
-      if (abs(o.x) + abs(o.y) > 3.5 || c.x < 0.0 || c.y < 0.0 || c.x >= n.x || c.y >= n.y) continue;
-      vec4 cur = currentSwap(c, n, sw);
-      float lift = swapLift(c, cur);
-      float up = max(lift, 0.0);
-      vec2 d = x - swapPos(c, cur, lift) * cell - light * (0.15 * g / min(cell.x, cell.y) + 0.06 * up);
-      float blur = 0.003 + 0.25 * g + 0.04 * up * min(cell.x, cell.y);
-      float sdist = boxDist(d, hb * (1.0 + GROW * up - SINK * max(-lift, 0.0)), rad);
-      float a = (1.0 - smoothstep(-blur, blur, sdist)) * (0.75 - 0.25 * up);
-      sh0 = max(sh0, a);
-      if (lift > z2 + 0.01) sh2 = max(sh2, a);
-      if (lift > z1 + 0.01) sh1 = max(sh1, a);
-    }
-  }
-
+  float sh1 = shadowOn(h1, z1), sh2 = shadowOn(h1, z2);
+  sh1 = max(sh1, max(shadowOn(h2, z1), shadowOn(h3, z1)));
+  sh2 = max(sh2, max(shadowOn(h2, z2), shadowOn(h3, z2)));
   float k = clamp(shadow, 0.0, 1.0);
   vec4 col = vec4(tray.rgb * (1.0 - k * sh0), tray.a);
   // the lower tile only shows where the top one does not cover this point fully

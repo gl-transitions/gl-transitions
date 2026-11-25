@@ -164,15 +164,26 @@ vec4 transition(vec2 uv) {
   // perspective pushes the tiles outward, so look around where this pixel was before
   float pcx = floor((P.x / 1.1 + 0.5 * ratio) / size.x);
   vec3 hs = vec3(0.5 * size, 0.5 * THICK);
+  // a tile reaches no further than this from its center
+  float reach = length(hs) + 0.03;
+  float reach2 = reach * reach * dot(dir, dir);
+  // where a tile that is seen or casts its shadow here can come from: it drifts a little, falls and nears the eye
+  float zMax = 0.3 + reach;
+  vec2 q0 = P * (1.0 - zMax / EYE);
+  float margin = 0.12 + 1.6 * reach;
+  float xMin = min(min(P.x, q0.x), P.x + L.x / L.z * zMax) - margin;
+  float xMax = max(P.x, q0.x) + margin;
+  float yMin = min(P.y, q0.y) - margin;
   for (int j = 0; j < 8; j++) {
     if (float(j) >= grid.y) break;
     for (int i = -3; i <= 3; i++) {
       vec2 g = vec2(pcx + float(i), float(j));
       if (g.x < 0.0 || g.x >= grid.x) continue;
+      vec2 c0 = (g + 0.5) * size - 0.5 * aspect;
+      if (c0.x < xMin || c0.x > xMax || c0.y < yMin) continue;
       float u = popU(g, grid, size);
       if (u <= 0.0 || u >= 1.0) continue;
       vec4 h = hash4(g + 17.0);
-      vec2 c0 = (g + 0.5) * size - 0.5 * aspect;
       float fall = max(u - 0.2, 0.0);
       float a = (0.9 + 0.3 * h.y) * u * (1.6 - 0.6 * u);
       float r = (h.z - 0.5) * 0.6 * fall;
@@ -188,15 +199,6 @@ vec4 transition(vec2 uv) {
       vec2 off = 0.5 * (lo - hi);
       vec3 ctr = pivot + ey * hs.y - ez * hs.z + ex * off.x + ey * off.y;
       vec3 toEye = eye - ctr;
-      float sy = dot(ey, toEye) > 0.0 ? 1.0 : -1.0;
-      float sx = dot(ex, toEye) > 0.0 ? 1.0 : -1.0;
-      float sz = dot(ez, toEye) > 0.0 ? 1.0 : -1.0;
-
-      vec4 F = face(eye, dir, ctr + ez * (sz * hs.z), ex, ey, hf, vec2(sx, sy));
-      vec4 Sy = face(eye, dir, ctr + ey * (sy * hf.y), ex, ez, vec2(hf.x, hs.z), vec2(sx, sz));
-      vec4 Sx = face(eye, dir, ctr + ex * (sx * hf.x), ey, ez, vec2(hf.y, hs.z), vec2(sy, sz));
-      float m = max(F.x, max(Sy.x, Sx.x));
-
       vec2 ax = ex.xy - L.xy / L.z * ex.z;
       vec2 ay = ey.xy - L.xy / L.z * ey.z;
       vec2 sd = P - (ctr.xy - L.xy / L.z * ctr.z);
@@ -209,6 +211,16 @@ vec4 transition(vec2 uv) {
       vec2 sb = hs.xy - abs(sl);
       shadow = max(shadow, smoothstep(-blur, blur, min(sb.x, sb.y)) * (1.0 - u) * smoothstep(0.0, 0.05, u) * edgeOn / (1.0 + 2.0 * ctr.z));
 
+      vec3 miss = cross(toEye, dir);
+      if (dot(miss, miss) > reach2) continue;
+      float sy = dot(ey, toEye) > 0.0 ? 1.0 : -1.0;
+      float sx = dot(ex, toEye) > 0.0 ? 1.0 : -1.0;
+      float sz = dot(ez, toEye) > 0.0 ? 1.0 : -1.0;
+
+      vec4 F = face(eye, dir, ctr + ez * (sz * hs.z), ex, ey, hf, vec2(sx, sy));
+      vec4 Sy = face(eye, dir, ctr + ey * (sy * hf.y), ex, ez, vec2(hf.x, hs.z), vec2(sx, sz));
+      vec4 Sx = face(eye, dir, ctr + ex * (sx * hf.x), ey, ez, vec2(hf.y, hs.z), vec2(sy, sz));
+      float m = max(F.x, max(Sy.x, Sx.x));
       if (m <= 0.0) continue;
       float t = 1e5;
       vec2 st = vec2(0.0);
