@@ -42,7 +42,14 @@ xvfb-run -a pnpm run bench --software -t MyWipe   # what the PR preview measures
 
 Close what else uses the GPU: the times are those of a shared machine. `--json` also writes the measures.
 
-The **Preview** workflow measures the transitions a PR changes with `--software`: 320x180 frames drawn on the CPU by headless gl on Mesa's llvmpipe. The preview comment shows the cost relative to Fade, measured in the same run, with a warning when it is `high` (about 4 ms per 1080p frame on an Apple M1 Pro) or `very high` (about 8 ms). It is an estimate, so it never fails a PR: on the 359 transitions measured on both, it ranks them like the GPU (Spearman correlation 0.95, against 0.94 for SwiftShader, which separates the heavy ones less well, 0.81 for counting texture reads and loop iterations, and 0.27 for texture reads alone), `very high` finds 10 of the 13 transitions over 8 ms without a wrong warning, and `high` 26 of the 37 over 4 ms with 7 wrong ones (1.3 to 3.7 ms). Transitions heavy in ways a CPU is not sensitive to, such as `BloomDissolve`, are missed: measure on a GPU when in doubt.
+The **Preview** workflow measures the transitions a PR changes with `--software`: 320x180 frames drawn on the CPU by headless gl on Mesa's llvmpipe. The preview comment shows the cost relative to Fade, measured in the same run, with a warning when it is `high` (about 4 ms per 1080p frame on an Apple M1 Pro) or `very high` (about 8 ms). It is an estimate, so it never fails a PR.
+
+How far to trust it, from the whole collection measured on 5 CI runners (3 CPU models) and on the GPU:
+
+- It ranks the transitions like the GPU: Spearman correlation 0.95, against 0.94 for SwiftShader, which separates the heavy ones less well, 0.81 for counting texture reads and loop iterations, and 0.27 for texture reads alone.
+- Depending on the runner, `very high` finds 8 to 11 of the 13 transitions over 8 ms, with 0 to 3 wrong ones, and `high` 16 to 28 of the 36 over 4 ms, with 1 to 13 wrong ones (1.3 to 4 ms). Transitions heavy in ways a CPU is not sensitive to, such as `BloomDissolve`, are missed: measure on a GPU when in doubt.
+- Runners with the same CPU agree within 3%, but the cost relative to Fade is 1.4 times higher on an Intel Xeon 6975P than on an AMD EPYC 7763 (up to 1.7), so 31 of the 366 transitions, near a limit, get another level from one runner to another, by one level at most.
+- The 5 progress values miss at most 8% of the worst frame compared with 9 (the 115 transitions over 1 ms, on the GPU). A peak narrower than 0.1 can still be missed.
 
 The limits are in `checks/frame-cost.mjs`. To check them again, measure the whole collection on a GPU, and on CI runners with `--software`, then:
 

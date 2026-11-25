@@ -226,9 +226,9 @@ jobs:
               const { relative, level } = costs.get(name) ?? {};
               if (relative === undefined) return 'GPU cost: not measured.';
               const cost = `${Math.round(Math.min(Math.max(relative, 1), 9999))}x Fade`;
-              if (level === 'very high') return `⚠️ **GPU cost: ${cost}, very high** (estimate, ±15%): among the heaviest of the collection, likely over 8 ms per 1080p frame on an Apple M1 Pro. Please reduce texture reads and loop iterations.`;
-              if (level === 'high') return `⚠️ **GPU cost: ${cost}, high** (estimate, ±15%): clearly above the collection, likely over 4 ms per 1080p frame on an Apple M1 Pro. Can it do with fewer texture reads or loop iterations?`;
-              return `GPU cost: ${cost} (estimate, ±15%).`;
+              if (level === 'very high') return `⚠️ **GPU cost: ${cost}, very high** (estimate, ±25%): among the heaviest of the collection, likely over 8 ms per 1080p frame on an Apple M1 Pro. Please reduce texture reads and loop iterations.`;
+              if (level === 'high') return `⚠️ **GPU cost: ${cost}, high** (estimate, ±25%): clearly above the collection, likely over 4 ms per 1080p frame on an Apple M1 Pro. Can it do with fewer texture reads or loop iterations?`;
+              return `GPU cost: ${cost} (estimate, ±25%).`;
             };
             const rendered = all.filter(name => isRegular(`${name}.gif`));
             const names = (rendered.length ? rendered : all).slice(0, PREVIEWS);

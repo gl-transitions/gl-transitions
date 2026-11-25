@@ -12,7 +12,7 @@ const WARNING_MS = { high: 4, "very high": 8 };
 // calibrate-cost.mjs (scripts/README.md, "Cost benchmark").
 const LIMITS = {
   gpu: { high: 40, "very high": 80 },
-  software: { high: 22, "very high": 40 },
+  software: { high: 27, "very high": 43 },
 };
 
 const costLevel = (relative, limits) =>
