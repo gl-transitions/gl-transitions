@@ -12,13 +12,14 @@ const cube = {
   license: "MIT",
   description: "The images turn like the faces of a cube",
   tags: ["3d", "rotate"],
+  preview: 0.4,
   params: {
     persp: { type: "float", default: 0.7, min: 0, max: 1, description: "Amount of perspective" },
     reflection: { type: "float", default: 0.4 },
   },
   textures: [],
 };
-const luma = { name: "luma", author: "gre", license: "MIT", tags: [], params: {}, textures: ["luma"] };
+const luma = { name: "luma", author: "gre", license: "MIT", tags: [], preview: 0.3, params: {}, textures: ["luma"] };
 
 test("glslLiteral", () => {
   assert.equal(glslLiteral("float", 0.5), "0.5");
@@ -48,6 +49,7 @@ test("llms-full.txt: parameters, textures and SkSL links", () => {
   assert.ok(txt.includes("  - `persp` (float = 0.7) [range 0 to 1]: Amount of perspective"));
   assert.ok(txt.includes("  - `reflection` (float = 0.4)\n"));
   assert.ok(txt.includes("- SkSL: https://cdn.jsdelivr.net/npm/gl-transitions@1.2.3/sksl/cube.sksl"));
+  assert.ok(txt.includes("- Tags: 3d, rotate\n- Still frame: progress 0.4\n"));
   assert.ok(txt.includes("`wgsl/<name>.wgsl`"));
   for (const { dir } of PACKAGES) assert.ok(txt.includes(`/tree/gl-transitions@1.2.3/${dir})`), dir);
   const lumaSection = txt.slice(txt.indexOf("## luma"));

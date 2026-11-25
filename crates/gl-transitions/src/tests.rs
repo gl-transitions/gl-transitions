@@ -43,6 +43,7 @@ fn every_transition_has_metadata_and_valid_sources() {
             "{}",
             t.name()
         );
+        assert!(t.preview() > 0.0 && t.preview() < 1.0, "{}", t.name());
         assert!(t.glsl().contains("transition"), "{}", t.name());
         let sources = [
             t.sksl().map(|s| s.contains("half4 main(")),
@@ -64,6 +65,8 @@ fn every_transition_has_metadata_and_valid_sources() {
         }
     }
     assert!(shipped.iter().all(|&n| n > 0), "{shipped:?}");
+    assert_eq!(get("Fade").unwrap().preview(), 0.3);
+    assert_eq!(get("PopIn").unwrap().preview(), 0.15);
 }
 
 #[test]

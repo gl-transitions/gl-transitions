@@ -46,7 +46,7 @@ vec4 transition(vec2 uv) {
 5. Use the contextual **`progress`** variable (0.0 to 1.0)
 6. **Keep transparency** (see [Transparency](README.md#transparency)): keep the images' alpha, return `vec4(0.0)` where no image is drawn, and make a fill color a `vec4` parameter with `@color`. `pnpm run validate` checks it.
 7. **Be continuous in `progress`**: the frame starts on exactly the outgoing image at 0, moves away from it smoothly, and lands on exactly the incoming image at 1. Get there through the math itself (eased envelopes that are 0 at both ends, thresholds that start below and end above every value), never with an early return such as `if (progress <= 0.0) return getFromColor(uv);`: such a guard only fixes the frames at exactly 0 and 1 and hides a jump on the next ones, which is what viewers see, and it branches every pixel. `pnpm run validate` rejects these guards and renders progress 0.00001 and 0.99999 to catch jumps.
-8. **Comment only what the code cannot say**: why, not what. Keep a short comment for a math trick, the reason behind a constant, a precision or portability workaround, or an ordering subtlety; leave out comments that restate the next line (`// mix the colors`), section banners and `// ----` dividers, numbered step-by-step narration, and commented-out code. The header lines, the `@param`/`@range`/`@color` hints and the `// = default` comments are metadata, not comments: keep them.
+8. **Comment only what the code cannot say**: why, not what. Keep a short comment for a math trick, the reason behind a constant, a precision or portability workaround, or an ordering subtlety; leave out comments that restate the next line (`// mix the colors`), section banners and `// ----` dividers, numbered step-by-step narration, and commented-out code. The header lines (`Author`, `License`, `Description`, `Tags`, `Preview`), the `@param`/`@range`/`@color` hints and the `// = default` comments are metadata, not comments: keep them.
 
 ### Transition parameters
 
@@ -69,6 +69,7 @@ Help people find and use your transition by describing it:
 // License: MIT
 // Description: A ragged left-to-right wipe, as if the image was blown away by the wind
 // Tags: wipe, horizontal, noise
+// Preview: 0.4
 
 // @range(0, 1) Width of the ragged edge
 uniform float size; // = 0.2
@@ -78,6 +79,8 @@ uniform bool reversed; // = false
 
 - Put hints (`@range(min, max[, step])`, `@color`, `@param`) on the line **above** the uniform, never after the default value.
 - Tags are lowercase; use dashes for multiple words (`zoom-in`).
+- `Preview` is the `progress` (strictly between 0 and 1) of the most meaningful moment of the transition, which tools show as its still image: you recognize the effect and can tell it from similar ones, ideally both images are visible, and the frame isn't blank, plain or unreadable. It isn't necessarily the middle, nor the most spectacular moment. Leave the line out when the default, 0.3, is a good one.
+- Adding a `Preview` line to an existing transition changes its `updatedAt`: do it only when 0.3 represents it badly.
 
 See [Transition metadata](README.md#transition-metadata-optional) for the full syntax.
 

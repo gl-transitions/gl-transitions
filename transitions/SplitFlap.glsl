@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The frame becomes a split-flap board: in each cell the top half of the outgoing image flips down on a hinge across the middle, cell after cell, its back bringing the bottom half of the incoming image
 // Tags: 3d, flip, grid
+// Preview: 0.5
 
 // @param Number of cells (columns, rows)
 uniform ivec2 size; // = ivec2(8, 6)

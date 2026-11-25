@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image opens like double doors swinging toward the viewer, as the incoming one comes forward from the dark room behind, with a floor reflection
 // Tags: doors, 3d, reflection
+// Preview: 0.5
 
 // @range(0, 1) Strength of the floor reflection under the incoming image
 uniform float reflection; // = 0.4

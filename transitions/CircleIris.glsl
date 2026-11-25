@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image closes into a circle over a background color, then the incoming one opens from it
 // Tags: circle, iris, shape
+// Preview: 0.4
 
 // @param Center of the circle
 uniform vec2 center; // = vec2(0.5, 0.5)

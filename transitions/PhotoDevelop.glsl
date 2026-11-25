@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image washes out to a blank cream card, then the incoming image develops on it like an instant photo: shadows first, faint and tinted, then its contrast and colors come up and it settles
 // Tags: fade, color, photo, retro
+// Preview: 0.6
 
 // @color Color of the blank card between the two images
 uniform vec4 card; // = vec4(0.93, 0.91, 0.85, 1.0)

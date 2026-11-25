@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The image falls out of focus like a camera lens, its highlights swelling into large bright bokeh discs, and the incoming image sharpens back out of its own bokeh
 // Tags: blur, bokeh, lens, dissolve, light
+// Preview: 0.5
 
 // @range(0.01, 0.15) Radius of the bokeh discs at the peak, in frame heights
 uniform float radius; // = 0.05

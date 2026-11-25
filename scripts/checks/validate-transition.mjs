@@ -10,7 +10,7 @@
 // 5. No unused uniform parameters
 // 6. Has required metadata (Author, License)
 // 7. Contains a transition(vec2) function
-// 8. Description, Tags and parameter annotations are well formed
+// 8. Description, Tags, Preview and parameter annotations are well formed
 // 9. With transparent images (and @color parameters), the output stays transparent
 //
 // Exit code 0 = pass, 1 = errors found

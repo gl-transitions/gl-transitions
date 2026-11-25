@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The picture slips like film in a projector gate: it shrinks to show the sprocket holes, the strip runs down with motion blur and a slight weave, then the incoming frame lands in place
 // Tags: retro, vertical, motion-blur, film
+// Preview: 0.6
 
 // @range(1, 6, 1) Number of frames that slip by
 uniform int frames; // = 2

@@ -8,6 +8,7 @@ final class CatalogTests: XCTestCase {
         XCTAssertFalse(GLTransitions.catalogVersion.isEmpty)
         for transition in GLTransitions.all {
             XCTAssertEqual(GLTransitions.named(transition.name), transition)
+            XCTAssertTrue(transition.preview > 0 && transition.preview < 1, transition.name)
             XCTAssertTrue(transition.metalSource.contains("fragment main_Output main_("), transition.name)
             let layout = transition.uniformLayout
             XCTAssertEqual(layout.fields.prefix(2).map(\.name), ["progress", "ratio"], transition.name)
@@ -19,6 +20,8 @@ final class CatalogTests: XCTestCase {
             }
         }
         XCTAssertNil(GLTransitions.named("nope"))
+        XCTAssertEqual(GLTransitions.named("Fade")?.preview, 0.3)
+        XCTAssertEqual(GLTransitions.named("PopIn")?.preview, 0.15)
     }
 
     func testUniformBuffer() throws {

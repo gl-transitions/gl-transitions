@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Discs of three solid colors burst out of a point one after another, each covering the last, then a hole bursts open from the same point in the last one to reveal the incoming image
 // Tags: circle, burst, color, reveal, motion-graphics
+// Preview: 0.6
 
 // @param Point the discs burst out of, in texture coordinates
 uniform vec2 center; // = vec2(0.5, 0.5)

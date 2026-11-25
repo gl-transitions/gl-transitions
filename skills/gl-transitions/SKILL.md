@@ -5,7 +5,7 @@ description: Adds image and video transitions (fades, wipes, zooms, glitches, pa
 
 # gl-transitions
 
-Each transition is a GLSL function `vec4 transition(vec2 uv)` that blends an outgoing image into an incoming one as `progress` goes from 0 to 1. The npm package `gl-transitions` ships every transition as GLSL, plus SkSL, GLSL ES 3.00, WGSL and Metal versions of each one that translates (`compatibility.json`), and a catalog (`gl-transitions.json`) with descriptions, tags and typed parameters. Ready-made packages wrap it for React Native Skia, Remotion, Rust, Swift and Android.
+Each transition is a GLSL function `vec4 transition(vec2 uv)` that blends an outgoing image into an incoming one as `progress` goes from 0 to 1. The npm package `gl-transitions` ships every transition as GLSL, plus SkSL, GLSL ES 3.00, WGSL and Metal versions of each one that translates (`compatibility.json`), and a catalog (`gl-transitions.json`) with descriptions, tags, a `preview` progress and typed parameters. Ready-made packages wrap it for React Native Skia, Remotion, Rust, Swift and Android.
 
 ## 1. Pick a transition
 
@@ -19,7 +19,7 @@ Read `references/catalog.md` (by tag, then one line per transition). If it is mi
 
 | Need | Where |
 |---|---|
-| JS/TS project | `npm install gl-transitions`, then `import transitions from "gl-transitions"` and `transitions.find((t) => t.name === "Cube")` (`glsl`, `params`, `textures`; typed in `index.d.ts`) |
+| JS/TS project | `npm install gl-transitions`, then `import transitions from "gl-transitions"` and `transitions.find((t) => t.name === "Cube")` (`glsl`, `params`, `textures`, `preview`; typed in `index.d.ts`) |
 | GLSL file | `node_modules/gl-transitions/transitions/<name>.glsl` or `https://cdn.jsdelivr.net/npm/gl-transitions@2/transitions/<name>.glsl` |
 | SkSL file | `node_modules/gl-transitions/sksl/<name>.sksl` or `https://cdn.jsdelivr.net/npm/gl-transitions@2/sksl/<name>.sksl` |
 | GLSL ES 3.00, WGSL, Metal file | `glsl3/<name>.glsl`, `wgsl/<name>.wgsl`, `msl/<name>.metal` at the same places; uniform layouts in `layouts.json`, contracts in the package README |
@@ -44,6 +44,8 @@ The host defines `progress`, `ratio`, `getFromColor(uv)`, `getToColor(uv)` and o
 | Swift: iOS, macOS, tvOS, visionOS (Metal, AVFoundation) | Swift package `GLTransitions` | `references/native.md` |
 | Android 13+ (Views, Jetpack Compose) | `com.gl-transitions:gl-transitions` (AGSL `RuntimeShader`) | `references/native.md` |
 | three.js (WebGL), PixiJS, Flutter, Unity, Godot | No dedicated package | Adapt the WebGL recipe where GLSL is accepted (three.js also takes `glsl3/` with `glslVersion: THREE.GLSL3`); otherwise port the GLSL |
+
+For a still image or thumbnail of a transition, render one frame at `progress = preview`, read from its catalog entry (always set, strictly between 0 and 1; `preview()` in Rust). Never hardcode it per name, nor use one fixed progress for all: it is the frame where the effect is recognizable.
 
 ## 4. Check the result
 

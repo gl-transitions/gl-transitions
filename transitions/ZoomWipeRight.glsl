@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Zooms into the outgoing image, then the incoming one wipes in from left to right
 // Tags: zoom, wipe, horizontal
+// Preview: 0.75
 
 // @param Part of the first half spent zooming (capped at 0.5)
 uniform float zoom_quickness; // = 0.8

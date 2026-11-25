@@ -2,6 +2,7 @@
 // License: MIT
 // Description: A leaf shape grows from the center to reveal the incoming image
 // Tags: shape, wipe
+// Preview: 0.5
 
 // inspired by http://www.wolframalpha.com/input/?i=cannabis+curve
 

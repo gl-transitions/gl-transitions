@@ -21,7 +21,7 @@ The full contract is in the npm package README ("WGSL and Metal contract"). In R
 gl-transitions = "0.1"   # or: cargo add gl-transitions
 ```
 
-[crates.io/crates/gl-transitions](https://crates.io/crates/gl-transitions), with its own semver (0.x); each npm release publishes a patch release with its transitions, and `gl_transitions::CATALOG_VERSION` says which npm version they come from. It has the GLSL, SkSL, WGSL, Metal and GLSL ES 3.00 sources with metadata, typed parameters and uniform layouts; no dependencies and no GPU code (bring your own renderer). Each source is a Cargo feature (`sksl`, `wgsl`, `msl`, `glsl3`), all on by default.
+[crates.io/crates/gl-transitions](https://crates.io/crates/gl-transitions), with its own semver (0.x); each npm release publishes a patch release with its transitions, and `gl_transitions::CATALOG_VERSION` says which npm version they come from. It has the GLSL, SkSL, WGSL, Metal and GLSL ES 3.00 sources with metadata (`preview()` is the progress to render for a still image), typed parameters and uniform layouts; no dependencies and no GPU code (bring your own renderer). Each source is a Cargo feature (`sksl`, `wgsl`, `msl`, `glsl3`), all on by default.
 
 ```rust
 let transition = gl_transitions::get("DirectionalWarp").expect("in the collection");

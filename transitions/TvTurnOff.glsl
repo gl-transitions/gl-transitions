@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image collapses into a glowing line and a dot, like an old TV turned off, then the incoming image powers on from the dot
 // Tags: retro, vertical, flash
+// Preview: 0.1
 
 // @color Color of the switched-off screen
 uniform vec4 color; // = vec4(0.0, 0.0, 0.0, 1.0)

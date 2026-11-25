@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing picture is the reflection in a puddle when a shower starts: drops land all over it, each sending out little rings that bend the reflection and catch the light, the rings crowd as the rain gets heavy and open onto the incoming picture, then the shower stops and the water settles calm
 // Tags: rain, water, ripples, reflection, weather
+// Preview: 0.5
 
 // @range(0.5, 2) Size of the rings
 uniform float dropSize; // = 1.0

@@ -40,7 +40,7 @@ Transitions with extra images (`transition.textures`, e.g. `luma`) take them in 
 
 ## The collection
 
-`GLTransitions.all` lists the transitions, `GLTransitions.named(name)` finds one; this part works on any Android version. Each `Transition` has its `name`, `author`, `license`, `description`, `tags`, `params` (type, default, range, whether it is a color), extra `textures` and its AGSL source (`agsl`), whose contract is the [SkSL one of the npm package](https://github.com/gl-transitions/gl-transitions/tree/master/packages/gl-transitions#sksl-contract).
+`GLTransitions.all` lists the transitions, `GLTransitions.named(name)` finds one; this part works on any Android version. Each `Transition` has its `name`, `author`, `license`, `description`, `tags`, `preview` (the progress to render for a still image), `params` (type, default, range, whether it is a color), extra `textures` and its AGSL source (`agsl`), whose contract is the [SkSL one of the npm package](https://github.com/gl-transitions/gl-transitions/tree/master/packages/gl-transitions#sksl-contract).
 
 `GLTransitions.CATALOG_VERSION` is the version of the [gl-transitions npm package](https://www.npmjs.com/package/gl-transitions) the transitions come from. In CI, every transition is rendered with this library on an Android emulator and compared with the GLSL reference renders.
 

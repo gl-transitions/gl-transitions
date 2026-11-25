@@ -2,6 +2,7 @@
 // License: MIT
 // Description: A line sweeps across the frame and drags the outgoing image's pixels behind it as long streaks, which shorten as it goes and reveal the incoming image
 // Tags: smear, streaks, directional, chromatic
+// Preview: 0.6
 
 // @param Direction in which the line sweeps
 uniform vec2 direction; // = vec2(1.0, 0.0)

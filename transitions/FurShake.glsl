@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing picture grows a thick coat of fur and shakes itself like a wet animal: the skin rolls from side to side, the long hair whips after it, and each lash leaves more of the coat in the colors of the incoming picture, which settles and grows smooth again
 // Tags: fur, shake, animal, playful, organic
+// Preview: 0.5
 
 // @range(0.04, 0.16) Length of the fur, in frame heights
 uniform float fur; // = 0.13

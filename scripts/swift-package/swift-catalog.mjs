@@ -92,6 +92,7 @@ function renderCatalog({ transitions, layouts, msl, version }) {
     license: ${str(t.license ?? "")},
     description: ${optional(t.description, str)},
     tags: [${(t.tags ?? []).map(str).join(", ")}],
+    preview: ${float(t.preview)},
     params: [${params.length ? `\n        ${params.join(",\n        ")},\n    ` : ""}],
     textures: [${(t.textures ?? []).map(str).join(", ")}],
     uniformLayout: ${layout(layouts[t.name], t.name)},

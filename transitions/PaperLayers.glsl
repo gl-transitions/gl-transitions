@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The incoming image is rebuilt as a stack of cut paper sheets, one per band of brightness: from the darkest to the lightest, each sheet slides in lifted above the stack, drops into place with a soft shadow on the sheets below, then the paper flattens into the photo
 // Tags: paper, layers, cut, shadow, stylized
+// Preview: 0.6
 
 // @range(2, 8, 1) Number of paper sheets, one per band of brightness of the incoming image
 uniform int layers; // = 5

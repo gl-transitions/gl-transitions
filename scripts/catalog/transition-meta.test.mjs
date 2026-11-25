@@ -34,6 +34,41 @@ test("header: invalid tag", () => {
   assert.equal(h.errors.length, 1);
 });
 
+test("header: preview", () => {
+  const parse = (...lines) => parseHeader(["// Author: a", "// License: MIT", ...lines].join("\n"));
+  for (const [line, preview] of [
+    ["// Preview: 0.15", 0.15],
+    ["//preview : .5 ", 0.5],
+    ["// Preview: 0.7\r", 0.7],
+  ]) {
+    const h = parse(line);
+    assert.equal(h.preview, preview, line);
+    assert.deepEqual(h.errors, [], line);
+  }
+  assert.equal(parse().preview, 0.3);
+  assert.deepEqual(parse().errors, []);
+});
+
+test("header: invalid preview", () => {
+  const parse = (...lines) => parseHeader(["// Author: a", ...lines, "// License: MIT"].join("\n"));
+  for (const value of ["", " ", " half", " 0.5s", " 50%", " 1e-1", " 0x1", " 0", " 1", " 1.0", " -0.2", " 1.5"]) {
+    const h = parse(`// Preview:${value}`);
+    assert.equal(h.preview, 0.3, value);
+    assert.equal(h.errors.length, 1, value);
+    assert.match(h.errors[0], /Preview/, value);
+  }
+  assert.match(parse("// Preview: 0.2", "// Preview: 0.2").errors[0], /repeated/);
+});
+
+test("header: a preview outside the header block is ignored", () => {
+  const { transition, errors } = parseTransition(
+    "// Author: a\n// License: MIT\n\n// Preview: 2\n// Preview: 0.9\nvec4 transition(vec2 uv);\n",
+    "t.glsl",
+  );
+  assert.equal(transition.preview, 0.3);
+  assert.deepEqual(errors, []);
+});
+
 test("annotations: range, color, description, multi-line, multi-name uniforms", () => {
   const { hints, errors } = parseParamAnnotations(
     [

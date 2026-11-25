@@ -30,6 +30,12 @@ export interface Transition {
   glsl: string;
   description?: string;
   tags: string[];
+  /**
+   * The `progress` (strictly between 0 and 1) of the frame that best represents the transition as a
+   * still image: a thumbnail, an Open Graph card. From `// Preview:`, 0.3 unless the transition sets
+   * it. A progress value, not an image, and unrelated to the preview GIFs of pull requests.
+   */
+  preview: number;
   params: { [name: string]: TransitionParam };
   /** Extra `sampler2D` inputs beyond `from` and `to`, to be provided by the implementer. */
   textures: string[];

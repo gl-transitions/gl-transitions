@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image diffuses into a shimmering, grainy haze, as if its pixels were scattered further and further from where they belong, and the incoming image condenses back out of the haze as they settle into place
 // Tags: dissolve, grain, noise, scatter, texture
+// Preview: 0.5
 
 // @range(0.01, 0.2) How far the pixels scatter at the peak, in frame heights
 uniform float radius; // = 0.06

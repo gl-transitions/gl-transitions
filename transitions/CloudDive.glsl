@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The camera dives down through a deck of clouds: sunlit billows with shadowed undersides drift in over the outgoing picture and rush past the lens layer after layer, a brief white-out inside the cloud, then the billows thin and part as the incoming picture opens out below them
 // Tags: clouds, sky, flight, depth, light, dissolve
+// Preview: 0.2
 
 // @range(0, 1) How much of the sky the clouds cover
 uniform float density; // = 0.85

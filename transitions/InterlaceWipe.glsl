@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The incoming image loads over the outgoing one like an interlaced picture on a slow connection: a first pass sweeps down drawing it in big blocky rows, then each new pass sweeps down again at twice the detail until the picture is sharp
 // Tags: wipe, retro, pixelate, blocks, scanlines, vertical
+// Preview: 0.2
 
 // @range(24, 480) Number of rows of pixels of the picture being loaded, before its last pass draws it at full detail
 uniform float rows; // = 120.0

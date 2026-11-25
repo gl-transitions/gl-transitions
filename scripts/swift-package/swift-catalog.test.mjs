@@ -8,6 +8,7 @@ const transition = (name, extra = {}) => ({
   author: "A",
   license: "MIT",
   tags: [],
+  preview: 0.3,
   params: {},
   textures: [],
   ...extra,
@@ -45,7 +46,7 @@ test("swift catalog: typed parameter values", () => {
     d: { type: "bool", default: true },
   };
   const swift = renderCatalog({
-    transitions: [transition("t", { params })],
+    transitions: [transition("t", { params, preview: 0.15 })],
     layouts: { t: layout(["a", "float", 8], ["b", "ivec2", 16], ["c", "vec4", 32], ["d", "bool", 48]) },
     msl: { t: "" },
     version: "1.0.0",
@@ -59,6 +60,7 @@ test("swift catalog: typed parameter values", () => {
     swift,
     /defaultValue: \.vec4\(SIMD4<Float>\(0, 0, 0, 1\)\), min: nil, max: nil, step: nil, isColor: true, description: "A \\"color\\""\)/,
   );
+  assert.match(swift, /tags: \[\],\n {4}preview: 0\.15,/);
   assert.match(swift, /defaultValue: \.bool\(true\)/);
 });
 

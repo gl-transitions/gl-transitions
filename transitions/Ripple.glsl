@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Ripples spread from the center while crossfading
 // Tags: ripple, wave, blend
+// Preview: 0.5
 // @param Frequency of the ripples
 uniform float amplitude; // = 100.0
 // @param Speed of the ripples

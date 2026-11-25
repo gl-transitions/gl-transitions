@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Shimmering heat waves rise through the frame, strongest at the bottom, making the outgoing image wobble like the air over hot asphalt; the incoming image shows through the haze and settles as it calms
 // Tags: distort, heat, shimmer, noise, organic, blend
+// Preview: 0.45
 
 // @range(0, 0.1) How far the haze bends the image, in frame heights (the strongest waves bend it about 1.5 times as far)
 uniform float strength; // = 0.04

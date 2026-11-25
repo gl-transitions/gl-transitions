@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The incoming image closes in from the top and bottom edges toward the middle
 // Tags: wipe, split
+// Preview: 0.6
 
 vec4 transition (vec2 uv) {
 

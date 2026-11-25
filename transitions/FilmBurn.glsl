@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Glowing film-burn light leaks wash over the image and reveal the incoming one
 // Tags: burn, film, light-leak
+// Preview: 0.5
 // @param Random seed
 uniform float Seed; // = 2.31
 float sigmoid(float x, float a) {

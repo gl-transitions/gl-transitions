@@ -1,6 +1,6 @@
 // Renders the agent-facing documents of the npm package from the catalog (gl-transitions.json):
 //   llms.txt       index in the llmstxt.org format: summary, docs, one line per transition
-//   llms-full.txt  every transition with its description, tags, parameters and source links
+//   llms-full.txt  every transition with its description, tags, preview progress, parameters and source links
 //   catalog.md     compact index for the Agent Skill (skills/gl-transitions/references/)
 // Links point to the published version on jsDelivr, so a document always matches its sources.
 
@@ -89,7 +89,7 @@ function renderLlmsTxt(transitions, { version }) {
     "",
     `- [Full catalog](${base}/llms-full.txt): every transition with its description, tags, parameters and source links`,
     `- [Agent Skill](${base}/skills/gl-transitions/SKILL.md): how to pick a transition and wire it into WebGL, WebGPU, Skia, Remotion, editly, FFmpeg, Rust, Swift or Android`,
-    `- [Catalog JSON](${base}/gl-transitions.json): the same data as an array of objects (name, glsl, params, tags, ...), typed in index.d.ts`,
+    `- [Catalog JSON](${base}/gl-transitions.json): the same data as an array of objects (name, glsl, params, tags, preview, ...), typed in index.d.ts`,
     `- [Package README](${base}/README.md): files of the npm package and the contracts of its SkSL, GLSL ES 3.00, WGSL and Metal versions`,
     `- [Compatibility](${base}/compatibility.json): which transitions each target supports, and how close each one renders to the GLSL`,
     ...packageLinks(version),
@@ -136,6 +136,7 @@ function renderLlmsFullTxt(transitions, { version, sksl = new Set() }) {
     out.push(`## ${t.name}`, "");
     if (t.description) out.push(t.description, "");
     if (t.tags.length) out.push(`- Tags: ${t.tags.join(", ")}`);
+    out.push(`- Still frame: progress ${t.preview}`);
     const params = Object.entries(t.params);
     if (params.length) {
       out.push("- Parameters:");

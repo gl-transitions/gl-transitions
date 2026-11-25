@@ -2,6 +2,7 @@
 // License: MIT
 // Description: A flickering glitch with RGB offset, ghosting and scanlines that flashes back to the outgoing image
 // Tags: glitch, flicker, chromatic, scanlines
+// Preview: 0.15
 // Drop_Zone_Flicker.glsl
 uniform float frameRate;    // = 24.0
 uniform float rgbOffset;    // = 0.014

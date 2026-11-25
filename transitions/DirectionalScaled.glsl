@@ -4,6 +4,7 @@
 // License: MIT
 // Description: Like Directional, with both images scaled down while they slide
 // Tags: slide, push, zoom, directional
+// Preview: 0.5
 
 #define PI acos(-1.0)
 

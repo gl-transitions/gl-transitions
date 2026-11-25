@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The right half of the outgoing image is a book page that turns over from right to left on the spine at the middle of the frame, curling near its free edge, its back bringing the left half of the incoming image
 // Tags: page, flip, 3d
+// Preview: 0.45
 
 // @range(0, 1) Strength of the perspective: the page grows as it lifts toward the viewer
 uniform float perspective; // = 0.5

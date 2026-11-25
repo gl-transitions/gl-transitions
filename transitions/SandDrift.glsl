@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing picture turns into a sand drawing on a glowing light table; gusts of wind lift the grains, which drift and curl in eddies all over the frame and settle again into the incoming picture's sand drawing, which then takes its colours back
 // Tags: sand, wind, particles, organic, dissolve
+// Preview: 0.5
 
 // @color Light shining through the bare glass
 uniform vec4 light; // = vec4(1.0, 0.78, 0.42, 1.0)

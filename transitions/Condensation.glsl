@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Warm breath fogs the cold glass in front of the picture: an uneven milky haze blooms out from the middle, water beads swell in it and act as tiny lenses holding sharp upside-down views, a few grow heavy and run down leaving clear trails, then the fog evaporates from the edges inward, the beads last, off the incoming picture
 // Tags: glass, fog, water, droplets, breath, organic, dissolve
+// Preview: 0.6
 
 // @range(4, 20) Number of large beads across the frame height
 uniform float droplets; // = 8.0
