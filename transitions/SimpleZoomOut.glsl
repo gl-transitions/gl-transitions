@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The incoming image zooms out into place while fading in
 // Tags: zoom, fade
+// Preview: 0.7
 
 
 // @range(0.2, 1) Part of the transition spent zooming

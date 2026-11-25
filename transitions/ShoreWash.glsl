@@ -2,6 +2,7 @@
 // License: MIT
 // Description: A thin sheet of water runs up over the outgoing image like the last of a wave on a beach, its lobed front edged with bubbly foam; it slows, stops just past the far edge and drains back, leaving the incoming image wet and glossy as it dries
 // Tags: water, foam, beach, liquid, directional, reveal
+// Preview: 0.15
 
 // @param Direction the water runs up toward
 uniform vec2 direction; // = vec2(0.0, 1.0)

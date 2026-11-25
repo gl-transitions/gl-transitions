@@ -140,14 +140,16 @@ Transitions can describe themselves so that tools, editors and package integrati
 Header lines, next to `Author` and `License`:
 
 ```glsl
-// Author: Adrian Purser
+// Author: gre
 // License: MIT
-// Description: The outgoing image drops out of the frame with a few bounces, revealing the incoming one
-// Tags: bounce, slide, vertical, shadow
+// Description: The outgoing image opens like double doors swinging toward the viewer, as the incoming one comes forward from the dark room behind, with a floor reflection
+// Tags: doors, 3d, reflection
+// Preview: 0.5
 ```
 
 - `Description`: one line describing what the transition looks like.
 - `Tags`: comma-separated, lowercase words or dash-separated words (e.g. `wipe`, `zoom-in`).
+- `Preview`: the `progress`, one number strictly between 0 and 1, of the frame that best represents the transition as a still image (a thumbnail, an Open Graph card). 0.3 when absent. It is a progress value, not an image, doesn't change how the transition renders, and is unrelated to the preview GIFs commented on pull requests.
 
 Parameter hints go on comment lines **directly above** the uniform they describe. Text after the hints is the parameter description; `@param` alone marks a description-only line:
 
@@ -184,6 +186,7 @@ The npm package exposes the collection as an array of objects:
 | `paramsTypes`, `defaultParams` | Parameter types and default values (legacy, kept for compatibility) |
 | `params` | Per parameter: `type`, `default`, and when annotated `min`, `max`, `step`, `color`, `description` |
 | `description`, `tags` | From the header comments (`tags` is always an array) |
+| `preview` | From the header comments: the `progress` to render for a still image of the transition. Always a number, the default filled in |
 | `textures` | Extra `sampler2D` inputs beyond `from` and `to` |
 | `createdAt`, `updatedAt` | From git history |
 

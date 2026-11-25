@@ -116,6 +116,7 @@ function parseTransition(glsl, filename) {
       license,
       description: meta.description,
       tags: meta.tags,
+      preview: meta.preview,
       params: meta.params,
       textures: meta.textures,
     },

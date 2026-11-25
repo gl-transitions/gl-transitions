@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Billowing smoke drifts in across the outgoing image, with lit tops, darker folds and wispy edges, and thickens until it covers the frame; as it thins out and drifts away, the incoming image shows through
 // Tags: smoke, fog, organic, noise, cover
+// Preview: 0.2
 
 // @param Direction the smoke drifts toward (it comes in from the opposite side); its length is how far it drifts, in frame heights
 uniform vec2 direction; // = vec2(0.5, 0.1)

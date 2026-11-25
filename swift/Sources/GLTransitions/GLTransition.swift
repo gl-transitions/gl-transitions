@@ -15,6 +15,9 @@ public struct GLTransition: Hashable, Sendable {
     public let license: String
     public let description: String?
     public let tags: [String]
+    /// The `progress` (strictly between 0 and 1) of the frame that best represents the transition
+    /// as a still image, e.g. for a thumbnail. A progress value, not an image.
+    public let preview: Float
     /// The parameters, in declaration order.
     public let params: [Param]
     /// The extra textures the shader samples besides `from` and `to` (e.g. `luma`), in order.

@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing picture is a tray of stuck tiles that is wrenched: its two ends twist against each other in 3D while cracks run out along the joints, it snaps back flat, and the loosened tiles tip out one after another and fall out of the frame, uncovering the incoming picture
 // Tags: 3d, tiles, twist, crack, gravity, shadow
+// Preview: 0.7
 
 // @range(2, 8, 1) Number of rows of tiles
 uniform int rows; // = 4

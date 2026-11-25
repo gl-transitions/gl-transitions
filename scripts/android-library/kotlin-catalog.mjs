@@ -72,6 +72,7 @@ function renderCatalog({ transitions, agsl, version }) {
     ${str(t.license ?? "")},
     ${optional(t.description, str)},
     ${list((t.tags ?? []).map(str))},
+    ${float(t.preview)},
     ${params.length ? `listOf(\n        ${params.join(",\n        ")},\n    )` : "emptyList()"},
     ${list((t.textures ?? []).map(str))},
 )`;

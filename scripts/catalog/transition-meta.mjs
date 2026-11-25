@@ -4,6 +4,9 @@
 // Header lines (next to `// Author:` and `// License:`):
 //   // Description: The outgoing image falls and bounces on the floor
 //   // Tags: bounce, physics
+//   // Preview: 0.15
+// `Preview` is the progress (strictly between 0 and 1) of the frame that best represents the
+// transition as a still image; DEFAULT_PREVIEW when absent.
 //
 // Parameter hints, on comment lines directly above a uniform declaration.
 // Text after the hints is the parameter's description; @param alone marks a
@@ -18,6 +21,7 @@
 
 const NUMERIC_TYPES = ["float", "int", "vec2", "vec3", "vec4", "ivec2", "ivec3", "ivec4"];
 const COLOR_TYPES = ["vec3", "vec4"];
+const DEFAULT_PREVIEW = 0.3;
 const TAG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 // The header is the contiguous block of `//` lines holding the first Author or License
@@ -57,7 +61,18 @@ function parseHeader(glsl) {
     if (tags.length === 0 && errors.length === 0) errors.push("'// Tags:' is empty");
   }
 
-  return { description: description || undefined, tags, errors };
+  let preview = DEFAULT_PREVIEW;
+  // Not \s after the colon: it would match the newline and read the next line as the value.
+  const previews = [...header.matchAll(/^[ \t]*\/\/[ \t]*[Pp]review[ \t]*:(.*)$/gm)].map((m) => m[1].trim());
+  if (previews.length > 1) {
+    errors.push("'// Preview:' is repeated");
+  } else if (previews.length === 1) {
+    const value = /^(?:\d+\.?\d*|\.\d+)$/.test(previews[0]) ? Number(previews[0]) : NaN;
+    if (value > 0 && value < 1) preview = value;
+    else errors.push(`'// Preview:' must be a number strictly between 0 and 1 (e.g. 0.5), got '${previews[0]}'`);
+  }
+
+  return { description: description || undefined, tags, preview, errors };
 }
 
 // Parses one annotation comment body such as "@range(0, 1) @color Shadow color".
@@ -197,6 +212,7 @@ function parseMeta(glsl, paramsTypes, defaultParams) {
   return {
     description: header.description,
     tags: header.tags,
+    preview: header.preview,
     params: built.params,
     textures: parseTextures(glsl),
     errors: [...header.errors, ...annotations.errors, ...built.errors],

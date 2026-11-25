@@ -125,6 +125,7 @@ function renderCatalog({ transitions, layouts, available, version }) {
         license: ${str(t.license ?? "")},
         description: ${option(t.description, str)},
         tags: &[${(t.tags ?? []).map(str).join(", ")}],
+        preview: ${float(t.preview)},
         params: &[${params.length ? `\n            ${params.join(",\n            ")},\n        ` : ""}],
         textures: &[${(t.textures ?? []).map(str).join(", ")}],
         glsl: include_str!(${str(glsl)}),

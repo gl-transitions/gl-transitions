@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image melts down in uneven columns, like the Doom screen wipe
 // Tags: melt, columns, retro
+// Preview: 0.15
 
 
 // Number of total bars/columns

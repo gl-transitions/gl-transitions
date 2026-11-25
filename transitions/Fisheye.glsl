@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image bulges toward the viewer through a strong fisheye lens, then the incoming one flattens back into place
 // Tags: lens, distort, zoom, blend
+// Preview: 0.5
 
 // @range(0, 1) Strength of the lens at its peak
 uniform float strength; // = 0.8

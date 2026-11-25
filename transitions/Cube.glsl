@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The two images are faces of a box that turns a quarter turn in perspective, the outgoing face darkening as it turns away, above a reflective floor
 // Tags: 3d, cube, rotate, reflection
+// Preview: 0.4
 // @range(0, 1) Amount of perspective
 uniform float persp; // = 0.7
 // @range(0, 1) How far the camera pulls back mid-turn, as a part of the frame

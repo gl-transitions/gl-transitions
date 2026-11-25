@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Blocks of a solid color pop in at random over the outgoing image until they cover the frame, then pop out in another random order to show the incoming image
 // Tags: blocks, grid, squares, color, cover
+// Preview: 0.2
 
 // @range(1, 40, 1) Number of blocks along the longer side of the frame (the blocks stay about square)
 uniform int blocks; // = 16

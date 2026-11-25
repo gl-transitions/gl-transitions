@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The camera jolts violently in random directions, with motion blur and color fringes along each jolt; the cut happens at the peak of the shake, which then settles on the incoming image
 // Tags: shake, camera, motion-blur, chromatic, impact
+// Preview: 0.5
 
 // @range(0, 1) How far the camera jolts (and rolls) at the peak of the shake
 uniform float strength; // = 0.5

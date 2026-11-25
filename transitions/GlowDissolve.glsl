@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The incoming image spreads over the outgoing one with a hot, glowing edge
 // Tags: dissolve, burn, glow
+// Preview: 0.75
 
 uniform float uLineWidth; // = 0.1
 // @color Color of the spreading edge

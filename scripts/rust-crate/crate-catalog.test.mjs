@@ -11,6 +11,7 @@ const transition = (name, extra = {}) => ({
   author: "A",
   license: "MIT",
   tags: [],
+  preview: 0.3,
   params: {},
   textures: [],
   ...extra,
@@ -47,6 +48,7 @@ test("rust catalog: typed defaults and Rust string escapes", () => {
     transitions: [
       transition("t", {
         author: 'Jane "J" Doe\\',
+        preview: 0.15,
         description: "Line\nbreak, ünïcode",
         params: {
           a: { type: "float", default: 3, min: 0, max: 1e-7 },
@@ -62,6 +64,7 @@ test("rust catalog: typed defaults and Rust string escapes", () => {
   });
   assert.match(rust, /author: "Jane \\"J\\" Doe\\\\",/);
   assert.match(rust, /description: Some\("Line\\nbreak, ünïcode"\),/);
+  assert.match(rust, /tags: &\[\],\n\s+preview: 0\.15,/);
   assert.match(rust, /default: Value::Float\(3\.0\),\n\s+min: Some\(0\.0\),\n\s+max: Some\(1e-7\),/);
   assert.match(rust, /default: Value::IVec2\(\[4, -4\]\)/);
   assert.match(rust, /default: Value::Bool\(true\)/);

@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image is a sheet of paper that folds in half in 3D along a vertical crease, then in half again along a horizontal one, its lit and shaded faces turning to show the back of the paper, and the small folded packet flies off the frame, leaving its shadow on the incoming image underneath
 // Tags: paper, fold, 3d, shadow
+// Preview: 0.2
 
 // @param Direction the folded packet flies off toward
 uniform vec2 direction; // = vec2(1.0, 0.5)

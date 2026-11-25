@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image is cut in quick beats like a sheet under a guillotine, each piece cut again across its longer side at its own uneven point and pushed apart into floating cards, then the cards flip over one by one to the incoming image and the cuts close back in reverse order
 // Tags: split, cut, recursive, rhythm, flip, cards
+// Preview: 0.6
 
 // @range(0, 0.1) Width of the first cut's gap, in frame heights (each following cut opens a narrower one)
 uniform float gap; // = 0.05

@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Thin cracks run through the outgoing image along its own outlines, then the pieces they cut sag loose and fall away one after another from the top, tumbling and shrinking into the incoming image beneath
 // Tags: crumble, pieces, cracks, falling
+// Preview: 0.5
 
 // @range(2, 10) Pieces across the height of the frame
 uniform float cells; // = 4.0

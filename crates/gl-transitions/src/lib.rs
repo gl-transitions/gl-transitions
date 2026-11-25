@@ -21,6 +21,7 @@ pub struct Transition {
     license: &'static str,
     description: Option<&'static str>,
     tags: &'static [&'static str],
+    preview: f32,
     params: &'static [Param],
     textures: &'static [&'static str],
     glsl: &'static str,
@@ -59,6 +60,12 @@ impl Transition {
     /// Lowercase keywords such as `"wipe"`, `"zoom"` or `"3d"`.
     pub fn tags(&self) -> &'static [&'static str] {
         self.tags
+    }
+
+    /// The `progress` (strictly between 0 and 1) of the frame that best represents the transition
+    /// as a still image, e.g. for a thumbnail. A progress value, not an image.
+    pub fn preview(&self) -> f32 {
+        self.preview
     }
 
     /// Parameters in declaration order.

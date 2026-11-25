@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image spans the frame like a plank held at its sides: it sags in the middle under its own weight, a jagged crack runs up from the bottom, and the two halves snap apart, swing down around their outer top corners and drop out of the frame, revealing the incoming image under their shadow
 // Tags: physical, gravity, break, crack, fall
+// Preview: 0.5
 
 // @range(0, 0.2) How far the middle sags before it cracks
 uniform float sag; // = 0.12

@@ -14,6 +14,7 @@ class CatalogTest {
         assertTrue(GLTransitions.CATALOG_VERSION.isNotEmpty())
         for (transition in all) {
             assertEquals(transition, GLTransitions.named(transition.name))
+            assertTrue(transition.name, transition.preview > 0f && transition.preview < 1f)
             assertTrue(transition.name, transition.agsl.contains("uniform shader _from;"))
             for (name in transition.textures) {
                 assertTrue("${transition.name}.$name", transition.agsl.contains("uniform shader $name;"))
@@ -23,6 +24,8 @@ class CatalogTest {
             }
         }
         assertNull(GLTransitions.named("nope"))
+        assertEquals(0.3f, GLTransitions.named("Fade")!!.preview)
+        assertEquals(0.15f, GLTransitions.named("PopIn")!!.preview)
     }
 
     @Test

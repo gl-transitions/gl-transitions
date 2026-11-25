@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The bright points of the outgoing image sparkle into crisp four-point star glints that swell and twinkle up to the cut, then shrink back into the highlights of the incoming image, which stays sharp
 // Tags: light, glints, sparkle, dissolve
+// Preview: 0.5
 
 // @range(0.02, 0.3) Length of the longest rays of the glints at the peak, in frame heights
 uniform float size; // = 0.15

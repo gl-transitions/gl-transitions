@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The frame wraps around a drum that rolls up, the outgoing image turning away over its top in a motion blur and the incoming one coming around from below and unrolling flat
 // Tags: 3d, roll, motion-blur, vertical, chromatic
+// Preview: 0.6
 
 // @range(0, 1) How much the frame wraps around the drum
 uniform float curvature; // = 0.8

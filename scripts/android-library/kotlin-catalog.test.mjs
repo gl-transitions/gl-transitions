@@ -8,6 +8,7 @@ const transition = (name, extra = {}) => ({
   author: "A",
   license: "MIT",
   tags: [],
+  preview: 0.3,
   params: {},
   textures: [],
   ...extra,
@@ -33,8 +34,13 @@ test("kotlin catalog: typed parameter values", () => {
     c: { type: "vec4", default: [0, 0, 0.5, 1], color: true, description: "A $color" },
     d: { type: "bool", default: false },
   };
-  const kotlin = renderCatalog({ transitions: [transition("t", { params })], agsl: new Set(["t"]), version: "1" });
+  const kotlin = renderCatalog({
+    transitions: [transition("t", { params, preview: 0.15 })],
+    agsl: new Set(["t"]),
+    version: "1",
+  });
   assert.match(kotlin, /Param\("a", ParamType\.FLOAT, ParamValue\.float\(1\.0f\), 0\.0f, 2\.0f, null, false, null\)/);
+  assert.match(kotlin, /emptyList\(\),\n {4}0\.15f,/);
   assert.match(kotlin, /ParamValue\.ivec2\(4, 4\)/);
   assert.match(kotlin, /ParamValue\.vec4\(0\.0f, 0\.0f, 0\.5f, 1\.0f\), null, null, null, true, "A \\\$color"\)/);
   assert.match(kotlin, /ParamValue\.bool\(false\)/);

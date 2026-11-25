@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Shafts of light burst from the highlights of the outgoing image and stream outward from a slowly drifting center; at their peak the incoming image takes over and its own rays shrink back into its highlights
 // Tags: light, glow, rays, radial
+// Preview: 0.5
 
 // @param Point the rays stream away from, at the middle of the transition
 uniform vec2 center; // = vec2(0.5, 0.6)

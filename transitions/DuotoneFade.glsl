@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image is printed in two inks, shadows first, as a bold high-contrast duotone; the incoming image is printed over it in the same two inks, its dark tones landing before its highlights, then its own colors come back, highlights first
 // Tags: color, duotone, print, poster, gradient-map, luminance
+// Preview: 0.5
 
 // @color Ink printed in the shadows (its alpha is its strength)
 uniform vec4 shadowInk; // = vec4(0.11, 0.09, 0.46, 1.0)

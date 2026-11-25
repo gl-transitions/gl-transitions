@@ -2,6 +2,7 @@
 // Author: rectalogic
 // Description: A crossfade through a strong zoom blur
 // Tags: zoom, blur, blend
+// Preview: 0.5
 // ported by gre from https://gist.github.com/rectalogic/b86b90161503a0023231
 
 // Converted from https://github.com/rectalogic/rendermix-basic-effects/blob/master/assets/com/rendermix/CrossZoom/CrossZoom.frag

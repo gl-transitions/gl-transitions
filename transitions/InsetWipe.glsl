@@ -2,6 +2,7 @@
 // License: MIT
 // Description: A rectangle anchored in a corner, on an edge or in the center grows until the incoming image fills the frame, revealing it in place without scaling it; in reverse, the outgoing image shrinks into the rectangle
 // Tags: wipe, shape, box
+// Preview: 0.5
 
 // @param Where the rectangle grows from: (0, 0) bottom left, (1, 1) top right, (0.5, 0) middle of the bottom edge, (0.5, 0.5) center
 uniform vec2 anchor; // = vec2(1.0, 1.0)

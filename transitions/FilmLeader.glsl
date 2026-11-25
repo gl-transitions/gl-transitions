@@ -2,6 +2,7 @@
 // License: MIT
 // Description: A clock hand sweeps the outgoing image away to reveal a scratched film countdown, with crosshair rings and big numbers counting down, each sweep wiping in the next one, and the last sweep reveals the incoming image in its wake
 // Tags: retro, film, countdown, radial, clock
+// Preview: 0.15
 
 // @range(1, 5, 1) Number of numbers counted down before the incoming image
 uniform int count; // = 3

@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The stage lights go down on the outgoing image and a soft oval spotlight searches across it along a curved path, comes to rest and lights the incoming image inside it, then widens until the stage lights come back up on the incoming image
 // Tags: light, spotlight, stage, iris, reveal
+// Preview: 0.7
 
 // @param Point where the spotlight comes to rest and opens from
 uniform vec2 center; // = vec2(0.5, 0.5)

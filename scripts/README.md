@@ -12,7 +12,7 @@ pnpm run build       # the gl-transitions package, in packages/gl-transitions/di
 
 | Folder | What it does |
 |---|---|
-| `catalog/` | Parses each `.glsl` (uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
+| `catalog/` | Parses each `.glsl` (header metadata, uniforms, defaults, annotations) into `gl-transitions.json` (`build-catalog.mjs`) |
 | `checks/` | `lint-transitions.mjs` (folder layout, UTF-8, LF, header and parameter defaults), `validate-transition.mjs` (spec checks shown in PR previews) and `check-changesets.mjs` (a pull request that changes a published package adds a changeset) |
 | `rendering/` | Headless GLSL rendering: reference strips (`render-references.mjs`) and PR preview GIFs (`render-preview.mjs`) |
 | `targets/` | Conversion to other shader languages (SkSL, GLSL ES 3.00, WGSL, MSL), checked with each language's compiler and, where it can render, against the reference renders. `toolchain.mjs` installs the pinned native compilers they need |
@@ -75,7 +75,7 @@ Transitions see straight (unpremultiplied) colors, as in the GLSL spec; the outp
 | File | Content |
 |---|---|
 | `llms.txt` | [llms.txt](https://llmstxt.org/) index: summary, the GLSL contract, docs links and one line per transition |
-| `llms-full.txt` | Every transition with its description, tags, typed parameters (defaults, ranges), author, license and GLSL / SkSL / preview links |
+| `llms-full.txt` | Every transition with its description, tags, still frame (`preview`), typed parameters (defaults, ranges), author, license and GLSL / SkSL / preview links |
 | `skills/gl-transitions/` | The Agent Skill from [`skills/gl-transitions/`](../skills/gl-transitions/SKILL.md), plus the generated `references/catalog.md` (tag index, one line per transition) |
 
 Links point to the exact package version on jsDelivr. The skill's integration guides (`references/*.md`) are written by hand; `agents/agent-docs.test.mjs` checks the `bakeParams` snippet against every transition.

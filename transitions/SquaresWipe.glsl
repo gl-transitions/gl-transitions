@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Squares grow along a diagonal sweep to reveal the incoming image
 // Tags: squares, grid, wipe, directional
+// Preview: 0.5
  
 // @param Number of squares (columns, rows)
 uniform ivec2 squares;// = ivec2(10,10)

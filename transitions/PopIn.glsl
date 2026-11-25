@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The incoming image pops in as a rounded card over the outgoing one, with an elastic overshoot: too big, a bit small, then it settles into the full frame as its corners square off
 // Tags: pop, scale, zoom, elastic, bounce, shadow
+// Preview: 0.15
 
 // @param Point of the frame the incoming image pops from
 uniform vec2 center; // = vec2(0.5, 0.5)

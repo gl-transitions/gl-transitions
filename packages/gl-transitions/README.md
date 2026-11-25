@@ -16,6 +16,7 @@ A Transition is an object with the following shape (TypeScript types are include
   glsl: string,          // implements vec4 transition(vec2 uv)
   description?: string,
   tags: string[],
+  preview: number,       // progress (0 to 1) of the frame to show as a still image, not an image
   params: {              // one entry per parameter
     [name: string]: {
       type: string,      // "float", "vec2", "bool", ...

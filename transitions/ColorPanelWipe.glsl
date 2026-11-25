@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Solid color panels, slightly staggered, sweep across and cover the frame, then sweep off the far side and reveal the incoming image
 // Tags: wipe, panels, color, slanted, motion-graphics
+// Preview: 0.75
 
 // @param Direction the panels sweep toward
 uniform vec2 direction; // = vec2(1.0, 0.0)

@@ -2,6 +2,7 @@
 // License: MIT
 // Description: Forked lightning bolts crack down from the top of the frame, the screen flashes white in a few stuttering strobes, and the incoming image appears lit by the last flickers as they fade out
 // Tags: light, flash, weather, strobe
+// Preview: 0.2
 
 // @range(1, 3, 1) Number of bolts: the main one strikes the ground, the others fork out higher in the sky
 uniform int bolts; // = 2

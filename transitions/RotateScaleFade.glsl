@@ -2,6 +2,7 @@
 // License: MIT
 // Description: The outgoing image spins and zooms while fading to the incoming one, over a background color
 // Tags: rotate, zoom, fade
+// Preview: 0.15
 
 #define PI 3.14159265359
 

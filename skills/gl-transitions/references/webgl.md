@@ -112,7 +112,7 @@ function createTexture(gl, source) {
 }
 ```
 
-Animate with `requestAnimationFrame`, computing `progress` from elapsed time (clamped to [0, 1], optionally eased). For video, call `createTexture` once and re-upload each frame with `texImage2D`.
+Animate with `requestAnimationFrame`, computing `progress` from elapsed time (clamped to [0, 1], optionally eased). For a still image, draw once at `transition.preview`. For video, call `createTexture` once and re-upload each frame with `texImage2D`.
 
 ## Existing libraries
 
