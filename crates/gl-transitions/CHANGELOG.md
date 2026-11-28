@@ -1,5 +1,12 @@
 # gl-transitions-crate
 
+## 2.1.1
+
+### Patch Changes
+
+- Updated dependencies [[`910fa6a`](https://github.com/gl-transitions/gl-transitions/commit/910fa6a764e0031a8dbcb33cb55fae0497ad404f)]:
+  - gl-transitions@3.5.0
+
 ## 2.1.0
 
 ### Minor Changes
